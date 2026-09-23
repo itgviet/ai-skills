@@ -1,13 +1,13 @@
 ---
 name: quick-fix
-version: 2.0.0
+version: 2.1.0
 author: itgviet
 last_updated: 2026-09-23
 description: >-
   Universal multi-role workflow for rapid bug fixing, targeted enhancements, UI tweaks,
   and local refactoring across any codebase (Node.js, Python, Java, Go, C#, C++, Rust, Swift, PHP).
   Enforces Requirement Alignment, Root Cause Analysis, Multi-Perspective Quality Gates, Scope Boundaries,
-  Self-Audit Review, Requirements Traceability, and Multi-Stack Empirical Verification.
+  Self-Audit Review, Requirements Traceability, Multi-Stack Empirical Verification, and Manual Verification Protocol.
 ---
 
 # SKILL: Universal Quick Fix & Rapid Improvement Protocol
@@ -183,11 +183,26 @@ AI kiểm tra các file cấu hình dự án để chọn câu lệnh kiểm th�
 | **iOS / Swift** | `xcodebuild build` | `swiftlint` | `xcodebuild test` |
 | **PHP (Laravel / Symfony)** | `vendor/bin/phpstan` | `vendor/bin/phpcs` | `php artisan test` (hoặc `phpunit`) |
 
-#### <ctrl42> 3. Vòng lặp Tự sửa Lỗi Kiểm thử (Auto-Remediation Loop):
+#### 🔄 3. Vòng lặp Tự sửa Lỗi Kiểm thử (Auto-Remediation Loop):
 Nếu bất kỳ lệnh verify nào thất bại (Exit Code $\neq$ 0):
 1. AI đọc trực tiếp log lỗi thực tế.
 2. Phân tích và điều chỉnh code theo đúng Root Cause.
 3. Chạy lại lệnh verify đến khi đạt **100% Pass / Green**.
+
+#### 📱 4. Kịch bản Kiểm thử Thủ công Bắt buộc (Manual Verification Protocol):
+> [!IMPORTANT]
+> **QUY TẮC BẮT BUỘC ĐỐI VỚI TÁC VỤ UI/UX HOẶC FLOW NGƯỜI DÙNG:**
+> Khi tác vụ có tương tác trực tiếp của người dùng hoặc thuộc các nhóm sau:
+> - 🎨 **UI/UX Tweak:** Đổi style, layout, responsive, màu sắc, font chữ, spacing.
+> - 🔄 **User Flow / Modal / Popup / Navigation:** Thêm/sửa form, popup chọn danh mục, flow wizard, chuyển màn hình.
+> - 📱 **Frontend / Mobile App / Web UI:** Bất kỳ thay đổi nào hiển thị lên giao diện.
+> - 🔌 **End-to-End Integration:** Tích hợp dữ liệu giữa App và Web/CMS cần kiểm tra đối chiếu.
+>
+> AI **BẮT BUỘC** phải cung cấp **Hướng dẫn Kiểm thử Thủ công (Manual Verification Steps)** chi tiết trong Báo cáo Bàn giao (Phase 6), bao gồm:
+> 1. **Mục tiêu & Điều kiện kiểm thử:** Môi trường, tài khoản, màn hình kiểm tra.
+> 2. **Các bước thao tác từng bước (Step-by-step):** Đánh số rõ ràng (Bước 1, Bước 2, Bước 3...).
+> 3. **Kết quả kỳ vọng chi tiết (Expected Result):** Cho từng thao tác, nêu rõ điểm khác biệt sau khi fix.
+> 4. **Các trường hợp ngoại lệ cần thử (Negative / Edge Cases):** Hủy popup, bỏ trống trường bắt buộc, mạng yếu, v.v.
 
 ---
 
@@ -216,12 +231,18 @@ Sau khi hoàn thành và verify thành công, AI tổng hợp báo cáo đa góc
   - Lint/Static Analysis: Pass ✅
   - Unit/Regression test: Pass ✅
 - **Edge cases đã rà soát:** [Ví dụ: null/undefined, mạng chậm, dữ liệu rỗng...]
+- **📱 Hướng dẫn Kiểm thử Thủ công (Manual Verification Steps):**
+  - **Môi trường & Điều kiện:** [Thiết bị/Trình duyệt, màn hình, tài khoản...]
+  - **Bước 1:** [Thao tác mở màn hình/popup...] $\rightarrow$ *Kỳ vọng:* [Hiển thị đúng...]
+  - **Bước 2:** [Thao tác tương tác với tính năng đã fix...] $\rightarrow$ *Kỳ vọng:* [Hành vi đúng như yêu cầu...]
+  - **Bước 3:** [Thao tác lưu/submit/đối chiếu dữ liệu...] $\rightarrow$ *Kỳ vọng:* [Dữ liệu lưu chuẩn xác, không lỗi...]
+  - **Trường hợp ngoại lệ (Edge case):** [Thao tác hủy/bỏ chọn/thử lỗi...] $\rightarrow$ *Kỳ vọng:* [Xử lý an toàn...]
 
 #### 🎨 4. Designer / UX (Visual & Interaction)
 - **Tác động UI/UX:** [Ví dụ: Giữ nguyên Layout, nhất quán màu sắc/spacing, không vỡ Responsive]
 
 #### 🤝 5. Khách hàng (Business Impact)
-- **Tóm tắt ngắn gọn:** [Mô tả 1-2 câu dễ hiểu về thay đổi này mang lại lợi lợi cho người dùng cuối]
+- **Tóm tắt ngắn gọn:** [Mô tả 1-2 câu dễ hiểu về thay đổi này mang lại lợi ích cho người dùng cuối]
 ```
 
 ---
