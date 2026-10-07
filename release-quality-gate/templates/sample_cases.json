@@ -1,0 +1,74 @@
+{
+  "projectName": "Enterprise Universal Release Gate",
+  "version": "1.0.0",
+  "releaseDate": "2026-09-25",
+  "targetDomain": "https://example.com",
+  "environmentMatrix": [
+    { "id": "local", "name": "Local Dev", "badge": "bg-slate-700 text-slate-200" },
+    { "id": "staging", "name": "Staging UAT", "badge": "bg-blue-700 text-blue-100" },
+    { "id": "prod", "name": "Production Live", "badge": "bg-emerald-700 text-emerald-100" }
+  ],
+  "checklistSections": [
+    {
+      "id": "infra",
+      "title": "Hạ tầng & Triển khai (Infrastructure & Cloud)",
+      "items": [
+        { "id": "INFRA-01", "name": "Cập nhật biến môi trường / Secret Manager", "env": "prod", "checked": false },
+        { "id": "INFRA-02", "name": "Database Schema Migrations đã chạy thành công", "env": "prod", "checked": false },
+        { "id": "INFRA-03", "name": "Cloud Logging & Alerting hoạt động bình thường", "env": "prod", "checked": false }
+      ]
+    },
+    {
+      "id": "security",
+      "title": "An toàn & Bảo mật (Security & Access Control)",
+      "items": [
+        { "id": "SEC-01", "name": "Chặn truy cập trực tiếp Backend (Zero direct IP/Port bypass)", "env": "prod", "checked": false },
+        { "id": "SEC-02", "name": "Kiểm tra quyền hạn RBAC & Session Cookie expiry", "env": "prod", "checked": false }
+      ]
+    }
+  ],
+  "testCases": [
+    {
+      "id": "AUTH-01",
+      "module": "Authentication",
+      "priority": "P0",
+      "title": "Đăng nhập người dùng qua tài khoản mật khẩu",
+      "preconditions": "Tài khoản active trong cơ sở dữ liệu",
+      "steps": "1. Mở trang login\n2. Nhập username, password\n3. Bấm Submit",
+      "expected": "HTTP 200, cấp JWT Session Cookie và redirect vào Dashboard",
+      "actual": "Chuyển trang Dashboard thành công, cookie Secure HttpOnly được lưu",
+      "status": "PASSED",
+      "environment": "Prod",
+      "isBlocker": true,
+      "evidence": "POST /api/auth/login -> 200 OK (duration 185ms)"
+    },
+    {
+      "id": "AUTH-02",
+      "module": "Authentication",
+      "priority": "P1",
+      "title": "Khóa tài khoản khi nhập sai mật khẩu quá 5 lần",
+      "preconditions": "Tài khoản chưa bị khóa",
+      "steps": "1. Nhập sai pass 5 lần liên tiếp",
+      "expected": "HTTP 429 / 403: 'Tài khoản tạm thời bị khóa 15 phút'",
+      "actual": "",
+      "status": "UNTESTED",
+      "environment": "Staging",
+      "isBlocker": false,
+      "evidence": ""
+    },
+    {
+      "id": "DATA-01",
+      "module": "Core API",
+      "priority": "P0",
+      "title": "Truy vấn danh mục sản phẩm phân trang",
+      "preconditions": "Database có dữ liệu",
+      "steps": "GET /api/products?page=1&limit=20",
+      "expected": "Trả về mảng 20 phần tử, kèm total_count và pagination metadata",
+      "actual": "Trả về đúng 20 records, thời gian query 45ms",
+      "status": "PASSED",
+      "environment": "Prod",
+      "isBlocker": true,
+      "evidence": "GET /api/products -> 200 OK (total: 5017 items)"
+    }
+  ]
+}
