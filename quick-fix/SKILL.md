@@ -155,10 +155,19 @@ AI tự động xác định loại tác vụ, thiết lập ranh giới và ch�
 2. **Thiết lập ranh giới (Scope Boundary):**
    - Xác định danh sách các file được phép sửa (Target Files).
    - Đánh dấu các file **CẤM** đụng vào để tránh side-effect.
-3. **Lựa chọn Chế độ Thực thi:**
+3. **Kiểm tra Cô lập Nhánh (Branch Isolation & Git Governance Checkpoint):**
+   > [!CAUTION]
+   > **TUÂN THỦ [RULE-GIT-001] — CẤM SỬA CHUNG NHÁNH VỚI BUG KHÔNG LIÊN QUAN:**
+   > - Trước khi sửa bất kỳ dòng code nào, AI phải kiểm tra branch hiện tại (`git branch --show-current`).
+   > - Nếu nhánh hiện tại đang thuộc về một bug/feature khác KHÔNG LIÊN QUAN:
+   >   1. `git stash` hoặc commit hoàn tất phần việc cũ.
+   >   2. Chuyển về base (`develop`): `git checkout develop && git pull origin develop`.
+   >   3. Tạo nhánh mới riêng biệt: `git checkout -b fix/<kebab-case-topic>`.
+   >   4. Tiến hành sửa trên nhánh mới đó, tuyệt đối không commit đè lên nhánh cũ.
+4. **Lựa chọn Chế độ Thực thi:**
    - Nếu tác vụ liên quan đến $\ge 2$ repo/workspace hoặc logic phân tán Client-Server $\rightarrow$ Chọn **Multi-Agent Swarm Mode**.
    - Nếu tác vụ cục bộ trong 1 repo duy nhất $\rightarrow$ Chọn **Solo Fast Mode**.
-4. **Xác nhận & Làm rõ Yêu cầu (Requirement Alignment Checkpoint):**
+5. **Xác nhận & Làm rõ Yêu cầu (Requirement Alignment Checkpoint):**
    - **Trường hợp A (Yêu cầu rõ ràng, đủ thông tin):** Tóm tắt ngắn gọn ranh giới công việc và tự động chuyển sang Phase 2.
    - **Trường hợp B (Yêu cầu mập mờ, thiếu thông tin hoặc có nhiều phương án giải quyết):**
      > [!CAUTION]
@@ -265,6 +274,8 @@ Sau khi hoàn thành và verify thành công, AI tổng hợp báo cáo đa góc
 #### 👔 1. Quản lý (Scope & DoD)
 - **Tech Stack:** [Node.js / Python / Java / Go / C# / C++ / Rust / Swift / PHP]
 - **Chế độ thực thi:** [Solo Fast Mode / Multi-Agent Swarm Mode]
+- **Git Branch:** `[branch_name]` (Tuân thủ `[RULE-GIT-001]`)
+- **Commit Message:** `[type(scope): subject]` (Conventional Commits)
 - **Danh sách file đã sửa:** `[file_path_1]`, `[file_path_2]`
 - **Trạng thái:** ✅ Hoàn thành đúng Scope, không đụng vào module ngoài.
 
