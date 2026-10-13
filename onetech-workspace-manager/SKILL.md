@@ -1,72 +1,196 @@
 ---
 name: onetech-workspace-manager
-description: >-
-  [SKILL-INT-001] OneTech Workspace API & Task Automation Engine: Tự động kết nối, cào dữ liệu, truy vấn Sprint, tạo Task/Epic/Bug, gán Assignee, upload ảnh đính kèm, đăng bình luận và đồng bộ trạng thái hai chiều (kèm workflowStatusId) trên hệ thống quản lý dự án OneTech Workspace (https://workspace.onetech.vn) qua Playwright headless và API tích hợp.
+description: "OneTech workspace manager: synchronize Sprint tasks, track issue backlogs, and automate feedback reports."
 ---
 
-# [SKILL-INT-001] OneTech Workspace Manager
+# [SKILL-INT-001] OneTech Workspace & ITG Feedback Hub Manager
 
-Skill này chuyên trách tự động hóa toàn diện các thao tác trên hệ thống quản lý dự án **OneTech Workspace** (`https://workspace.onetech.vn`), bao gồm:
-1. **Truy vấn Đa Dự Án & Sprint:** Nạp danh sách 78+ dự án, truy vấn Sprint live, kiểm tra thành viên dự án (`dinhpl`, `vietnt`, v.v.).
-2. **Quản lý Task / Bug / Epic:** Tạo mới task hoặc bug, thiết lập độ ưu tiên, mức độ nghiêm trọng (`severity`), gán người phụ trách (`assigneeId`).
-3. **Upload Ảnh & Đính Kèm Comment:** Tải ảnh chụp màn hình lên CDN `/api/upload-image` và tự động nhúng ảnh Markdown vào comment của task (`/api/tasks/:id/comments`).
-4. **Cập Nhật Tiến Độ & Workflow Mapping:** Tự động map chính xác `status` và `workflowStatusId` (`405: To Do`, `406: In Progress`, `408: Review`, `409: Done`, `bugStatus: closed`).
-5. **Đồng Bộ Dữ Liệu An Toàn:** Lưu trữ tập trung tại [`d:\ITGVietAssistant\data\tasks_store.json`](file:///d:/ITGVietAssistant/data/tasks_store.json), bảo toàn 100% lịch sử trao đổi và ghi chú giải pháp giữa các lần đồng bộ.
+Skill này chuyên trách quản lý tự động hóa toàn diện 2 hệ thống cốt lõi:
+1. **OneTech Workspace** (`https://workspace.onetech.vn`): Hệ thống quản trị nội bộ 78+ dự án, Sprints, Tasks, Bugs, Comments và Workflow Statuses.
+2. **ITG Customer Feedback Hub** (`https://plan.itgviet.com`): Cổng tiếp nhận phản hồi, báo lỗi realtime từ khách hàng cho từng dự án (`cafenhatsinh`, `issx`, `dtg`,...), lưu trữ trên Google Cloud Firestore (`itgviet-plan`).
+
+---
+
+## 🧭 Bản Đồ & Định Danh Dự Án (Project Mapping)
+
+Khi người dùng hỏi về feedback hoặc task của dự án hiện tại, tự động ánh xạ thư mục làm việc sang Project Key:
+
+| Thư mục Workspace | Mã Dự Án Feedback Hub (`projectKey`) | URL Cổng Khách Hàng | OneTech Project ID |
+| :--- | :--- | :--- | :--- |
+| `d:\Projects\NhatSinhCafe` | `cafenhatsinh` | `https://plan.itgviet.com/tickets?project=cafenhatsinh` | N/A (Internal/Cloud) |
+| `d:\Projects\NhatSinhSite` | `nhatsinhsite` | `https://plan.itgviet.com/tickets?project=nhatsinhsite` | N/A (Brand Website) |
+| `d:\Projects\insightScanX*` | `issx` | `https://plan.itgviet.com/tickets?project=issx` | `#82` (insightScanX_Product) |
+| `d:\Projects\DTGenius*` | `dtg` | `https://plan.itgviet.com/tickets?project=dtg` | `#76` (DTGenius) |
+
+---
+
+## 🔄 Luồng Vòng Đời & Phân Cấp Trách Nhiệm (5-Stage Collaboration Lifecycle)
 
 ```mermaid
 flowchart TD
-    UserReq[User: Yêu cầu Quản lý / Báo Bug / Sync Task] --> Supervisor[Supervisor: OneTech Manager Skill]
-    Supervisor --> ActionRoute{Hành Động?}
-
-    ActionRoute -->|1. Đăng Bug / Task| CreateTask[POST /api/projects/:id/tasks]
-    ActionRoute -->|2. Upload Ảnh Lỗi| UploadCDN[POST /api/upload-image -> Trả về /uploads/...]
-    ActionRoute -->|3. Đăng Comment| AddComment[POST /api/tasks/:id/comments]
-    ActionRoute -->|4. Đổi Trạng Thái| UpdateWF[PUT /api/tasks/:id -> status + workflowStatusId: 409]
-    ActionRoute -->|5. Đồng Bộ Đa Dự Án| SyncStore[Sync tasks_store.json theo project_id]
-
-    UploadCDN --> AddComment
-    CreateTask --> AddComment
-    UpdateWF & SyncStore --> Dashboard[Local Web Dashboard: http://localhost:8989]
+    Customer[1. Khách Hàng gửi Feedback] -->|received| Hub[Feedback Hub: plan.itgviet.com]
     
-    Dashboard & CreateTask & UploadCDN & AddComment --> PlaywrightProfile[Session Lưu Tại: C:\Users\vietn\.gemini\config\playwright_profile]
+    Hub -->|Tra cứu list| Supervisor[2. Agent Cha / Supervisor]
+    Supervisor -->|Đổi in_progress & checkout branch| GitBranch["Nhánh riêng: feat/ hoặc fix/"]
+    
+    GitBranch -->|Ủy quyền kỹ thuật| Subagent[3. Subagent Dev / Worker]
+    Subagent -->|Dev, Test, Chụp Evidence| LocalEvidence["screenshots/evidence-*.png"]
+    Subagent -->|Báo cáo nội bộ - CẤM gọi CLI Hub| Supervisor
+    
+    Supervisor -->|Đổi pending_deploy kèm Evidence| Hub
+    Supervisor -->|Hard Stop: Chờ lệnh| UserApproval{4. User Phê Duyệt Deploy?}
+    
+    UserApproval -->|Từ chối / Cần chỉnh sửa| Subagent
+    UserApproval -->|Đồng ý / Lệnh Deploy| DeployPipeline[5. Merge main & Deploy Hosting]
+    
+    DeployPipeline -->|Live Healthcheck OK| TagAndLive[6. Đổi ready_for_uat & Đánh Tag]
+    TagAndLive -->|Khách nghiệm thu trên Live OK| Resolved[7. resolved: Hoàn tất]
 ```
+
+### 🎯 Quy Tắc Trạng Thái Ticket Chuẩn (Feedback Hub Statuses):
+1. **`received` (Tiếp nhận):** Ticket mới được khách gửi lên cổng.
+2. **`in_progress` (Đang xử lý):** Supervisor nhận vé, tạo branch riêng `feat/<ticket-id>` hoặc `fix/<ticket-id>` và giao việc cho Subagent.
+3. **`pending_deploy` (Chờ deploy):** Subagent hoàn tất code, test, chụp evidence. Supervisor upload ảnh bằng chứng lên Hub và cập nhật trạng thái `pending_deploy`. **Dừng lại (Hard Stop) báo cáo User, CẤM tự ý deploy.**
+4. **`ready_for_uat` (Chờ nghiệm thu UAT):** CHỈ CẬP NHẬT KHI ĐÃ DEPLOY LÊN LIVE THÀNH CÔNG (sau khi User phê duyệt). Khách hàng sẽ vào domain live thật (`cafe.nhatsinh.com.vn`) để kiểm tra.
+5. **`resolved` (Hoàn tất):** Khách hàng/Quản lý nghiệm thu hài lòng và đóng vé.
 
 ---
 
-## 🛠️ Cấu Trúc Bộ Công Cụ (Scripts)
+### 🛡️ Nguyên Tắc Phân Quyền Giao Tiếp (Anti-Spam Boundary):
+- **Subagent (Dev/Worker):** CẤM TUYỆT ĐỐI gọi các lệnh `cli.py feedback ...` hoặc `cli.py comment/status`. Subagent chỉ làm việc trong local codebase, xuất ảnh vào thư mục `screenshots/` và gửi message nội bộ cho Supervisor.
+- **Supervisor (Parent Agent):** Là ĐẦU MỐI DUY NHẤT được phép tương tác với Feedback Hub:
+  - 1 lần khi bắt đầu: `in_progress`
+  - 1 lần khi xong code/evidence: `pending_deploy` kèm ảnh evidence
+  - 1 lần sau khi deploy live thành công: `ready_for_uat` hướng dẫn khách test
 
-Toàn bộ mã nguồn nằm tại:  
-📁 `C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\`
 
-### 1. `onetech_client.py` (`OneTechClient`)
-Lớp Python điều khiển trình duyệt headless Chromium với persistent session:
-* `get_projects()`: Lấy danh sách toàn bộ dự án user có quyền truy cập.
-* `get_sprints(project_id)`: Lấy danh sách Sprints của dự án cụ thể.
-* `get_members(project_id)`: Tra cứu danh sách thành viên dự án (tìm user ID như `dinhpl`).
-* `get_tasks(project_id, sprint_id, assignee_id)`: Lọc danh sách tasks.
-* `create_task(project_id, payload)`: Tạo Task / Bug / Epic / Story mới.
-* `update_task(task_id, payload)`: Cập nhật task (tự động map `workflowStatusId` và `bugStatus`).
-* `upload_image(image_path)`: Tải ảnh từ ổ đĩa lên máy chủ OneTech, trả về URL `/uploads/...`.
-* `add_comment(task_id, content, author_id)`: Đăng comment kèm Markdown/ảnh vào task.
-* `sync_to_local_store(project_id, user_id, project_name)`: Đồng bộ bảo toàn dữ liệu vào local store.
+---
+
+## 🛠️ Bộ Công Cụ & Thư Viện (Scripts)
+
+📁 **Thư mục thực thi gốc (Central Hub tại D:\ITGVietAssistant):**
+- **Thư mục gốc:** `D:\ITGVietAssistant\skills\onetech-workspace-manager\scripts\`
+- **Đồng bộ tự động qua Junction:**
+  - *Gemini / Antigravity:* `C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\`
+  - *Kiro:* `C:\Users\vietn\.kiro\skills\onetech-workspace-manager\scripts\`
+*(Tất cả đường dẫn đều trỏ về cùng một mã nguồn duy nhất, dùng chung phiên đăng nhập Playwright & Firebase)*
+
+1. **`feedback_client.py` (`FeedbackHubClient`):**
+   * Tương tác trực tiếp với Google Cloud Firestore của Feedback Hub (`itgviet-plan`) qua REST API.
+   * **Cơ chế xác thực:** Tự động lấy và làm mới OAuth access token qua Firebase CLI (`C:\Users\vietn\.config\configstore\firebase-tools.json`), không cần đăng nhập lại.
+   * `get_projects()`: Danh sách các dự án trên Hub.
+   * `get_tickets(project_key)`: Lấy danh sách vé phản hồi (lọc theo dự án).
+   * `get_ticket(ticket_id)`: Xem chi tiết vé, metadata thiết bị khách hàng, ảnh đính kèm và trao đổi (comments).
+   * `update_status(ticket_id, status, comment)`: Cập nhật trạng thái (`received`, `in_progress`, `ready_for_uat`, `resolved`).
+   * `add_comment(ticket_id, content)`: Gửi phản hồi vào luồng chat của vé cho khách hàng.
+   * `link_onetech_task(ticket_id, onetech_task_id, project_id)`: Liên kết mã task OneTech vào vé phản hồi.
+
+2. **`onetech_client.py` (`OneTechClient`):**
+   * Điều khiển Chromium headless với persistent profile `C:\Users\vietn\.gemini\config\playwright_profile`.
+   * Thao tác trên `https://workspace.onetech.vn`: Sprints, Projects, Tasks, Comments, Upload ảnh CDN.
+
+3. **`cli.py`:** Giao diện dòng lệnh hợp nhất hỗ trợ cả OneTech và Feedback Hub.
 
 ---
 
 ## 💻 Hướng Dẫn Sử Dụng Nhanh (CLI Commands)
 
-### 1. Xem danh sách dự án:
+### 🌟 1. Tra cứu & Quản lý trên ITG Feedback Hub (`plan.itgviet.com`)
+
+#### Xem danh sách ticket mới của dự án:
 ```powershell
-python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py projects
+# Liệt kê vé phản hồi của dự án Nhật Sinh Cafe:
+python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py feedback list --project cafenhatsinh
+
+# Liệt kê vé phản hồi của dự án ISSX:
+python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py feedback list --project issx
 ```
 
-### 2. Đồng bộ tasks của dự án hiện tại về máy:
+#### Xem chi tiết 1 ticket (kèm ảnh, mô tả, cấu hình máy KH):
 ```powershell
-python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py sync --project 82
+python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py feedback get --ticket CAFENHATSINH-584
 ```
 
-### 3. Tạo Bug mới, gán cho thành viên khác kèm ảnh minh họa:
+#### Cập nhật trạng thái ticket và phản hồi cho khách:
 ```powershell
-python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py create `
+# Cập nhật sang ĐANG XỬ LÝ (in_progress):
+python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py feedback status `
+  --ticket CAFENHATSINH-584 `
+  --status in_progress `
+  --message "Đội ngũ kỹ thuật đã tiếp nhận và đang tiến hành tối ưu giao diện."
+
+# Cập nhật sang SẴN SÀNG KIỂM THỬ (ready_for_uat):
+python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py feedback status `
+  --ticket CAFENHATSINH-584 `
+  --status ready_for_uat `
+  --message "Đã tối ưu xong layout màn hình đặt món. Mời quán kiểm tra lại trên máy tính tiền."
+```
+
+#### Gửi bình luận riêng vào ticket:
+```powershell
+python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py feedback comment `
+  --ticket CAFENHATSINH-584 `
+  --message "Bản vá đã được triển khai lên máy chủ live."
+```
+
+#### Liên kết Ticket với OneTech Task:
+```powershell
+python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py feedback link `
+  --ticket ISSX-101 `
+  --task 8303 `
+  --onetech-project 82
+```
+
+---
+
+### 🏢 2. Thao tác trên OneTech Workspace (`workspace.onetech.vn`)
+
+> [!IMPORTANT]
+> **QUY TẮC CẤM TẠO SCRIPT RÁC:**
+> Tuyệt đối **KHÔNG** tạo các file script Python tạm thời (như `get_task_*.py`, `get_open_tasks.py`, `get_project_*.py`) khi tra cứu task hoặc bình luận.
+> **LUÔN SỬ DỤNG** bộ lệnh CLI tối ưu sẵn (`cli.py list`, `cli.py task`, `cli.py comments`). Các lệnh này ưu tiên đọc từ cache local (`tasks_store.json`) với tốc độ **0.05 giây**, không làm nặng máy và không mở trình duyệt thừa.
+
+#### Xem danh sách dự án:
+```powershell
+python D:\ITGVietAssistant\skills\onetech-workspace-manager\scripts\cli.py projects
+```
+
+#### Tra cứu danh sách Task (Siêu tốc từ Cache):
+```powershell
+# Xem task đang mở (chưa Done) của tôi trong dự án DTGenius (#76):
+python D:\ITGVietAssistant\skills\onetech-workspace-manager\scripts\cli.py list --project 76 --mine --status open
+
+# Tìm kiếm task theo từ khóa:
+python D:\ITGVietAssistant\skills\onetech-workspace-manager\scripts\cli.py list --project 76 --search "inventory"
+
+# Bắt buộc lấy dữ liệu live trực tiếp qua browser (bỏ qua cache):
+python D:\ITGVietAssistant\skills\onetech-workspace-manager\scripts\cli.py list --project 82 --live
+```
+
+#### Xem chi tiết một Task cụ thể (0.05 giây):
+```powershell
+# Xem chi tiết task 7972 (tiêu đề, trạng thái, sprint, assignee, mô tả, AC):
+python D:\ITGVietAssistant\skills\onetech-workspace-manager\scripts\cli.py task 7972
+
+# Xem chi tiết kèm toàn bộ bình luận:
+python D:\ITGVietAssistant\skills\onetech-workspace-manager\scripts\cli.py task 7972 --comments
+```
+
+#### Quản lý Bình luận Task (Tự động chuẩn hóa Markdown, chống lộ thẻ HTML):
+```powershell
+# Xem danh sách bình luận của task:
+python D:\ITGVietAssistant\skills\onetech-workspace-manager\scripts\cli.py comments 8370
+
+# Đăng bình luận mới (tự động làm sạch định dạng, hỗ trợ xuống dòng \n):
+python D:\ITGVietAssistant\skills\onetech-workspace-manager\scripts\cli.py comments 8370 --add "[Update]\n• Hoàn thành kiểm thử\n• Đã commit code"
+
+# Xóa một bình luận theo Comment ID:
+python D:\ITGVietAssistant\skills\onetech-workspace-manager\scripts\cli.py comments 8370 --delete 4990
+```
+
+#### Tạo Task / Bug mới:
+```powershell
+python D:\ITGVietAssistant\skills\onetech-workspace-manager\scripts\cli.py create `
   --project 82 `
   --sprint 79 `
   --type bug `
@@ -74,30 +198,47 @@ python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cl
   --severity major `
   --assignee dinhpl `
   --title "[CMS] Issue popup is overlapped by panel" `
-  --description "Mô tả chi tiết lỗi..." `
-  --image "C:\path\to\screenshot.png"
+  --description "Mô tả chi tiết lỗi..."
 ```
 
-### 4. Đăng comment kèm ảnh vào Task đã có:
+#### Cập nhật trạng thái Task:
 ```powershell
-python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py comment 8276 `
-  --message "Ảnh chụp màn hình cập nhật sau khi tái hiện lỗi:" `
-  --image "C:\path\to\new_evidence.png"
+python D:\ITGVietAssistant\skills\onetech-workspace-manager\scripts\cli.py update 8086 --status done
 ```
 
-### 5. Đổi trạng thái Task (Tự động map Workflow Status):
+#### Quản lý & Tự động Log Timesheet:
 ```powershell
-# Chuyển sang DONE (Tự động set workflowStatusId: 409 và bugStatus: closed)
-python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py update 8086 --status done
+# 1. Kiểm tra tiến độ log giờ hôm nay (mục tiêu 8.0h):
+python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py timesheet today
 
-# Chuyển sang IN PROGRESS (workflowStatusId: 406)
-python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py update 8274 --status in_progress
+# 2. Thống kê toàn bộ thời gian làm việc trong tuần (Thứ 2 -> Chủ nhật):
+python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py timesheet week
+
+# 3. Xem lịch sử timesheet của 1 task:
+python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py timesheet list --task 8274
+
+# 4. Tự động log giờ vào task:
+python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py timesheet log `
+  --task 8274 `
+  --hours 2.5 `
+  --type development `
+  --desc "Nghiên cứu và triển khai thuật toán lọc loại bỏ con người khỏi point cloud"
+
+# 5. Xóa một bản ghi timesheet:
+python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py timesheet delete --entry-id 1234
 ```
 
 ---
 
-## 🔒 Cơ Chế Xác Thực & Quản Lý Phiên (Session)
+## 📌 Quy Chuẩn Nghiêm Ngặt Khi Đăng Task & Trao Đổi
 
-* **Vị trí Profile lưu phiên:** `C:\Users\vietn\.gemini\config\playwright_profile`
-* Client tự động tái sử dụng phiên đã đăng nhập, chạy hoàn toàn **headless 100% ngầm** trong nền mà không yêu cầu user nhập lại mật khẩu.
-* Hỗ trợ tải dữ liệu siêu tốc, tương thích hoàn toàn với Web Task Dashboard tại **`http://localhost:8989`**.
+1. **Quy chuẩn ngôn ngữ (Language Policy):**
+   - **Tiêu đề (Title):** Bắt buộc 100% viết bằng **Tiếng Anh (English)** chuẩn kỹ thuật theo cú pháp: `[Module/Scope] Clear descriptive title in English` (ví dụ: `[Processing Server] Point cloud turns black after auto-processing in BIM scan mode`, `[APP] Manual AprilTag Placement Guide`, `[CMS] Issue popup is overlapped by panel`).
+   - **Nội dung mô tả (Description) & Thảo luận (Comments):** Viết bằng **Tiếng Việt chuyên nghiệp, ngắn gọn**, cấu trúc 3 phần rõ ràng:
+     - `### 1. Hiện trạng & Mô tả lỗi:`
+     - `### 2. Tác động / Nguyên nhân:`
+     - `### 3. Đề xuất giải pháp khắc phục:`
+2. **Định dạng xuống dòng & Trình bày (Formatting Quality):**
+   - Tuyệt đối không để dính chuỗi hoặc in nguyên văn ký tự `\n` thô. Luôn ngắt dòng thực sự, có gạch đầu dòng bullet points rõ ràng.
+3. **Không tự bịa nội dung (Zero Hallucination):** Chỉ trích xuất đúng mô tả, ảnh chụp và dữ liệu môi trường thực tế từ ticket khách gửi hoặc phản ánh của người dùng.
+4. **Phản hồi khách hàng (Comments trên Feedback Hub):** Dùng tiếng Việt lịch sự, rõ ràng, nêu bật giải pháp đã xử lý và hướng dẫn khách kiểm tra lại (UAT).
