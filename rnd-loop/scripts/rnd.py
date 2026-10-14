@@ -14,7 +14,7 @@ Layout inside a project (all git-tracked):
 Commands:
 
     rnd.py init <task>                          create charter + notebook from templates
-    rnd.py run <task> -H "hypothesis" [--kind baseline|experiment] [--change "..."] [--no-exec]
+    rnd.py run <task> -H "hypothesis" [--kind baseline|experiment] [--change "..."] [--no-exec] [--workdir <worktree>]
     rnd.py promote <task> <run-id>              make an experiment the new baseline (after merge)
     rnd.py note <task> "text" [--tag lesson]    append a dated note to the notebook
     rnd.py status [<task>]                      baseline, last runs, open hypotheses
@@ -202,7 +202,10 @@ def cmd_run(args) -> None:
     root = project_root()
     charter = load_charter(root, args.task)
     run = charter["run"]
-    metrics_path = (root / run["metrics_file"]).resolve()
+    # --workdir: run the evaluator in an experiment worktree, but keep ONE registry in the main checkout,
+    # so rejected experiments (whose branches are never merged) still leave history.
+    wd = Path(args.workdir).resolve() if args.workdir else root
+    metrics_path = (wd / run["metrics_file"]).resolve()
     records = read_registry(root, args.task)
     rid = next_id(records, args.task)
     t0 = dt.datetime.now()
@@ -211,7 +214,7 @@ def cmd_run(args) -> None:
         if metrics_path.exists():
             metrics_path.unlink()  # never grade a stale file
         print(f"[rnd] {rid}: {run['command']}", flush=True)
-        proc = subprocess.run(run["command"], cwd=root, shell=True, timeout=run.get("timeout_s", 7200))
+        proc = subprocess.run(run["command"], cwd=wd, shell=True, timeout=run.get("timeout_s", 7200))
         exit_code = proc.returncode
     if not metrics_path.is_file():
         sys.exit(f"[rnd] evaluator produced no metrics file at {metrics_path} (exit {exit_code}); nothing recorded")
@@ -223,7 +226,7 @@ def cmd_run(args) -> None:
     rec = {
         "schema": SCHEMA, "id": rid, "task": args.task, "kind": args.kind, "ts": now(),
         "hypothesis": args.hypothesis, "change": args.change or "", "baseline_id": base["id"] if base else None,
-        "git": git_state(root), "command_exit": exit_code,
+        "git": git_state(wd), "workdir": str(wd) if wd != root else None, "command_exit": exit_code,
         "duration_s": round((dt.datetime.now() - t0).total_seconds(), 1),
         "metrics": metrics, "gate": g, "verdict": g["verdict"] if args.kind == "experiment" else "baseline",
     }
@@ -306,6 +309,7 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--kind", choices=("baseline", "experiment"), default="experiment")
     p.add_argument("--change", help="what was changed (commit, flag, policy field)")
     p.add_argument("--no-exec", action="store_true", help="grade the existing metrics file without running the command")
+    p.add_argument("--workdir", help="run the evaluator in this checkout (e.g. an experiment worktree); registry stays here")
     p.set_defaults(fn=cmd_run)
     p = sub.add_parser("promote"); p.add_argument("task"); p.add_argument("run_id")
     p.add_argument("--force", action="store_true"); p.add_argument("--reason"); p.set_defaults(fn=cmd_promote)

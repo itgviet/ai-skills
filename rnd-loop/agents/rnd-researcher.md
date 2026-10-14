@@ -19,8 +19,9 @@ Procedure:
    Change only files in `charter.task.scope`; never files in `off_limits`, the evaluator, or the charter's
    metrics/constraints.
 4. Run the project's tests for the touched area. Failing tests = stop, note `#bug`, do not run the evaluator.
-5. Commit the change on the branch, then `rnd.py run <task> -H "<hypothesis>" --change "<branch>@<sha>"`.
-6. Record: `rnd.py note <task> "<run-id>: <verdict> — <one-line why>" --tag lesson`, and update the hypothesis
+5. Commit the change on the branch, then FROM THE MAIN CHECKOUT run
+   `rnd.py run <task> -H "<hypothesis>" --change "<branch>@<sha>" --workdir <worktree>` so the registry stays in one place.
+6. Record (from the main checkout): `rnd.py note <task> "<run-id>: <verdict> — <one-line why>" --tag lesson`, and update the hypothesis
    `status` in the charter (accepted / rejected / still open) — that edit is allowed.
 7. Stop after the run budget or the first `accepted`.
 

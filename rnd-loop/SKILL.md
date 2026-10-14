@@ -1,6 +1,6 @@
 ---
 name: rnd-loop
-version: 1.0.0
+version: 1.1.0
 last_updated: 2026-10-14
 description: "Quy trình R&D chung cho mọi dự án: charter → baseline → giả thuyết → thí nghiệm → cổng chống hồi quy → registry → report → retro. Dùng khi người dùng yêu cầu R&D, nghiên cứu, thử nghiệm, tối ưu/cải thiện một thuật toán hoặc chất lượng (độ chính xác, tốc độ, chất lượng output), đánh giá 'đã đủ tốt chưa', so sánh phương án, hoặc hỏi lịch sử/tiến độ một task R&D. Có registry lịch sử, lab notebook, dashboard và playbook tự cải thiện."
 ---
@@ -62,7 +62,9 @@ Thêm vào `[[hypotheses]]` trong charter: một câu, có cơ chế ("vì X nê
 1. Làm trên nhánh `exp/<task>-<slug>` (hoặc worktree riêng), không trên main.
 2. Sửa code / tham số trong `scope`.
 3. Chạy test của dự án (thay đổi không được làm vỡ test).
-4. `rnd.py run <task> -H "<giả thuyết>" --change "<commit/flag>"`.
+4. Từ checkout chính: `rnd.py run <task> -H "<giả thuyết>" --change "<branch>@<sha>" --workdir <worktree>` —
+   evaluator chạy trong worktree, registry/notebook **luôn ở checkout chính** để run bị bác vẫn còn lịch sử.
+   Dữ liệu lớn bị gitignore (Data/, .venv) thì junction vào worktree; kiểm tra code import từ worktree, không phải từ bản cài editable.
 5. Đọc verdict:
    - `accepted`: constraints giữ, không case nào hồi quy quá tolerance, ≥ 1 cải thiện.
    - `neutral`: không xấu đi, không tốt lên — **không merge** chỉ vì "không hại"; ghi bài học.
