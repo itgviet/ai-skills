@@ -16,6 +16,7 @@ off_limits = []            # what must not change (API contract, other modules, 
 command = ""
 metrics_file = "rnd/{{task}}/last_metrics.json"
 timeout_s = 7200
+# after = ""             # optional: run after every recorded run (e.g. regenerate the task status report)
 
 # Metrics compared against the baseline. goal = "max" | "min".
 # tolerance = change smaller than this is noise (neither win nor regression).

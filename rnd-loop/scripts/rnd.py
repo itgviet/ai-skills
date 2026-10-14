@@ -248,8 +248,17 @@ def cmd_run(args) -> None:
     snap.mkdir(exist_ok=True)
     shutil.copyfile(metrics_path, snap / f"{rid}.json")
     append_registry(root, args.task, rec)
+    run_after(root, run)
     print(json.dumps({"id": rid, "verdict": rec["verdict"], **{k: g[k] for k in ("failures", "known_failures", "regressions", "improvements")}},
                      indent=2, ensure_ascii=False))
+
+
+def run_after(root: Path, run: dict) -> None:
+    """charter [run].after: a command run after every recorded run/invalidate (e.g. regenerate the task's report)."""
+    if run.get("after"):
+        proc = subprocess.run(run["after"], cwd=root, shell=True, timeout=600)
+        if proc.returncode != 0:
+            print(f"[rnd] warning: run.after exited {proc.returncode}: {run['after']}", file=sys.stderr)
 
 
 def cmd_promote(args) -> None:
@@ -273,6 +282,7 @@ def cmd_invalidate(args) -> None:
     append_registry(root, args.task, {"schema": SCHEMA, "id": f"{args.run_id}-invalidate", "task": args.task,
                                       "kind": "invalidate", "ts": now(), "target": args.run_id, "reason": args.reason})
     print(f"{args.run_id} marked invalid: {args.reason}")
+    run_after(root, load_charter(root, args.task)["run"])
 
 
 def cmd_note(args) -> None:

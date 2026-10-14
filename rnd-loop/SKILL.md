@@ -1,6 +1,6 @@
 ---
 name: rnd-loop
-version: 1.2.0
+version: 1.3.0
 last_updated: 2026-10-14
 description: "Quy trình R&D chung cho mọi dự án: charter → baseline → giả thuyết → thí nghiệm → cổng chống hồi quy → registry → report → retro. Dùng khi người dùng yêu cầu R&D, nghiên cứu, thử nghiệm, tối ưu/cải thiện một thuật toán hoặc chất lượng (độ chính xác, tốc độ, chất lượng output), đánh giá 'đã đủ tốt chưa', so sánh phương án, hoặc hỏi lịch sử/tiến độ một task R&D. Có registry lịch sử, lab notebook, dashboard và playbook tự cải thiện."
 ---
@@ -44,6 +44,7 @@ Script chỉ dùng stdlib, Python ≥ 3.11. Chạy từ gốc repo dự án (ho�
   và đo **đúng thứ hệ thống dùng để quyết định** (playbook P8).
 - `metrics` (goal max/min, tolerance = ngưỡng nhiễu) và `constraints` (ngưỡng tuyệt đối, có `why`).
 - `report.sections / evidence / audience`: cách report riêng của task này.
+- `run.after` (tuỳ chọn): lệnh tự chạy sau mỗi run/invalidate — dùng để sinh lại report hiện trạng, để report luôn có **mọi lần chạy**.
 - `scope` / `off_limits`.
 
 Chất lượng benchmark quyết định mọi thứ sau. Kiểm tra: case có độc lập không (không so dữ liệu với chính nó)?
