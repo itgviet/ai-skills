@@ -1,7 +1,6 @@
 ---
 name: vcb-payroll-exporter
-description: >-
-  Skill tự động chuyển đổi bảng lương bất kỳ (Excel, CSV, Image, PDF, Text) sang File Excel Lô Chuyển Tiền Vietcombank (VCB Batch Transfer Format) khớp 100% định dạng mẫu (Loại hình chuyển tiền 1/2/3, mapping tự động mã ngân hàng CITAD/Napas, tài khoản trích nợ, định dạng text/number, và bảng chú thích).
+description: "VCB payroll exporter: parse employee salary data, validate account numbers, and generate VCB batch transfer files."
 ---
 
 # VCB Payroll Exporter Skill
@@ -59,8 +58,9 @@ Kích hoạt skill này khi người dùng yêu cầu:
 2. **Khởi tạo và Chạy Script Converter**:
    Thực thi python script:
    ```bash
-   python .gemini/skills/vcb-payroll-exporter/scripts/convert_payroll.py
+   python skills/vcb-payroll-exporter/scripts/convert_payroll.py
    ```
+   hoặc `python scripts/convert_payroll.py` (nếu đang ở trong thư mục skill),
    hoặc gọi hàm `convert_payroll_to_vcb(records, output_path)` trong Python.
 
 3. **Tiêu Chí Nghiệm Thu (Acceptance Criteria)**:

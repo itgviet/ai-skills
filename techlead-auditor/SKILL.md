@@ -1,7 +1,6 @@
 ---
 name: techlead-auditor
-description: >-
-  Skill dành cho Tech Lead Agent: Tự động soi Git Diff/PR, kiểm tra lỗ hổng bảo mật OWASP, hiệu năng, kiến trúc SOLID và tạo báo cáo Code Review kèm đề xuất ADR.
+description: "Tech lead code review: inspect git diffs, OWASP security vulnerabilities, SOLID architecture, and propose ADRs."
 ---
 
 # Tech Lead Auditor: Code Review & Security Gate

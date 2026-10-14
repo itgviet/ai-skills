@@ -1,3 +1,4 @@
+import os
 import sys
 import json
 from pathlib import Path
@@ -7,9 +8,29 @@ from playwright.sync_api import sync_playwright
 
 sys.stdout.reconfigure(encoding='utf-8')
 
-USER_DATA_DIR = Path(r"C:\Users\vietn\.gemini\config\playwright_profile")
-STORE_FILE = Path(r"d:\ITGVietAssistant\data\tasks_store.json")
-EVENTS_FILE = Path(r"d:\ITGVietAssistant\data\dashboard_events.jsonl")
+# Dynamic resolution: scripts -> skill -> skills -> project root
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+
+def _resolve_user_data_dir() -> Path:
+    env_profile = os.environ.get("PLAYWRIGHT_PROFILE_DIR")
+    if env_profile and Path(env_profile).exists():
+        return Path(env_profile)
+    proj_profile = PROJECT_ROOT / "data" / "playwright_profile"
+    if proj_profile.exists():
+        return proj_profile
+    home = Path.home()
+    for candidate in [
+        home / ".gemini" / "config" / "playwright_profile",
+        home / ".kiro" / "playwright_profile",
+        home / ".config" / "itgviet" / "playwright_profile"
+    ]:
+        if candidate.exists():
+            return candidate
+    return proj_profile
+
+USER_DATA_DIR = _resolve_user_data_dir()
+STORE_FILE = PROJECT_ROOT / "data" / "tasks_store.json"
+EVENTS_FILE = PROJECT_ROOT / "data" / "dashboard_events.jsonl"
 DEFAULT_USER_ID = "19bcfc0a-1108-40bd-810a-abbe7af46fc5"
 
 

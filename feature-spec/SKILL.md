@@ -3,9 +3,7 @@ name: feature-spec
 version: 2.0.0
 author: itgviet
 last_updated: 2026-09-23
-description: >-
-  Universal end-to-end multi-role protocol for Spec Creation (Requirements, Technical Design, Task Planning) 
-  and Spec Execution (Task Run, Automated Gates, Checkpoint Audits, Delivery Reports) across any tech stack.
+description: "Spec-Driven Development protocol: generate and maintain requirements, technical design, task plans, and two-way sync."
 ---
 
 # SKILL: Universal Feature & Architecture Specification & Execution Protocol (`feature-spec`)

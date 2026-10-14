@@ -1,7 +1,6 @@
 ---
 name: meta-learner
-description: >-
-  [SKILL-META-001] Self-Evolving Engine: Tự động phân tích góp ý của User, kiểm tra trùng lặp trước khi chèn, tránh rác dữ liệu và cập nhật tri thức tinh gọn vào bộ nhớ.
+description: "Self-evolving learning engine: extract user preferences and store concise rules without duplication."
 ---
 
 # [SKILL-META-001] Meta-Learner: Deduplication-First Self-Evolving Engine

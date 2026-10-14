@@ -5,7 +5,7 @@ from pathlib import Path
 
 # Add script dir to sys.path
 sys.path.insert(0, str(Path(__file__).parent))
-from onetech_client import OneTechClient, DEFAULT_USER_ID
+from onetech_client import OneTechClient, DEFAULT_USER_ID, STORE_FILE
 from feedback_client import FeedbackHubClient
 
 def main():
@@ -194,7 +194,7 @@ def main():
 
     elif args.command == "list":
         # Ưu tiên đọc siêu tốc từ cache (tasks_store.json) nếu không yêu cầu --live
-        store_path = Path(r"d:\ITGVietAssistant\data\tasks_store.json")
+        store_path = STORE_FILE
         tasks = []
         from_cache = False
 

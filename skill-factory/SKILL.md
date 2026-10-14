@@ -1,7 +1,6 @@
 ---
 name: skill-factory
-description: >-
-  Skill tự động đóng gói các quy trình làm việc lặp lại (SOP) thành một Custom Skill độc lập hoàn chỉnh (.gemini/skills/<skill-name>/SKILL.md).
+description: "Custom skill creator: package repetitive workflows and SOPs into standalone custom skills."
 ---
 
 # Skill Factory: Automated Skill Generator
@@ -16,7 +15,7 @@ Sử dụng skill này khi cần biến một quy trình làm việc thủ công
    - `workflow`: Các bước thực thi chi tiết từ 1 đến N.
 
 2. **Khởi tạo File cấu trúc**:
-   Tạo file mới tại `.gemini/skills/<skill-name>/SKILL.md` với cấu trúc YAML frontmatter chuẩn:
+   Tạo file mới tại `skills/<skill-name>/SKILL.md` (hoặc thư mục skills tương ứng của agent) với cấu trúc YAML frontmatter chuẩn:
 
 ```markdown
 ---

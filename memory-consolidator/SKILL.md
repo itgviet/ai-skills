@@ -1,7 +1,6 @@
 ---
 name: memory-consolidator
-description: >-
-  [SKILL-PRUNE-001] Anti-Entropy & Memory Garbage Collection Engine: Tự động thu dọn tri thức rác, gộp quy tắc trùng lặp, bãi bỏ quy tắc cũ bị mâu thuẫn và nén bộ nhớ để chống phình dữ liệu tuyệt đối.
+description: "Memory garbage collection: prune obsolete knowledge, merge overlapping rules, and prevent context bloat."
 ---
 
 # [SKILL-PRUNE-001] Memory Garbage Collector & Anti-Entropy Engine
@@ -12,7 +11,7 @@ Skill này chịu trách nhiệm kiểm soát dung lượng, ngăn chặn tình 
 
 | Thành Phần | Ngưỡng Tối Đa (Max Cap) | Hành Động Khi Vượt Ngưỡng |
 | :--- | :--- | :--- |
-| **File Rules (`.gemini/rules/`)** | tối đa 150 dòng / file | Tự động gộp 3 quy tắc đơn lẻ thành 1 quy tắc tổng quát. |
+| **File Rules (`rules/`)** | tối đa 150 dòng / file | Tự động gộp 3 quy tắc đơn lẻ thành 1 quy tắc tổng quát. |
 | **Learned Patterns (`learned_patterns.json`)** | tối đa 30 patterns | Gom nhóm theo cụm (Clustering) và nén các patterns tương đồng. |
 | **Active Skills Directory** | Không tạo Skill trùng lặp | Bắt buộc kiểm tra `unit_registry.json` trước khi sinh Skill mới. |
 

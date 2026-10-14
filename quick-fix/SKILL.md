@@ -3,12 +3,7 @@ name: quick-fix
 version: 3.0.0
 author: itgviet
 last_updated: 2026-10-07
-description: >-
-  Universal multi-role and multi-agent workflow for rapid bug fixing, targeted enhancements, UI tweaks,
-  and local refactoring across any codebase (Node.js, Python, Java, Go, C#, C++, Rust, Swift, PHP).
-  Supports Dual-Mode Execution: Solo Fast Mode for micro-fixes, and Multi-Agent Swarm Mode (Actor-Critic)
-  for complex, cross-repository, fullstack, and high-concurrency fixes. Enforces Requirement Alignment,
-  Root Cause Analysis, Adversarial Quality Gates, Multi-Stack Empirical Verification, and Manual Verification Protocol.
+description: "Rapid bug fixing and targeted refactoring with root cause analysis and multi-stack empirical verification."
 ---
 
 # SKILL: Universal Quick Fix & Rapid Improvement Protocol (v3.0.0)
@@ -198,6 +193,11 @@ AI tự động xác định loại tác vụ, thiết lập ranh giới và ch�
    - **Minimal Diff:** Chỉ sửa đúng những dòng code cần thiết để khắc phục Root Cause.
    - **Pattern Matching:** Tuân thủ 100% naming convention, indent, import pattern và coding style hiện có của dự án.
    - **No Unused Code:** Không để lại `console.log`, `print()`, code comment thừa, hoặc import không dùng.
+   - 🎨 **[RULE-UI-BUDGET] Space Budgeting & Fitts's Law Rule (Bắt buộc cho Frontend/UI):**
+     * **Tính toán Dung lượng Không gian (Space Budgeting):** Khi thêm bất kỳ button, badge, hay control mới vào một container có sẵn, BẮT BUỘC tính tổng pixel chiều rộng trên breakpoint nhỏ nhất (Mobile 360-390px, Tablet 768px, POS 1336px).
+     * **CẤM Nhồi nhét Hàng ngang Hẹp:** Tuyệt đối không nhét $\ge 3$ nút có text dài trên cùng một hàng ngang hẹp (< 320px). Với các thao tác phụ trợ (In ấn, Sửa, Hủy), BẮT BUỘC dùng Icon Button chuẩn hóa (viewBox 24x24, container 28-36px) kèm `title` tooltip và `aria-label`.
+     * **Phân cấp Thị giác (Visual Hierarchy):** Mỗi vùng chỉ có 1 Primary Action nổi bật nhất (Pha chế / Tất toán / Bắt đầu), các nút phụ trợ có kiểu dáng thanh nhã (Outline/Subtle Surface).
+     * **Khoảng cách An toàn (Touch Safety):** Nút nguy hiểm (Hủy / Xóa - màu đỏ) TUYỆT ĐỐI KHÔNG ĐƯỢC đặt dính sát nút Action chính để tránh chạm nhầm trên màn hình cảm ứng POS/Mobile.
 2. **Điều phối theo Chế độ:**
    - **Solo Mode:** Thực hiện chỉnh sửa trực tiếp bằng các khối edit tập trung.
    - **Multi-Agent Swarm Mode:** Supervisor gọi `invoke_subagent` giao việc cụ thể cho từng Subagent Worker trên từng repo, kèm theo Contract đã thống nhất ở Phase 2.
@@ -209,11 +209,12 @@ AI tự động xác định loại tác vụ, thiết lập ranh giới và ch�
 > [!IMPORTANT]
 > **TRIỆT TIÊU THIÊN KIẾN XÁC NHẬN (CONFIRMATION BIAS):**
 > Sau khi sửa code xong, AI **KHÔNG ĐƯỢC TUYÊN BỐ HOÀN THÀNH NGAY**.
+> DOM TEST PASS $\neq$ GIAO DIỆN HOÀN HẢO. `expect(btn).toBeInTheDocument()` chỉ chứng minh thẻ HTML có trong RAM, KHÔNG chứng minh giao diện cân đối, không bị vỡ layout trước mắt người dùng!
 
-- **Trong Solo Mode:** AI tự đóng vai **Senior Code Reviewer / QC Lead** soi lại git diff theo 4 ma trận kiểm định bên dưới.
+- **Trong Solo Mode:** AI tự đóng vai **Senior Code Reviewer / QC Lead** soi lại git diff và tự soi ảnh chụp thực tế.
 - **Trong Multi-Agent Mode:** Supervisor điều phối **Critic Subagent** độc lập để thực hiện kiểm toán chéo (Adversarial Review).
 
-#### 🛡️ 4 Ma trận Kiểm định Bắt buộc:
+#### 🛡️ 5 Ma trận Kiểm định Bắt buộc:
 1. **Đối chiếu Yêu cầu Ban đầu (Requirements Traceability Matrix):**
    - Rà soát lại 100% các mục yêu cầu trong lời gọi của người dùng / ticket.
    - ❓ *Từng yêu cầu đã được đáp ứng đầy đủ chưa? Có mục nào bị bỏ sót hay làm sai lệch không?*
@@ -227,6 +228,14 @@ AI tự động xác định loại tác vụ, thiết lập ranh giới và ch�
 4. **Kịch bản Trường hợp Biên & Bất đồng bộ (Concurrency & Edge-Case Checklist):**
    - ❓ *Đã xử lý an toàn tính lũy đẳng (Idempotency) khi gọi lặp lại (double-call, retry) chưa?*
    - ❓ *Đã xử lý trường hợp kill app, mạng yếu, ngắt kết nối giữa chừng, đổi trạng thái chưa?*
+5. 👁️ **[GATE-UI-INSPECTION] Tự Soi Bằng Mắt Ảnh Chụp Màn Hình (Visual Self-Audit):**
+   - Khi có thay đổi UI/UX, BẮT BUỘC chụp ảnh bằng chứng (Playwright/Puppeteer) ở tối thiểu 2 breakpoint: POS/Desktop (1280-1336px) và Mobile (390px).
+   - AI **BẮT BUỘC PHẢI DÙNG TOOL `view_file` ĐỂ TỰ MỞ VÀ SOI TỪNG BỨC ẢNH VỪA CHỤP**:
+     * ❓ *Có bị rớt dòng (line wrap) không mong muốn làm lệch chiều cao giữa các card cạnh nhau không?*
+     * ❓ *Có các nút bấm dính chùm vào nhau không? Khoảng cách giữa các nút có đồng đều không?*
+     * ❓ *Nút thao tác chính (Primary CTA) có rõ ràng, nổi bật không?*
+     * ❓ *Trên màn hình nhỏ (Mobile), các nút có vừa vặn một hàng không hay bị tràn ngang?*
+   - **Chỉ khi AI tự nhìn thấy ảnh thực tế đẹp, cân đối, sạch sẽ mới được phép gửi bằng chứng cho khách hàng.**
 
 ---
 

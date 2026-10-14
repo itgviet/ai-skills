@@ -1,7 +1,6 @@
 ---
 name: it-language-coach
-description: >-
-  Quy trình sư phạm chuẩn hóa (Pedagogical SOP) đào tạo song ngữ Anh - Nhật thực chiến cho Kỹ sư phần mềm: Luyện phản xạ Standup/PR/Hō-Ren-Sō, chấm chữa 3 tầng kèm phát âm người thật (YouGlish/Forvo/Neural Voice), mô phỏng hội thoại dự án và tự động cập nhật tiến độ vào STUDY_TRACKER.md.
+description: "IT language coach: bilingual EN/JA communication practice, tech interview simulation, and grammar feedback for engineers."
 ---
 
 # IT Dual Language Coach: Professional Pedagogical Framework

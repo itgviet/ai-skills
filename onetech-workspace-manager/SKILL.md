@@ -68,16 +68,14 @@ flowchart TD
 
 ## 🛠️ Bộ Công Cụ & Thư Viện (Scripts)
 
-📁 **Thư mục thực thi gốc (Central Hub tại D:\ITGVietAssistant):**
-- **Thư mục gốc:** `D:\ITGVietAssistant\skills\onetech-workspace-manager\scripts\`
-- **Đồng bộ tự động qua Junction:**
-  - *Gemini / Antigravity:* `C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\`
-  - *Kiro:* `C:\Users\vietn\.kiro\skills\onetech-workspace-manager\scripts\`
-*(Tất cả đường dẫn đều trỏ về cùng một mã nguồn duy nhất, dùng chung phiên đăng nhập Playwright & Firebase)*
+📁 **Thư mục thực thi (Scripts Execution Hub):**
+- **Đường dẫn từ workspace root:** `skills/onetech-workspace-manager/scripts/`
+- **Đường dẫn nội bộ skill:** `scripts/`
+*(Tương thích với mọi Agent: Antigravity, Kiro, Claude, Cursor... Tự động định vị dữ liệu và profile tương đối)*
 
 1. **`feedback_client.py` (`FeedbackHubClient`):**
    * Tương tác trực tiếp với Google Cloud Firestore của Feedback Hub (`itgviet-plan`) qua REST API.
-   * **Cơ chế xác thực:** Tự động lấy và làm mới OAuth access token qua Firebase CLI (`C:\Users\vietn\.config\configstore\firebase-tools.json`), không cần đăng nhập lại.
+   * **Cơ chế xác thực:** Tự động lấy và làm mới OAuth access token qua Firebase CLI (`~/.config/configstore/firebase-tools.json`), không cần đăng nhập lại.
    * `get_projects()`: Danh sách các dự án trên Hub.
    * `get_tickets(project_key)`: Lấy danh sách vé phản hồi (lọc theo dự án).
    * `get_ticket(ticket_id)`: Xem chi tiết vé, metadata thiết bị khách hàng, ảnh đính kèm và trao đổi (comments).
@@ -86,7 +84,7 @@ flowchart TD
    * `link_onetech_task(ticket_id, onetech_task_id, project_id)`: Liên kết mã task OneTech vào vé phản hồi.
 
 2. **`onetech_client.py` (`OneTechClient`):**
-   * Điều khiển Chromium headless với persistent profile `C:\Users\vietn\.gemini\config\playwright_profile`.
+   * Điều khiển Chromium headless với persistent profile (tự động nhận diện từ `data/playwright_profile` hoặc profile người dùng).
    * Thao tác trên `https://workspace.onetech.vn`: Sprints, Projects, Tasks, Comments, Upload ảnh CDN.
 
 3. **`cli.py`:** Giao diện dòng lệnh hợp nhất hỗ trợ cả OneTech và Feedback Hub.
@@ -95,32 +93,34 @@ flowchart TD
 
 ## 💻 Hướng Dẫn Sử Dụng Nhanh (CLI Commands)
 
+> **Ghi chú đường dẫn CLI**: Các lệnh dưới đây dùng đường dẫn tương đối từ workspace root: `skills/onetech-workspace-manager/scripts/cli.py` (hoặc `scripts/cli.py` nếu đang ở trong thư mục skill).
+
 ### 🌟 1. Tra cứu & Quản lý trên ITG Feedback Hub (`plan.itgviet.com`)
 
 #### Xem danh sách ticket mới của dự án:
 ```powershell
 # Liệt kê vé phản hồi của dự án Nhật Sinh Cafe:
-python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py feedback list --project cafenhatsinh
+python skills/onetech-workspace-manager/scripts/cli.py feedback list --project cafenhatsinh
 
 # Liệt kê vé phản hồi của dự án ISSX:
-python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py feedback list --project issx
+python skills/onetech-workspace-manager/scripts/cli.py feedback list --project issx
 ```
 
 #### Xem chi tiết 1 ticket (kèm ảnh, mô tả, cấu hình máy KH):
 ```powershell
-python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py feedback get --ticket CAFENHATSINH-584
+python skills/onetech-workspace-manager/scripts/cli.py feedback get --ticket CAFENHATSINH-584
 ```
 
 #### Cập nhật trạng thái ticket và phản hồi cho khách:
 ```powershell
 # Cập nhật sang ĐANG XỬ LÝ (in_progress):
-python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py feedback status `
+python skills/onetech-workspace-manager/scripts/cli.py feedback status `
   --ticket CAFENHATSINH-584 `
   --status in_progress `
   --message "Đội ngũ kỹ thuật đã tiếp nhận và đang tiến hành tối ưu giao diện."
 
 # Cập nhật sang SẴN SÀNG KIỂM THỬ (ready_for_uat):
-python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py feedback status `
+python skills/onetech-workspace-manager/scripts/cli.py feedback status `
   --ticket CAFENHATSINH-584 `
   --status ready_for_uat `
   --message "Đã tối ưu xong layout màn hình đặt món. Mời quán kiểm tra lại trên máy tính tiền."
@@ -128,14 +128,14 @@ python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cl
 
 #### Gửi bình luận riêng vào ticket:
 ```powershell
-python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py feedback comment `
+python skills/onetech-workspace-manager/scripts/cli.py feedback comment `
   --ticket CAFENHATSINH-584 `
   --message "Bản vá đã được triển khai lên máy chủ live."
 ```
 
 #### Liên kết Ticket với OneTech Task:
 ```powershell
-python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py feedback link `
+python skills/onetech-workspace-manager/scripts/cli.py feedback link `
   --ticket ISSX-101 `
   --task 8303 `
   --onetech-project 82
@@ -203,29 +203,29 @@ python D:\ITGVietAssistant\skills\onetech-workspace-manager\scripts\cli.py creat
 
 #### Cập nhật trạng thái Task:
 ```powershell
-python D:\ITGVietAssistant\skills\onetech-workspace-manager\scripts\cli.py update 8086 --status done
+python skills/onetech-workspace-manager/scripts/cli.py update 8086 --status done
 ```
 
 #### Quản lý & Tự động Log Timesheet:
 ```powershell
 # 1. Kiểm tra tiến độ log giờ hôm nay (mục tiêu 8.0h):
-python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py timesheet today
+python skills/onetech-workspace-manager/scripts/cli.py timesheet today
 
 # 2. Thống kê toàn bộ thời gian làm việc trong tuần (Thứ 2 -> Chủ nhật):
-python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py timesheet week
+python skills/onetech-workspace-manager/scripts/cli.py timesheet week
 
 # 3. Xem lịch sử timesheet của 1 task:
-python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py timesheet list --task 8274
+python skills/onetech-workspace-manager/scripts/cli.py timesheet list --task 8274
 
 # 4. Tự động log giờ vào task:
-python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py timesheet log `
+python skills/onetech-workspace-manager/scripts/cli.py timesheet log `
   --task 8274 `
   --hours 2.5 `
   --type development `
   --desc "Nghiên cứu và triển khai thuật toán lọc loại bỏ con người khỏi point cloud"
 
 # 5. Xóa một bản ghi timesheet:
-python C:\Users\vietn\.gemini\config\skills\onetech-workspace-manager\scripts\cli.py timesheet delete --entry-id 1234
+python skills/onetech-workspace-manager/scripts/cli.py timesheet delete --entry-id 1234
 ```
 
 ---

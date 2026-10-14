@@ -1,7 +1,6 @@
 ---
 name: pm-decomposer
-description: >-
-  Skill dành cho Project Manager Agent: Tự động phân rã User Story/BRD thành các Micro-tasks kỹ thuật chi tiết kèm tiêu chuẩn nghiệm thu (Acceptance Criteria) và estimate.
+description: "PM task decomposition: break user stories into actionable micro-tasks with clear acceptance criteria and estimates."
 ---
 
 # PM Decomposer: Agile Task Breakdown Engine

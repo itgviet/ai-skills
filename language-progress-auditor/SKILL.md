@@ -1,7 +1,6 @@
 ---
 name: language-progress-auditor
-description: >-
-  Hệ thống kiểm toán và đánh giá tiến độ học tập song ngữ IT (English & Japanese Progress Auditor): Định vị năng lực đầu vào (Baseline Calibration), sinh đề kiểm tra ngắt quãng (Spaced Quizzes), tính toán độ hiểu và tự động điều chỉnh tốc độ lộ trình (Dynamic Pacing) trong STUDY_TRACKER.md và ROADMAP.md.
+description: "Language progress auditor: evaluate foreign language fluency, track vocabulary retention, and generate learning roadmaps."
 ---
 
 # Language Progress Auditor: Dynamic Pacing & Milestone Evaluation

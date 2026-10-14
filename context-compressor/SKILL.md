@@ -1,7 +1,6 @@
 ---
 name: context-compressor
-description: >-
-  [SKILL-COST-001] Context Compression & Token Savings Engine: Tự động cô đọng các đoạn log dài, file dữ liệu lớn hoặc lịch sử trao đổi thành bản tóm tắt siêu nhỏ trước khi truyền vào prompt để tiết kiệm 70-90% token.
+description: "Context compression engine: condense long logs, files, and conversation history to save 70-90% input tokens."
 ---
 
 # [SKILL-COST-001] Context Compression & Token Savings Engine

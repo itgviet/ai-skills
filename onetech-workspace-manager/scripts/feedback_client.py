@@ -7,7 +7,7 @@ import urllib.parse
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
-CONFIG_STORE_PATH = Path(r"C:\Users\vietn\.config\configstore\firebase-tools.json")
+CONFIG_STORE_PATH = Path.home() / ".config" / "configstore" / "firebase-tools.json"
 FIREBASE_PROJECT = "itgviet-plan"
 FIRESTORE_BASE_URL = f"https://firestore.googleapis.com/v1/projects/{FIREBASE_PROJECT}/databases/(default)/documents"
 

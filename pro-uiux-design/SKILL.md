@@ -3,10 +3,7 @@ name: pro-uiux-design
 version: 3.0.0
 author: itgviet
 last_updated: 2026-09-27
-description: >-
-  Universal professional human-centered UI/UX design standards and execution protocol.
-  Enforces modern design tokens, platform-native design languages (Apple HIG, Microsoft Fluent, Material 3),
-  anti-AI-cliché aesthetics, strict SVG iconography rules, optical hierarchy, micro-interactions, and accessible responsive layouts.
+description: "UI/UX design standards: design tokens, Material 3, platform-native aesthetics, SVG icons, and responsive layouts."
 ---
 
 # SKILL: Professional UI/UX Design System & Execution Protocol (`pro-uiux-design`)
@@ -104,9 +101,27 @@ abstract class AppDesignTokens {
 
 ---
 
-## 📋 4. Quy Trình Kiểm Thử Tự Động UI/UX (Self-Audit Protocol)
+## 🧭 5. Kiến Trúc UX Chiều Sâu & Tính Năng Toàn Diện (Deep UX Architecture)
 
-Trước khi nghiệm thu bất kỳ giao diện nào do AI sinh ra, AI **PHẢI TỰ CHẠY CHECKLIST 10 ĐIỂM**:
+Để đảm bảo sản phẩm không dừng lại ở mức "giao diện bề mặt", mọi ứng dụng thương mại bắt buộc phải có:
+
+1. **Kiến Trúc Điều Hướng Chuẩn (Standard 4-Tab Bar):**
+   - **Tab 1: Sổ Thu Chi (Dashboard & Feed):** Danh sách giao dịch, lọc theo ngày/ví/hũ, tìm kiếm nhanh, nút thêm nhanh.
+   - **Tab 2: Phân Tích & Báo Cáo (Analytics & Charts):** Biểu đồ tỷ lệ Vector SVG động, cơ cấu chi tiêu, cảnh báo vượt hạn mức, xuất file báo cáo.
+   - **Tab 3: Phương Pháp Luận / Chuyên Mục Sâu (Methodology / Reflection):** Nội dung giá trị thực tiễn (như 4 câu hỏi Kakeibo, đánh giá hành vi chi tiêu).
+   - **Tab 4: Cài Đặt & Trung Tâm Dữ Liệu (Settings & Vault):** Khóa bảo mật PIN, quản lý ví, sao lưu/khôi phục, đổi đơn vị tiền tệ, chính sách quyền riêng tư và xóa sạch dữ liệu.
+2. **Chi Tiết Hóa Dữ Liệu (Drill-Down Detail):**
+   - Khi bấm vào bất kỳ danh mục/hũ/ví nào, phải mở ra Modal hoặc màn hình con hiển thị danh sách các khoản chi của riêng mục đó kèm nút điều chỉnh ngân sách.
+3. **Thao Tác Tức Thì Kèm Phục Hồi (Immediate Action & Reversible UX):**
+   - Mọi hành động nhạy cảm (Xóa giao dịch, Khởi tạo lại) đều phải có Dialog xác nhận hoặc Toast thông báo kèm nút "HOÀN TÁC" (Undo).
+4. **Không Để Lại Thành Phần "Chết":**
+   - Bất kỳ nút, icon hay thẻ nào xuất hiện trên màn hình đều phải có phản hồi khi người dùng chạm vào (Active state, Modal, Drawer, hoặc Action sheet).
+
+---
+
+## 📋 6. Quy Trình Kiểm Thử Tự Động UI/UX (Self-Audit Protocol)
+
+Trước khi nghiệm thu bất kỳ giao diện nào do AI sinh ra, AI **PHẢI TỰ CHẠY CHECKLIST 12 ĐIỂM**:
 
 - [ ] **1. Anti-Emoji Check:** ĐÃ THAY THẾ toàn bộ Emoji unicode bằng Vector SVG stroke icons chuẩn.
 - [ ] **2. Anti-AI Colors:** Không có gradient chói mắt bừa bãi, không có shadow đen mờ đục đè lên đĩa.
@@ -116,5 +131,7 @@ Trước khi nghiệm thu bất kỳ giao diện nào do AI sinh ra, AI **PHẢI
 - [ ] **6. Typography Scale:** Text size tuân thủ bảng Typographic Hierarchy.
 - [ ] **7. 5-State Support:** Component đã xử lý đủ 5 trạng thái (`Default`, `Hover/Active`, `Shimmer/Loading`, `Empty`, `Error`).
 - [ ] **8. Touch Target:** Nút bấm trên mobile đạt tối thiểu 44x44px.
-- [ ] **9. Hover Feedback:** Nút bấm và card có hiệu ứng hover và press scale 0.98 mượt mà.
-- [ ] **10. Localization Ready:** Không hardcode text hiển thị, 100% đi qua i18n localization keys.
+- [ ] **9. Hover & Active Feedback:** Nút bấm và card có hiệu ứng scale 0.98 mượt mà.
+- [ ] **10. Zero Dead UI Element:** 100% các nút và thẻ đều có tính năng tương tác thực tế, không có mockup chết.
+- [ ] **11. Drill-Down Detail:** Cho phép xem chi tiết từng danh mục/hũ khi bấm vào thẻ.
+- [ ] **12. Real Persistence:** Dữ liệu lưu vĩnh viễn trên LocalStorage, hỗ trợ xuất CSV/JSON thật.

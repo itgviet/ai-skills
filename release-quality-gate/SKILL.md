@@ -1,10 +1,6 @@
 ---
 name: release-quality-gate
-description: >-
-  Quy trình chuẩn hóa toàn cầu thiết lập Cổng Kiểm Soát Chất Lượng Phát Hành (Release Quality Gate)
-  và tự động khởi tạo Bảng Điều Khiển Kiểm Thử Tương Tác Độc Lập (Single-file HTML Portal) cho mọi dự án phần mềm.
-  Áp dụng tiêu chuẩn quốc tế IEEE 829 & ISTQB, hỗ trợ phân tách đa môi trường (Local / Staging / Production),
-  tự động nhúng bằng chứng kiểm thử (Evidence Ingestion), tính toán Go/No-Go Decision Gate và xuất báo cáo CSV/PDF.
+description: "Release Quality Gate: IEEE 829 test audit portal generation, multi-environment verification, and Go/No-Go decision."
 ---
 
 # Universal Release Quality Gate & Interactive Portal Protocol
@@ -21,7 +17,7 @@ Portal kiểm thử và cổng duyệt phát hành được thiết kế theo t�
 flowchart TD
     subgraph Input ["1. Dữ Liệu Đầu Vào (Cross-Stack)"]
         A["File Testcase Cấu Hình (JSON / YAML / Markdown)"]
-        B["Logs / Báo Cáo Test Tự Động (Jest, PyTest, Playwright, Postman)"]
+        B["Logs / Báo Cáo Test Tự Động (Jest, PyTest, Playwright, Maestro CLI, ADB Matrix, Postman)"]
     end
 
     subgraph SkillEngine ["2. Bộ Máy release-quality-gate"]
@@ -103,20 +99,20 @@ Bất kỳ dự án nào cũng chỉ cần cung cấp 1 file JSON theo cấu tr�
 ### Cách 1: Khởi Tạo Portal Từ File JSON Mẫu
 Khi chuẩn bị đợt Release mới trong bất kỳ thư mục dự án nào:
 ```bash
-node ~/.gemini/config/skills/release-quality-gate/scripts/generate_portal.js \
+node skills/release-quality-gate/scripts/generate_portal.js \
   --input=./testcases.json \
   --output=./Release_Quality_Gate.html
 ```
 
 ### Cách 2: Tự Động Ghép Bằng Chứng Từ Test Tự Động (Evidence Merge)
-Nếu dự án có chạy test tự động (Jest, PyTest, Playwright) xuất ra file JSON kết quả:
+Nếu dự án có chạy test tự động (Jest, PyTest, Playwright, Maestro CLI, ADB Matrix) xuất ra file JSON / screenshot kết quả:
 ```bash
-node ~/.gemini/config/skills/release-quality-gate/scripts/generate_portal.js \
+node skills/release-quality-gate/scripts/generate_portal.js \
   --input=./testcases.json \
   --evidence=./reports/test-results.json \
   --output=./Release_Quality_Gate.html
 ```
-*Script sẽ tự động so khớp `id` của testcase, cập nhật trạng thái `PASSED/FAILED` và điền chi tiết `evidence` vào portal.*
+*Script sẽ tự động so khớp `id` của testcase, cập nhật trạng thái `PASSED/FAILED`, đính kèm ảnh chụp màn hình đa độ phân giải (`e2e/screenshots/*.png`) và điền chi tiết `evidence` vào portal.*
 
 ### Cách 3: Yêu Cầu AI Trực Tiếp Thực Hiện
 Chỉ cần chat với Agent:

@@ -1,7 +1,6 @@
 ---
 name: task-lifecycle-manager
-description: >-
-  [SKILL-PM-003] Persistent Task Lifecycle & State Engine: Quản lý vòng đời task của User, truy vấn trạng thái siêu tốc, tiết kiệm token tối đa và tự động cập nhật tiến độ khi hoàn thành.
+description: "Task lifecycle manager: state tracking, fast querying, and automated completion updates."
 ---
 
 # [SKILL-PM-003] Task Lifecycle Manager: Persistent State & Fast Retrieval Engine
@@ -17,7 +16,7 @@ flowchart TD
     CheckAction -->|2. Hỏi Còn Task Gì| QueryTask[Đọc duy nhất tasks_store.json -> Xuất Bảng Task Board]
     CheckAction -->|3. Báo Xong Task| UpdateTask[Đổi trạng thái sang DONE -> Lưu completed_at]
     
-    AddTask & QueryTask & UpdateTask --> SyncGlobal[Đồng bộ sang C:\Users\vietn\.gemini\config\memory\tasks_store.json]
+    AddTask & QueryTask & UpdateTask --> SyncGlobal[Đồng bộ sang data/tasks_store.json]
 ```
 
 ---

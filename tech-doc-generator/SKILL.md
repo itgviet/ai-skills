@@ -1,7 +1,6 @@
 ---
 name: tech-doc-generator
-description: >-
-  [SKILL-LEAD-003] System & Source Code Reverse-Engineering & Technical Documentation Engine: Tự động quét toàn bộ codebase, phân tích kiến trúc, trích xuất Database Schema/API Endpoints, vẽ sơ đồ Mermaid và xuất tài liệu kỹ thuật hệ thống (Technical Architecture Document / SAD) toàn diện.
+description: "Technical documentation engine: reverse-engineer codebases, extract schemas/endpoints, and generate Mermaid SAD diagrams."
 ---
 
 # [SKILL-LEAD-003] Tech Doc Generator: System & Source Code Reverse-Engineering Engine
