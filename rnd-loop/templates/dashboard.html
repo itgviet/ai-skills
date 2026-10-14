@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>R&amp;D Board · {{project}}</title>
+<style>
+:root{
+  --bg:#f4f6f7;--surface:#fff;--ink:#17212b;--muted:#5d6b76;--line:#d9e1e6;
+  --accent:#0f7480;--accent-soft:#e0f1f2;--good:#1d7a46;--good-soft:#e2f3e8;
+  --warn:#9a5d08;--warn-soft:#fbefdb;--bad:#b13434;--bad-soft:#f9e3e3;
+  --mono:ui-monospace,"Cascadia Mono",Consolas,monospace;
+  --sans:"Segoe UI",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  color-scheme:dark;--bg:#10171c;--surface:#162129;--ink:#e2eaef;--muted:#93a2ad;--line:#27353f;
+  --accent:#50c2cb;--accent-soft:#15343a;--good:#5cc98a;--good-soft:#173324;
+  --warn:#e6a64c;--warn-soft:#33270f;--bad:#ef7d7d;--bad-soft:#3a1c1c;}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 var(--sans)}
+.wrap{max-width:1200px;margin:0 auto;padding:28px 18px 60px}
+h1{font-size:26px;margin:0 0 4px;letter-spacing:-.01em}
+h2{font-size:19px;margin:0}
+h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:22px 0 8px}
+.sub{color:var(--muted);margin:0 0 22px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.tabs button{font:inherit;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px;border-radius:7px;cursor:pointer}
+.tabs button[aria-selected=true]{border-color:var(--accent);color:var(--accent);font-weight:600}
+.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-top:14px}
+.kpis div{background:var(--surface);padding:12px 14px}
+.kpis b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.kpis span{font-size:12px;color:var(--muted)}
+.q{color:var(--muted);margin:6px 0 0;max-width:80ch}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{display:inline-block;font:500 11.5px/1 var(--mono);padding:4px 8px;border-radius:999px;white-space:nowrap}
+.v-accepted{background:var(--good-soft);color:var(--good)}
+.v-neutral{background:var(--accent-soft);color:var(--accent)}
+.v-rejected{background:var(--bad-soft);color:var(--bad)}
+.v-baseline,.v-promote{background:var(--warn-soft);color:var(--warn)}
+.v-baseline_with_failures{background:var(--bad-soft);color:var(--bad)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.spark{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.spark .t{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.spark svg{width:100%;height:56px;display:block}
+.gate{font-size:12.5px;margin:4px 0 0;padding-left:16px}
+.gate li.f{color:var(--bad)} .gate li.k{color:var(--warn)} .gate li.i{color:var(--good)}
+details summary{cursor:pointer;color:var(--accent)}
+pre.nb{white-space:pre-wrap;font:12.5px/1.6 var(--mono);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;max-height:420px;overflow:auto}
+.empty{color:var(--muted);font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>R&amp;D Board</h1>
+  <p class="sub">Dự án <b>{{project}}</b> · sinh từ <code>rnd/*/registry.jsonl</code> bởi skill rnd-loop. Chạy lại <code>rnd.py dashboard</code> để cập nhật.</p>
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <div id="view"></div>
+</div>
+<script>
+const DATA = /*__DATA__*/[];
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = v => typeof v === "number" ? (Math.abs(v) >= 100 ? v.toFixed(1) : +v.toFixed(4)) : esc(v);
+
+function baselineOf(records){
+  let base=null; const byId=Object.fromEntries(records.map(r=>[r.id,r]));
+  for(const r of records){ if(r.kind==="baseline") base=r; else if(r.kind==="promote") base=byId[r.promotes]||base; }
+  return base;
+}
+function spark(points, goal){
+  if(points.length<1) return "";
+  const w=240,h=56,p=6, ys=points.map(q=>q.v), lo=Math.min(...ys), hi=Math.max(...ys), span=(hi-lo)||1;
+  const x=i=> points.length===1? w/2 : p+i*(w-2*p)/(points.length-1);
+  const y=v=> h-p-(v-lo)/span*(h-2*p);
+  const d=points.map((q,i)=>`${i?"L":"M"}${x(i).toFixed(1)},${y(q.v).toFixed(1)}`).join("");
+  const dots=points.map((q,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(q.v).toFixed(1)}" r="${i===points.length-1?3.5:2.2}" fill="${q.ok?"var(--accent)":"var(--bad)"}"><title>${esc(q.id)}: ${fmt(q.v)}</title></circle>`).join("");
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="var(--muted)" stroke-width="1.4"/>${dots}</svg>`;
+}
+function render(t){
+  const {task, charter, records, notebook} = t;
+  const runs = records.filter(r=>r.kind==="baseline"||r.kind==="experiment");
+  const base = baselineOf(records);
+  const count = v => runs.filter(r=>r.verdict===v).length;
+  const ti = charter.task||{};
+  let h = `<div class="card"><h2>${esc(ti.title||task)}</h2><p class="q">${esc(ti.question||"")}</p>
+  <div class="kpis"><div><b>${esc(base?base.id:"—")}</b><span>baseline hiện tại</span></div>
+  <div><b>${runs.length}</b><span>lượt chạy</span></div><div><b>${count("accepted")}</b><span>accepted</span></div>
+  <div><b>${count("rejected")}</b><span>rejected</span></div><div><b>${count("neutral")}</b><span>neutral</span></div></div></div>`;
+
+  const metrics = charter.metrics||[];
+  h += `<h3>Xu hướng chỉ số theo từng case</h3>`;
+  const cells=[];
+  for(const m of metrics){
+    if(!m.name) continue;
+    const cases = new Set(); runs.forEach(r=>Object.keys((r.metrics||{}).cases||{}).forEach(c=>cases.add(c)));
+    const groups = (m.scope==="aggregate") ? [["*",r=>r.metrics.aggregate?.[m.name]]] : [...cases].map(c=>[c,r=>r.metrics.cases?.[c]?.[m.name]]);
+    for(const [c,get] of groups){
+      const pts = runs.map(r=>({id:r.id,v:get(r),ok:r.verdict!=="rejected"})).filter(q=>typeof q.v==="number");
+      if(!pts.length) continue;
+      const last=pts[pts.length-1].v;
+      cells.push(`<div class="spark"><div class="t"><span>${esc(c)} · ${esc(m.name)} (${m.goal==="max"?"↑ tốt":"↓ tốt"})</span><b>${fmt(last)}</b></div>${spark(pts,m.goal)}</div>`);
+    }
+  }
+  h += cells.length? `<div class="grid">${cells.join("")}</div>` : `<p class="empty">Chưa có lượt chạy nào.</p>`;
+
+  h += `<h3>Lịch sử chạy</h3><div class="card scroll"><table><thead><tr><th>Run</th><th>Thời điểm</th><th>Verdict</th><th>Giả thuyết / thay đổi</th><th>Git</th><th>Cổng</th></tr></thead><tbody>`;
+  for(const r of [...records].reverse()){
+    if(r.kind==="promote"){ h+=`<tr><td class="num">${esc(r.id)}</td><td class="num">${esc(r.ts.slice(0,16).replace("T"," "))}</td><td><span class="pill v-promote">promote</span></td><td colspan="3">Baseline → ${esc(r.promotes)}. ${esc(r.reason)}</td></tr>`; continue; }
+    const g=r.gate||{}; const li=[...(g.failures||[]).map(x=>`<li class="f">${esc(x)}</li>`),...(g.regressions||[]).map(x=>`<li class="f">${esc(x)}</li>`),...(g.known_failures||[]).map(x=>`<li class="k">known: ${esc(x)}</li>`),...(g.improvements||[]).map(x=>`<li class="i">${esc(x)}</li>`)];
+    h+=`<tr><td class="num">${esc(r.id)}</td><td class="num">${esc(r.ts.slice(0,16).replace("T"," "))}</td><td><span class="pill v-${esc(r.verdict)}">${esc(r.verdict)}</span></td>
+    <td>${esc(r.hypothesis)}${r.change?`<br><span style="color:var(--muted)">${esc(r.change)}</span>`:""}</td>
+    <td class="num">${esc(r.git?.sha)}${r.git?.dirty?" *":""}<br><span style="color:var(--muted)">${esc(r.git?.branch)}</span></td>
+    <td>${li.length?`<details><summary>${li.length} mục</summary><ul class="gate">${li.join("")}</ul></details>`:"—"}</td></tr>`;
+  }
+  h += `</tbody></table></div><p class="q" style="font-size:12px">* = chạy trên working tree có thay đổi chưa commit.</p>`;
+
+  const hyps = charter.hypotheses||[];
+  h += `<h3>Backlog giả thuyết</h3>`;
+  h += hyps.length? `<div class="card scroll"><table><thead><tr><th>ID</th><th>Trạng thái</th><th>Giả thuyết</th></tr></thead><tbody>${hyps.map(x=>`<tr><td class="num">${esc(x.id)}</td><td><span class="pill v-${x.status==="accepted"?"accepted":x.status==="rejected"?"rejected":"neutral"}">${esc(x.status||"open")}</span></td><td>${esc(x.text)}</td></tr>`).join("")}</tbody></table></div>` : `<p class="empty">Chưa có giả thuyết.</p>`;
+  h += `<h3>Lab notebook</h3><pre class="nb">${esc(notebook)||"—"}</pre>`;
+  document.getElementById("view").innerHTML = h;
+}
+const tabs=document.getElementById("tabs");
+if(!DATA.length){ document.getElementById("view").innerHTML='<p class="empty">Chưa có task nào trong rnd/.</p>'; }
+DATA.forEach((t,i)=>{ const b=document.createElement("button"); b.role="tab"; b.textContent=t.task; b.setAttribute("aria-selected",i===0);
+  b.onclick=()=>{ [...tabs.children].forEach(x=>x.setAttribute("aria-selected",x===b)); render(t); }; tabs.appendChild(b); });
+if(DATA.length) render(DATA[0]);
+</script>
+</body>
+</html>

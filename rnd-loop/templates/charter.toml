@@ -1,0 +1,48 @@
+# R&D charter for "{{task}}" — the only per-task part of the rnd-loop process.
+# Everything the loop needs to decide "better or not" lives here, so a decision is a diff, not a memory.
+
+[task]
+id = "{{task}}"
+title = ""                 # one line: what is being improved
+question = ""              # the research question, answerable with the metrics below
+owner = ""
+created = "{{date}}"
+scope = []                 # files / modules the experiments may change
+off_limits = []            # what must not change (API contract, other modules, prod config ...)
+
+[run]
+# Command run from the project root. It MUST write metrics_file in this shape:
+#   {"cases": {"<case>": {"<metric>": number, ...}}, "aggregate": {"<metric>": number}}
+command = ""
+metrics_file = "rnd/{{task}}/last_metrics.json"
+timeout_s = 7200
+
+# Metrics compared against the baseline. goal = "max" | "min".
+# tolerance = change smaller than this is noise (neither win nor regression).
+# scope = "per_case" (every case must not regress) | "aggregate".
+[[metrics]]
+name = ""
+goal = "max"
+tolerance = 0.0
+scope = "per_case"
+
+# Absolute constraints, checked on every run (baseline included).
+# op: <= >= < > == != or "abs<=" with value = [target, tolerance].  cases = ["*"] or a list of case names.
+# [[constraints]]
+# metric = ""
+# op = ">="
+# value = 0
+# cases = ["*"]
+# why = ""
+
+[report]
+# Which sections the report must have, in order. The skill fills them from the registry + notebook.
+sections = ["Kết luận", "Bối cảnh & câu hỏi", "Phương pháp", "Kết quả so với baseline", "Bằng chứng", "Rủi ro & giới hạn", "Bước tiếp theo"]
+evidence = []              # required evidence per run (images, files, viewer pairs ...)
+audience = ""              # who reads it: decides depth and language
+
+# Hypothesis backlog. status: open | running | accepted | rejected | parked
+# [[hypotheses]]
+# id = "H1"
+# text = ""
+# status = "open"
