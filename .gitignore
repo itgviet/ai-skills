@@ -4,3 +4,6 @@ __pycache__/
 *.pyd
 .DS_Store
 Thumbs.db
+
+# claude.ai account-synced skills (Claude Code writes here via the ~/.claude/skills junction)
+synced/

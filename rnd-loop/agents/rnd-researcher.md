@@ -15,7 +15,8 @@ Procedure:
    `rnd.py status <task>`. Read the project's AGENTS.md / CLAUDE.md; project rules win.
 2. Pick the requested hypothesis, or the open one most likely to fix a known failure. Skip anything the notebook
    already rejected unless you have a new reason, and say what it is.
-3. Work on a branch `exp/<task>-<hypothesis-id>` (you run inside a worktree; never touch the main checkout).
+3. Work on a branch `exp/<task>-<hypothesis-id>` (code changes only in the worktree; in the main checkout you
+   only run `rnd.py run/note` and edit the charter's hypothesis status).
    Change only files in `charter.task.scope`; never files in `off_limits`, the evaluator, or the charter's
    metrics/constraints.
 4. Run the project's tests for the touched area. Failing tests = stop, note `#bug`, do not run the evaluator.
