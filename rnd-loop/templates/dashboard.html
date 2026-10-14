@@ -43,6 +43,7 @@ td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:now
 .v-neutral{background:var(--accent-soft);color:var(--accent)}
 .v-rejected{background:var(--bad-soft);color:var(--bad)}
 .v-baseline,.v-promote{background:var(--warn-soft);color:var(--warn)}
+.v-invalid{background:transparent;border:1px dashed var(--muted);color:var(--muted)}
 .v-baseline_with_failures{background:var(--bad-soft);color:var(--bad)}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
 .spark{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
@@ -69,7 +70,7 @@ const fmt = v => typeof v === "number" ? (Math.abs(v) >= 100 ? v.toFixed(1) : +v
 
 function baselineOf(records){
   let base=null; const byId=Object.fromEntries(records.map(r=>[r.id,r]));
-  for(const r of records){ if(r.kind==="baseline") base=r; else if(r.kind==="promote") base=byId[r.promotes]||base; }
+  for(const r of records){ if(r.kind==="baseline"&&r.verdict!=="invalid") base=r; else if(r.kind==="promote") base=byId[r.promotes]||base; }
   return base;
 }
 function spark(points, goal){
@@ -83,7 +84,9 @@ function spark(points, goal){
 }
 function render(t){
   const {task, charter, records, notebook} = t;
-  const runs = records.filter(r=>r.kind==="baseline"||r.kind==="experiment");
+  const bad=new Set(records.filter(r=>r.kind==="invalidate").map(r=>r.target));
+  records.forEach(r=>{ if(bad.has(r.id)) r.verdict="invalid"; });
+  const runs = records.filter(r=>(r.kind==="baseline"||r.kind==="experiment")&&r.verdict!=="invalid");
   const base = baselineOf(records);
   const count = v => runs.filter(r=>r.verdict===v).length;
   const ti = charter.task||{};
@@ -110,6 +113,7 @@ function render(t){
 
   h += `<h3>Lịch sử chạy</h3><div class="card scroll"><table><thead><tr><th>Run</th><th>Thời điểm</th><th>Verdict</th><th>Giả thuyết / thay đổi</th><th>Git</th><th>Cổng</th></tr></thead><tbody>`;
   for(const r of [...records].reverse()){
+    if(r.kind==="invalidate"){ h+=`<tr><td class="num">${esc(r.id)}</td><td class="num">${esc(r.ts.slice(0,16).replace("T"," "))}</td><td><span class="pill v-rejected">invalidate</span></td><td colspan="3">${esc(r.target)} bị huỷ: ${esc(r.reason)}</td></tr>`; continue; }
     if(r.kind==="promote"){ h+=`<tr><td class="num">${esc(r.id)}</td><td class="num">${esc(r.ts.slice(0,16).replace("T"," "))}</td><td><span class="pill v-promote">promote</span></td><td colspan="3">Baseline → ${esc(r.promotes)}. ${esc(r.reason)}</td></tr>`; continue; }
     const g=r.gate||{}; const li=[...(g.failures||[]).map(x=>`<li class="f">${esc(x)}</li>`),...(g.regressions||[]).map(x=>`<li class="f">${esc(x)}</li>`),...(g.known_failures||[]).map(x=>`<li class="k">known: ${esc(x)}</li>`),...(g.improvements||[]).map(x=>`<li class="i">${esc(x)}</li>`)];
     h+=`<tr><td class="num">${esc(r.id)}</td><td class="num">${esc(r.ts.slice(0,16).replace("T"," "))}</td><td><span class="pill v-${esc(r.verdict)}">${esc(r.verdict)}</span></td>

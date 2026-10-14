@@ -16,6 +16,7 @@ Commands:
     rnd.py init <task>                          create charter + notebook from templates
     rnd.py run <task> -H "hypothesis" [--kind baseline|experiment] [--change "..."] [--no-exec] [--workdir <worktree>]
     rnd.py promote <task> <run-id>              make an experiment the new baseline (after merge)
+    rnd.py invalidate <task> <run-id> --reason  void a run whose measurement failed (infra, data)
     rnd.py note <task> "text" [--tag lesson]    append a dated note to the notebook
     rnd.py status [<task>]                      baseline, last runs, open hypotheses
     rnd.py dashboard                            write rnd/dashboard.html
@@ -90,12 +91,18 @@ def current_baseline(records: list[dict]) -> dict | None:
     """The latest baseline, or the run a later promote points to."""
     base = None
     by_id = {r["id"]: r for r in records}
+    bad = invalidated(records)
     for r in records:
-        if r["kind"] == "baseline":
+        if r["kind"] == "baseline" and r["id"] not in bad and r.get("verdict") != "invalid":
             base = r
         elif r["kind"] == "promote":
             base = by_id.get(r["promotes"], base)
     return base
+
+
+def invalidated(records: list[dict]) -> set[str]:
+    """Run ids voided later by `rnd.py invalidate` (infra failure, wrong data ...)."""
+    return {r["target"] for r in records if r["kind"] == "invalidate"}
 
 
 def next_id(records: list[dict], task: str) -> str:
@@ -222,15 +229,20 @@ def cmd_run(args) -> None:
     base = None if args.kind == "baseline" else current_baseline(records)
     if args.kind == "experiment" and base is None:
         sys.exit("[rnd] no baseline yet: run with --kind baseline first")
-    g = gate(charter, metrics, base)
+    if metrics.get("invalid"):
+        # The evaluator says the measurement itself failed (crash, OOM, missing data): never grade it.
+        g = {"verdict": "invalid", "failures": [], "known_failures": [], "improvements": [], "regressions": [],
+             "invalid_reason": str(metrics["invalid"])}
+    else:
+        g = gate(charter, metrics, base)
     rec = {
         "schema": SCHEMA, "id": rid, "task": args.task, "kind": args.kind, "ts": now(),
         "hypothesis": args.hypothesis, "change": args.change or "", "baseline_id": base["id"] if base else None,
         "git": git_state(wd), "workdir": str(wd) if wd != root else None, "command_exit": exit_code,
         "duration_s": round((dt.datetime.now() - t0).total_seconds(), 1),
-        "metrics": metrics, "gate": g, "verdict": g["verdict"] if args.kind == "experiment" else "baseline",
+        "metrics": metrics, "gate": g, "verdict": g["verdict"] if args.kind == "experiment" or g["verdict"] == "invalid" else "baseline",
     }
-    if g["failures"] and args.kind == "baseline":
+    if g["failures"] and args.kind == "baseline" and g["verdict"] != "invalid":
         rec["verdict"] = "baseline_with_failures"
     snap = task_dir(root, args.task) / "runs"
     snap.mkdir(exist_ok=True)
@@ -251,6 +263,16 @@ def cmd_promote(args) -> None:
     append_registry(root, args.task, {"schema": SCHEMA, "id": f"{args.run_id}-promote", "task": args.task, "kind": "promote",
                                       "ts": now(), "promotes": args.run_id, "reason": args.reason or "", "git": git_state(root)})
     print(f"baseline of {args.task} is now {args.run_id}")
+
+
+def cmd_invalidate(args) -> None:
+    root = project_root()
+    records = read_registry(root, args.task)
+    if not any(r["id"] == args.run_id for r in records):
+        sys.exit(f"{args.run_id} not found in {args.task}")
+    append_registry(root, args.task, {"schema": SCHEMA, "id": f"{args.run_id}-invalidate", "task": args.task,
+                                      "kind": "invalidate", "ts": now(), "target": args.run_id, "reason": args.reason})
+    print(f"{args.run_id} marked invalid: {args.reason}")
 
 
 def cmd_note(args) -> None:
@@ -274,7 +296,11 @@ def cmd_status(args) -> None:
     for task in [args.task] if args.task else _tasks(root):
         charter, records = load_charter(root, task), read_registry(root, task)
         base = current_baseline(records)
+        bad = invalidated(records)
         runs = [r for r in records if r["kind"] in ("baseline", "experiment")]
+        for r in runs:
+            if r["id"] in bad:
+                r["verdict"] = "invalid"
         print(f"\n## {task} — {charter['task'].get('title', '')}")
         print(f"baseline: {base['id'] if base else 'none'}   runs: {len(runs)}   "
               f"accepted: {sum(r['verdict'] == 'accepted' for r in runs)}   "
@@ -313,6 +339,8 @@ def main(argv: list[str] | None = None) -> None:
     p.set_defaults(fn=cmd_run)
     p = sub.add_parser("promote"); p.add_argument("task"); p.add_argument("run_id")
     p.add_argument("--force", action="store_true"); p.add_argument("--reason"); p.set_defaults(fn=cmd_promote)
+    p = sub.add_parser("invalidate"); p.add_argument("task"); p.add_argument("run_id")
+    p.add_argument("--reason", required=True); p.set_defaults(fn=cmd_invalidate)
     p = sub.add_parser("note"); p.add_argument("task"); p.add_argument("text"); p.add_argument("--tag")
     p.set_defaults(fn=cmd_note)
     p = sub.add_parser("status"); p.add_argument("task", nargs="?"); p.set_defaults(fn=cmd_status)

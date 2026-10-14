@@ -1,6 +1,6 @@
 ---
 name: rnd-loop
-version: 1.1.0
+version: 1.2.0
 last_updated: 2026-10-14
 description: "Quy trình R&D chung cho mọi dự án: charter → baseline → giả thuyết → thí nghiệm → cổng chống hồi quy → registry → report → retro. Dùng khi người dùng yêu cầu R&D, nghiên cứu, thử nghiệm, tối ưu/cải thiện một thuật toán hoặc chất lượng (độ chính xác, tốc độ, chất lượng output), đánh giá 'đã đủ tốt chưa', so sánh phương án, hoặc hỏi lịch sử/tiến độ một task R&D. Có registry lịch sử, lab notebook, dashboard và playbook tự cải thiện."
 ---
@@ -40,6 +40,8 @@ Script chỉ dùng stdlib, Python ≥ 3.11. Chạy từ gốc repo dự án (ho�
 - `task.question`: câu hỏi trả lời được bằng số đo. "Làm cho tốt hơn" không phải câu hỏi.
 - `run.command`: lệnh đánh giá, ghi `metrics_file` dạng `{"cases": {case: {metric: số}}, "aggregate": {...}}`.
   Nếu dự án chưa có evaluator, **viết evaluator trước** — đây là việc quan trọng nhất của cả task.
+  Evaluator phải: kiểm tài nguyên trước khi chạy, trả `invalid` khi đo hỏng, không ghi vào file git-tracked,
+  và đo **đúng thứ hệ thống dùng để quyết định** (playbook P8).
 - `metrics` (goal max/min, tolerance = ngưỡng nhiễu) và `constraints` (ngưỡng tuyệt đối, có `why`).
 - `report.sections / evidence / audience`: cách report riêng của task này.
 - `scope` / `off_limits`.
@@ -65,7 +67,8 @@ Thêm vào `[[hypotheses]]` trong charter: một câu, có cơ chế ("vì X nê
 4. Từ checkout chính: `rnd.py run <task> -H "<giả thuyết>" --change "<branch>@<sha>" --workdir <worktree>` —
    evaluator chạy trong worktree, registry/notebook **luôn ở checkout chính** để run bị bác vẫn còn lịch sử.
    Dữ liệu lớn bị gitignore (Data/, .venv) thì junction vào worktree; kiểm tra code import từ worktree, không phải từ bản cài editable.
-5. Đọc verdict:
+5. Đọc verdict (`invalid` = đo hỏng: evaluator ghi `"invalid": "lý do"` khi crash / thiếu tài nguyên / thiếu dữ liệu;
+   run cũ đo hỏng thì `rnd.py invalidate <task> <run-id> --reason ...`. Run invalid không bao giờ thành baseline):
    - `accepted`: constraints giữ, không case nào hồi quy quá tolerance, ≥ 1 cải thiện.
    - `neutral`: không xấu đi, không tốt lên — **không merge** chỉ vì "không hại"; ghi bài học.
    - `rejected`: ghi rõ lý do vào notebook (`#lesson`), cập nhật status giả thuyết.
