@@ -186,12 +186,14 @@ class OneTechClient:
     def create_task(self, project_id: int, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Tạo task mới hoặc epic mới trên dự án."""
         def action(page):
-            js_code = f"""() => fetch('/api/projects/{project_id}/tasks', {{
-                method: 'POST',
-                headers: {{ 'Content-Type': 'application/json' }},
-                body: JSON.stringify({json.dumps(payload)})
-            }}).then(r => r.json())"""
-            return page.evaluate(js_code)
+            return page.evaluate("""async ([pid, data]) => {
+                const res = await fetch(`/api/projects/${pid}/tasks`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                return await res.json();
+            }""", [project_id, payload])
         return self._execute_browser(action)
 
     def upload_image(self, image_path: str) -> str:

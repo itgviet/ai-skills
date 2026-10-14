@@ -27,7 +27,7 @@ def main():
     list_p.add_argument("--search", type=str, default=None, help="Tìm kiếm từ khóa trong tiêu đề hoặc nội dung")
     list_p.add_argument("--mine", action="store_true", help="Chỉ lấy task gán cho tôi")
     list_p.add_argument("--live", action="store_true", help="Bỏ qua cache, gọi trực tiếp qua browser")
-    list_p.add_argument("--limit", type=int, default=50, help="Số task tối đa hiển thị (Mặc định: 50)")
+    list_p.add_argument("--limit", type=int, default=15, help="Số task tối đa hiển thị (Mặc định: 15, dùng --limit N để tùy chỉnh)")
 
     # 3b. Task Detail
     task_p = subparsers.add_parser("task", help="Xem chi tiết một task (Siêu tốc từ cache)")
@@ -62,6 +62,7 @@ def main():
     create_p.add_argument("--status", type=str, default="todo", choices=["todo", "in_progress", "review", "done"], help="Trạng thái")
     create_p.add_argument("--assignee", type=str, default=DEFAULT_USER_ID, help="User ID người được giao")
     create_p.add_argument("--description", type=str, default="", help="Mô tả")
+    create_p.add_argument("--due-date", type=str, default=None, help="Hạn chót hoàn thành (YYYY-MM-DD hoặc ISO)")
     create_p.add_argument("--image", type=str, default=None, help="Đường dẫn file ảnh đính kèm (sẽ tự động upload và nhúng vào comment)")
 
     # 6. Upload
@@ -364,8 +365,23 @@ def main():
         if args.parent:
             payload["parentId"] = args.parent
 
+        if args.sprint:
+            from datetime import datetime, timezone, timedelta
+            payload["startDate"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT00:00:00.000Z")
+            if not args.due_date:
+                payload["dueDate"] = (datetime.now(timezone.utc) + timedelta(days=7)).strftime("%Y-%m-%dT23:59:59.000Z")
+
+        if args.due_date:
+            d = args.due_date.replace('/', '-')
+            if len(d) == 10:
+                d = f"{d}T12:00:00.000Z"
+            payload["dueDate"] = d
+
         res = client.create_task(args.project, payload)
         new_id = res.get("id")
+        if not new_id:
+            print(f"[LỖI] OneTech phản hồi không hợp lệ: {res}")
+            return
         print(f"[THÀNH CÔNG] Đã tạo Task mới #{new_id}: {res.get('title')}")
 
         if args.image and new_id:
