@@ -7,3 +7,6 @@ Thumbs.db
 
 # claude.ai account-synced skills (Claude Code writes here via the ~/.claude/skills junction)
 synced/
+
+# Claude app trash for removed synced skills
+.trash/

@@ -111,7 +111,7 @@ class FeedbackHubClient:
 
     def get_tickets(self, project_key: Optional[str] = None) -> List[Dict[str, Any]]:
         """Lấy danh sách tickets, có thể lọc theo project_key (ví dụ: cafenhatsinh, issx, dtg)."""
-        resp = self._request("tickets")
+        resp = self._request("tickets", params={"pageSize": "300"})
         docs = resp.get("documents", [])
         tickets = []
         target = project_key.lower().strip() if project_key else None

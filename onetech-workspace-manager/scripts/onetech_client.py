@@ -441,7 +441,7 @@ class OneTechClient:
     def get_user_timesheet(self, start_date: str, end_date: str) -> List[Dict[str, Any]]:
         """Lấy bảng thống kê timesheet của user theo khoảng thời gian."""
         return self._execute_browser(
-            lambda page: page.evaluate(f"() => fetch('/api/users/me/timesheet?startDate={start_date}&endDate={end_date}', {{ credentials: 'include' }}).then(r => r.json())")
+            lambda page: page.evaluate(f"() => fetch('/api/users/me/timesheet?start={start_date}&end={end_date}', {{ credentials: 'include' }}).then(r => r.json())")
         )
 
     def log_time(
