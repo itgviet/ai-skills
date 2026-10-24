@@ -46,7 +46,7 @@ def main():
     update_p = subparsers.add_parser("update", help="Cập nhật task OneTech")
     update_p.add_argument("task_id", type=int, help="Task ID (ví dụ: 7305, 8273, 8086)")
     update_p.add_argument("--title", type=str, help="Tiêu đề mới")
-    update_p.add_argument("--status", type=str, choices=["todo", "in_progress", "review", "done", "cancel"], help="Trạng thái mới")
+    update_p.add_argument("--status", type=str, choices=["todo", "in_progress", "implementing", "review", "done", "cancel"], help="Trạng thái mới")
     update_p.add_argument("--sprint", type=int, help="Sprint ID mới")
     update_p.add_argument("--priority", type=str, choices=["low", "medium", "high", "critical"], help="Mức ưu tiên mới")
 

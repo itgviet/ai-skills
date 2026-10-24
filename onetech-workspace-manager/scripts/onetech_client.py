@@ -162,6 +162,7 @@ class OneTechClient:
             wf_map = {
                 "todo": (405, "new"),
                 "in_progress": (406, "assigned"),
+                "implementing": (407, "assigned"),
                 "review": (408, "fixed"),
                 "done": (409, "closed"),
                 "cancel": (405, "closed")
