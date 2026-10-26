@@ -1,83 +1,26 @@
 ---
 name: tech-doc-generator
-description: "Technical documentation engine: reverse-engineer codebases, extract schemas/endpoints, and generate Mermaid SAD diagrams."
+description: "Dùng khi cần viết tài liệu kỹ thuật cho một codebase có sẵn: khảo sát tech stack, trích xuất schema DB và danh mục API, vẽ sơ đồ Mermaid (component, ERD, sequence), đánh giá nợ kỹ thuật, xuất docs/TECHNICAL_SYSTEM_DOCUMENTATION.md theo khung 8 chương. Dùng khi người dùng nói \"viết tài liệu hệ thống\", \"onboard người mới vào repo này\", \"reverse-engineer dự án\". Chỉ cần một sơ đồ tương tác → archify."
 ---
 
 # [SKILL-LEAD-003] Tech Doc Generator: System & Source Code Reverse-Engineering Engine
 
-Skill này chịu trách nhiệm khảo sát toàn diện một dự án phần mềm có sẵn, rà soát mã nguồn (Codebase Review) và tự động tạo ra một bộ **Tài Liệu Kỹ Thuật Hệ Thống (System Architecture Document - SAD / Technical Specification)** đạt tiêu chuẩn doanh nghiệp.
+Khảo sát một codebase có sẵn và xuất tài liệu kỹ thuật hệ thống (SAD) tại `docs/TECHNICAL_SYSTEM_DOCUMENTATION.md` của repo dự án.
 
-```mermaid
-flowchart TD
-    A[Quét Cấu Trúc Codebase & Package/Config] --> B[Trích Xuất Data Models, DB Schemas, API Endpoints]
-    B --> C[Phân Tích Kiến Trúc Hệ Thống & Luồng Dữ Liệu]
-    C --> D[Tự Động Sinh Sơ Đồ Kiến Trúc Mermaid: Component, ERD, Sequence]
-    D --> E[Đánh Giá Nợ Kỹ Thuật, Rủi Ro Bảo Mật & Performance]
-    E --> F[Xuất File Tài Liệu Kỹ Thuật: docs/TECHNICAL_SYSTEM_DOCUMENTATION.md]
-```
+## Gotchas
 
----
+- **Không chép giá trị secret vào tài liệu.** File `.env`, keystore, service-account JSON chỉ ghi tên và nơi tham chiếu (secret của các dự án nằm ở `D:\SecureVault\<Project>\`); thấy secret nằm trong repo thì dừng và báo người dùng (RULE-SEC-001).
+- **Mọi khẳng định phải truy được về code:** endpoint, bảng, luồng đều ghi file định nghĩa. Không đủ bằng chứng thì ghi "chưa xác định" thay vì suy đoán — tài liệu sai còn hại hơn thiếu.
+- **Repo lớn:** đọc theo vùng (manifest, router, model, migration) thay vì đọc toàn bộ file lớn; lọc output dài trước khi đọc (RULE-PERF-001).
+- **Tài liệu master:** nếu dự án có `SYSTEM_ARCHITECTURE_AND_USER_GUIDE.md` hoặc spec trong `docs/specs/<app_id>/`, đối chiếu và ghi chỗ lệch thay vì viết song song một nguồn sự thật mới (RULE-SDD-001).
+- **Ghi commit hash** vào đầu tài liệu để người đọc biết tài liệu phản ánh phiên bản code nào.
 
-## 🛠️ Quy Trình 5 Bước Khảo Sát & Xuất Tài Liệu
+## Quy trình 5 bước
 
-### Bước 1: Quét Bản Đồ Dự Án (Codebase Topology Mapping)
-- Xác định Tech Stack: Ngôn ngữ (TypeScript, Python, Java, Go, C#), Frameworks (React, Next.js, NestJS, FastAPI, Spring Boot...).
-- Lập bản đồ cấu trúc thư mục (Directory Tree) và phân vùng trách nhiệm (Layered / Hexagonal / Clean Architecture).
-- Kiểm tra các file cấu hình môi trường, Dockerfile, CI/CD pipelines.
+1. **Bản đồ dự án:** ngôn ngữ, framework (từ `package.json`, `pyproject.toml`, `build.gradle`, `go.mod`...), cây thư mục và cách phân tầng, file môi trường, Dockerfile, CI/CD.
+2. **Dữ liệu & API:** đọc Prisma/TypeORM/SQLAlchemy/Mongoose/migration SQL/Firestore rules → ERD Mermaid; liệt kê endpoint REST/GraphQL/gRPC (method, route, input, response, auth).
+3. **Kiến trúc & luồng:** sơ đồ component; sequence diagram cho luồng cốt lõi; cơ chế xác thực/phân quyền (JWT, OAuth2, RBAC, Firestore rules).
+4. **Sức khỏe mã nguồn:** điểm nghẽn hiệu năng (N+1, query không index, leak), lỗ hổng cơ bản (secret, thiếu validate input), nợ kỹ thuật và đề xuất refactor — mỗi mục có file:dòng.
+5. **Xuất tài liệu:** viết `docs/TECHNICAL_SYSTEM_DOCUMENTATION.md` theo khung 8 chương trong `assets/sad-template.md` (đọc mẫu ở bước này). Bỏ chương không áp dụng thay vì điền chung chung.
 
-### Bước 2: Trích Xuất Mô Hình Dữ Liệu & API (Data Model & Endpoint Extraction)
-- **Database & Schemas**: Quét Prisma, TypeORM, SQLAlchemy, Mongoose, SQL Migrations hoặc Firestore rules $\rightarrow$ Tự động sinh **sơ đồ ERD (Entity Relationship Diagram)** bằng Mermaid.
-- **API Catalog**: Liệt kê toàn bộ REST/GraphQL/gRPC endpoints (HTTP Method, Route, Input DTO, Response, Auth Protection).
-
-### Bước 3: Phân Tích Luồng Nghiệp Vụ & Kiến Trúc (Architecture & Flow Modeling)
-- Vẽ **Sơ đồ Kiến trúc Tổng thể (High-Level Architecture / Component Diagram)**.
-- Vẽ **Sơ đồ Tuần tự (Sequence Diagram)** cho luồng nghiệp vụ cốt lõi (ví dụ: Auth, Checkout, Data Processing).
-- Phân tích cơ chế Xác thực & Phân quyền (Authentication / Authorization: JWT, OAuth2, RBAC).
-
-### Bước 4: Đánh Giá Sức Khỏe Mã Nguồn (Code Quality & Technical Debt Review)
-- Rà soát điểm nghẽn hiệu năng (N+1 queries, memory leak, unindexed queries).
-- Rà soát lỗ hổng an ninh cơ bản (OWASP Top 10, Secrets exposure, missing input validations).
-- Tổng hợp danh mục Nợ kỹ thuật (Technical Debt) và khuyến nghị tái cấu trúc.
-
-### Bước 5: Biên Soạn & Xuất Tài Liệu (Document Generation)
-Xuất ra file tài liệu hoàn chỉnh tại `docs/TECHNICAL_SYSTEM_DOCUMENTATION.md` với khung chuẩn 8 chương (Chi tiết xem mẫu bên dưới).
-
----
-
-## 📋 Cấu Trúc Khung Chuẩn Của Tài Liệu Kỹ Thuật Đầu Ra
-
-File được xuất ra tại `docs/TECHNICAL_SYSTEM_DOCUMENTATION.md` gồm 8 phần chính:
-
-```markdown
-# Tài Liệu Kỹ Thuật Hệ Thống (System Architecture Document - SAD)
-**Dự Án**: [Tên Dự Án] | **Ngày Xuất**: [YYYY-MM-DD] | **Lead Reviewer**: Antigravity [PIL-LEAD]
-
-## 1. Tổng Quan Hệ Thống & Bối Cảnh Nghiệp Vụ (System Overview)
-- Mục đích dự án, đối tượng người dùng, phạm vi chức năng chính.
-
-## 2. Công Nghệ & Tech Stack (Technology Stack)
-- Frontend, Backend, Database, Caching, Cloud/DevOps, Thư viện bên thứ ba quan trọng.
-
-## 3. Kiến Trúc Hệ Thống & Sơ Đồ Thành Phần (System Architecture & Component Diagrams)
-- Sơ đồ C4 Model / Component Diagram vẽ bằng Mermaid.
-- Mô tả phân tầng logic (Controller -> Service -> Repository / Data Access).
-
-## 4. Mô Hình Dữ Liệu & Sơ Đồ ERD (Database Schema & ERD)
-- Sơ đồ `erDiagram` Mermaid chi tiết các bảng/collections và quan hệ 1-N, N-N.
-- Bảng mô tả chi tiết các trường dữ liệu quan trọng.
-
-## 5. Danh Mục Giao Tiếp API (API Specification & Contracts)
-- Bảng tổng hợp Endpoints (Method, Path, Auth, Request/Response Payload mẫu).
-
-## 6. Luồng Nghiệp Vụ Cốt Lõi & Sơ Đồ Tuần Tự (Core Business Flows & Sequence Diagrams)
-- Sơ đồ `sequenceDiagram` Mermaid mô phỏng các luồng phức tạp nhất.
-
-## 7. Cơ Chế An Ninh, Xác Thực & Vận Hành (Security, Auth & Deployment)
-- Cơ chế bảo mật, phân quyền, CORS, Rate Limiting, Logging & Monitoring.
-- Quy trình Build, Test và Deploy (CI/CD, Docker, Cloud).
-
-## 8. Đánh Giá Chất Lượng Mã Nguồn & Nợ Kỹ Thuật (Code Review & Technical Debt)
-- Các điểm tốt của kiến trúc hiện tại.
-- Các rủi ro tiềm ẩn (Performance, Security, Anti-patterns).
-- Lộ trình cải tiến & đề xuất hành động ngắn/dài hạn (Roadmap).
-```
+Chỉ cần một sơ đồ tương tác (kiến trúc, ERD, sequence) thay vì cả bộ tài liệu → dùng skill `archify`.

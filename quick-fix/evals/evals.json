@@ -1,0 +1,41 @@
+{
+  "skill_name": "quick-fix",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Trong repo này, hàm formatCurrency ở src/utils/money.ts hiển thị '1.000.000,5 đ' khi số tiền là 1000000.5, đáng lẽ phải làm tròn thành '1.000.001 đ'. Sửa giúp.",
+      "expected_output": "Sửa đúng hàm formatCurrency (làm tròn trước khi format), thêm hoặc cập nhật unit test cho ca số lẻ, chạy test thật và báo cáo theo mẫu 5 góc nhìn.",
+      "files": [],
+      "assertions": [
+        "Chỉ sửa file trong phạm vi money.ts và file test tương ứng (≤ 5 file)",
+        "Báo cáo nêu nguyên nhân gốc kèm file:dòng",
+        "Có ít nhất một unit test mới/cập nhật cho giá trị 1000000.5",
+        "Báo cáo ghi lệnh test đã chạy thật và kết quả của lệnh đó",
+        "Kiểm tra branch hiện tại trước khi sửa (git branch --show-current hoặc tương đương)",
+        "Không để lại console.log hay code debug trong diff"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "fix lỗi app bị chậm",
+      "expected_output": "Không sửa code ngay; hỏi lại 1–3 câu làm rõ (màn hình nào, thao tác nào, từ phiên bản nào, có log/profile không), mỗi câu kèm phương án gợi ý.",
+      "files": [],
+      "assertions": [
+        "Không có thay đổi file nào trước khi người dùng trả lời",
+        "Đặt từ 1 đến 3 câu hỏi làm rõ",
+        "Có ít nhất một phương án đánh dấu (Recommended)"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Thêm module quản lý nhà cung cấp gồm CRUD, màn hình danh sách, API mới và bảng suppliers trong DB.",
+      "expected_output": "Nhận ra vượt scope quick-fix (tính năng mới, có migration DB, > 5 file) và chuyển sang feature-spec thay vì sửa trực tiếp.",
+      "files": [],
+      "assertions": [
+        "Nói rõ yêu cầu vượt phạm vi quick-fix và nêu lý do (tính năng mới / migration / > 5 file)",
+        "Đề xuất hoặc chuyển sang feature-spec",
+        "Không tạo migration hay file code nào"
+      ]
+    }
+  ]
+}

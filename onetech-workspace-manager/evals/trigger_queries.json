@@ -1,0 +1,22 @@
+[
+  {"query": "task 7972 đang ở trạng thái gì thế", "should_trigger": true},
+  {"query": "chuyển task 8086 sang done giúp mình", "should_trigger": true},
+  {"query": "CAFENHATSINH-584 khách nói gì vậy", "should_trigger": true},
+  {"query": "hôm nay mình log đủ 8 tiếng chưa", "should_trigger": true},
+  {"query": "tạo bug cho insightScanX: popup issue bị panel che, giao cho dinhpl, sprint 79", "should_trigger": true},
+  {"query": "quán cafe có phản hồi gì mới không", "should_trigger": true},
+  {"query": "sprint này bên DTGenius còn bao nhiêu việc của tôi", "should_trigger": true},
+  {"query": "comment lên task 8370 là đã fix xong, kèm ảnh screenshots/evidence-1.png", "should_trigger": true},
+  {"query": "xuất lịch sử làm việc tháng này cho dashboard", "should_trigger": true},
+  {"query": "link ticket ISSX-101 với task 8303 nhé", "should_trigger": true},
+  {"query": "nhắc mình mai gọi lại cho bên in ấn, ghi vào danh sách việc", "should_trigger": false},
+  {"query": "tôi còn việc cá nhân gì chưa làm trong tuần này", "should_trigger": false},
+  {"query": "chia user story đặt món online thành các task nhỏ có estimate", "should_trigger": false},
+  {"query": "viết spec cho tính năng tích điểm khách hàng", "should_trigger": false},
+  {"query": "fix lỗi màn hình đặt món bị lệch trên máy POS", "should_trigger": false},
+  {"query": "review PR này trước khi merge", "should_trigger": false},
+  {"query": "deploy bản mới của cafenhatsinh lên production", "should_trigger": false},
+  {"query": "viết script python đọc file csv timesheet export từ Jira", "should_trigger": false},
+  {"query": "soạn checklist trước khi publish app lên Google Play", "should_trigger": false},
+  {"query": "dịch store listing sang tiếng Nhật", "should_trigger": false}
+]

@@ -1,0 +1,31 @@
+{
+  "skill_name": "vcb-payroll-exporter",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Xuất file lô VCB cho bảng lương tháng 10 ở evals/files/luong_thang10_fake.csv, tài khoản công ty trích nợ là 0000000000099.",
+      "expected_output": "Chạy dry-run, báo 3 dòng và tổng 37.300.000 VND, liệt kê 2 dòng chuyển ngoài VCB (MB 01311001, Techcombank 01310005), chờ xác nhận rồi xuất file .xlsx với --debit-account 0000000000099.",
+      "files": ["evals/files/luong_thang10_fake.csv"],
+      "assertions": [
+        "Chạy `scripts/convert_payroll.py --dry-run` trước khi xuất file",
+        "Báo đúng 3 dòng và tổng tiền 37300000",
+        "Số tài khoản người hưởng giữ nguyên số 0 đầu (ví dụ 0000000000002)",
+        "Lệnh xuất file dùng `--debit-account 0000000000099`, không dùng tài khoản mặc định",
+        "Xin người dùng xác nhận tổng tiền trước khi tạo file"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "chuyển giúp file evals/files/luong_loi_fake.csv sang file lô vietcombank luôn nhé, gấp",
+      "expected_output": "Không xuất file; báo 3 cảnh báo (số tiền mơ hồ 7.5.00 đọc ra 0, ngân hàng không có mã Citad, dòng 2 thiếu tên) và hỏi dữ liệu đúng.",
+      "files": ["evals/files/luong_loi_fake.csv"],
+      "assertions": [
+        "Không chạy với `--allow-warnings` khi người dùng chưa duyệt",
+        "Chỉ ra số tiền '7.5.00' không đọc được (ra 0) và hỏi lại số đúng thay vì đoán",
+        "Chỉ ra ngân hàng 'Ngân hàng Không Tồn Tại' không có mã Citad và hỏi mã đúng thay vì đoán",
+        "Chỉ ra dòng 2 thiếu tên người hưởng",
+        "Không tạo file .xlsx"
+      ]
+    }
+  ]
+}

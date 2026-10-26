@@ -1,43 +1,35 @@
 ---
 name: memory-consolidator
-description: "Memory garbage collection: prune obsolete knowledge, merge overlapping rules, and prevent context bloat."
+description: "Dùng khi bộ nhớ/luật của workspace ITGVietAssistant phình to hoặc mâu thuẫn: learned_patterns.json vượt 30 mục, một file trong rules/ vượt 150 dòng, có luật trùng hoặc trái nhau, log cũ hơn 60 ngày. Gộp trùng, đánh DEPRECATED luật cũ, chuyển log vào archive và đồng bộ unit_registry.json. Dùng khi người dùng nói \"dọn memory\", \"gộp rule\", hoặc khi meta-learner báo vượt ngưỡng. Auto-memory của Claude Code → consolidate-memory."
+compatibility: "Đọc/ghi dữ liệu trong workspace ITGVietAssistant ($ITGVIET_HOME, mặc định D:\\ITGVietAssistant)."
 ---
 
-# [SKILL-PRUNE-001] Memory Garbage Collector & Anti-Entropy Engine
+# [SKILL-PRUNE-001] Memory Consolidator — dọn và gộp tri thức workspace
 
-Skill này chịu trách nhiệm kiểm soát dung lượng, ngăn chặn tình trạng "Rác dữ liệu" (Data Pollution) và giữ cho toàn bộ Rules/Skills/Memory luôn gọn gàng, không bị phình ra mất kiểm soát.
+Giữ luật và memory của workspace ITGVietAssistant (`$ITGVIET_HOME`, mặc định `D:\ITGVietAssistant`) gọn và không mâu thuẫn. Phạm vi chỉ gồm dữ liệu workspace; auto-memory theo dự án của Claude Code (`~/.claude/projects/<dự án>/memory/`) do `consolidate-memory` lo, không đụng tới ở đây.
 
-## 🛡️ 4 Ngưỡng Tự Động Thu Dọn (Cap & Limits Protocol)
+## Ngưỡng
 
-| Thành Phần | Ngưỡng Tối Đa (Max Cap) | Hành Động Khi Vượt Ngưỡng |
-| :--- | :--- | :--- |
-| **File Rules (`rules/`)** | tối đa 150 dòng / file | Tự động gộp 3 quy tắc đơn lẻ thành 1 quy tắc tổng quát. |
-| **Learned Patterns (`learned_patterns.json`)** | tối đa 30 patterns | Gom nhóm theo cụm (Clustering) và nén các patterns tương đồng. |
-| **Active Skills Directory** | Không tạo Skill trùng lặp | Bắt buộc kiểm tra `unit_registry.json` trước khi sinh Skill mới. |
+Đọc từ `anti_entropy_policy` trong `$ITGVIET_HOME/docs/memory/unit_registry.json` (hiện tại):
 
-## 🔄 Quy Trình Garbage Collection 4 Bước
+| Thành phần | Ngưỡng | Khi vượt |
+|---|---|---|
+| `docs/memory/learned_patterns.json` → `learned_rules` | `max_active_patterns` = 30 | gom nhóm, gộp mục cùng bản chất |
+| Mỗi file `rules/*.md` | `max_lines_per_rule_file` = 150 dòng | tách phần chi tiết sang file tham chiếu hoặc gộp các luật nhỏ |
+| Log/lịch sử (`episodic_history.json`, `reflexion_log.json`, archive task) | cũ hơn 60 ngày, không còn dùng | chuyển vào `docs/memory/archive/` |
 
-```mermaid
-flowchart TD
-    Start[Kích Hoạt Cleanup Engine] --> Scan[Quét Toàn Bộ Unit IDs]
-    Scan --> Dedup[1. Kiểm Tra Trùng Lặp - Similarity > 80%]
-    Dedup -->|Trùng lặp| Merge[Gộp 2 Unit IDs -> Cập nhật Unit ID Tổng Thể]
-    Scan --> Conflict[2. Kiểm Tra Mâu Thuẫn Indicative]
-    Conflict -->|Mâu thuẫn| Deprecate[Đổi trạng thái Unit cũ thành DEPRECATED]
-    Scan --> Archive[3. Chuyển Dữ Liệu Cũ Ít Dùng]
-    Archive -->|Lưu trữ| ArchStore["Di chuyển vào docs/memory/archive/"]
-    Merge & Deprecate & ArchStore --> RegUpdate[Cập nhật unit_registry.json]
-```
+## Gotchas
 
-### Bước 1: Deduplication & Clustering (Hợp Nhất Tri Thức Trùng)
-- So sánh các câu chỉ dẫn trong `learned_patterns.json`.
-- Nếu 2 quy tắc có cùng bản chất (ví dụ: *"Dùng camelCase cho biến"* và *"Tên biến phải là camelCase"*), gộp lại làm 1 và đánh dấu Unit ID cũ là `CONSOLIDATED`.
+- Hai bản memory song song: `docs/memory/` (master) và `memory/` (junction `~/.claude/shared-memory`). Hiện đã lệch: `unit_registry.json` và `user_preferences.md` khác nhau giữa hai bản; `memory/tasks_store.json` ~450 KB trong khi `docs/memory/tasks_store.json` rỗng. Không tự gộp hai bản; liệt kê khác biệt và để người dùng chọn bản chuẩn.
+- `unit_registry.json` thiếu nhiều skill đang dùng (onetech-workspace-manager, production-safety-guardrail, rnd-loop, skill ngôn ngữ/đồ họa/compliance). Khi đồng bộ registry, đối chiếu với `$ITGVIET_HOME/skills/*/SKILL.md` và báo danh sách thiếu.
+- `memory/rnd_playbook.md` do `rnd-loop` quản lý (giới hạn 40 mục riêng), không gộp vào `learned_patterns.json`.
 
-### Bước 2: Conflict Resolution (Xử Lý Mâu Thuẫn)
-- Nếu User đưa ra chỉ dẫn mới trái ngược chỉ dẫn cũ (ví dụ: Chuyển từ REST API sang GraphQL), quy tắc cũ lập tức chuyển trạng thái sang `DEPRECATED` và không được nạp vào Prompt nữa.
+## Quy trình
 
-### Bước 3: Archiving (Lưu Trữ Dữ Liệu Lịch Sử)
-- Các file log quá 60 ngày hoặc không còn active sẽ được nén di chuyển vào thư mục `docs/memory/archive/` để giải phóng bộ nhớ chủ động.
+1. **Quét**: đếm mục/dòng theo bảng ngưỡng; liệt kê Unit ID trong `unit_registry.json`.
+2. **Gộp trùng**: hai luật cùng bản chất → giữ một luật tổng quát, mục kia đổi `status` thành `CONSOLIDATED` (các trạng thái hợp lệ nằm trong `lifecycle_states` của registry).
+3. **Xử lý mâu thuẫn**: chỉ dẫn mới trái chỉ dẫn cũ → luật cũ thành `DEPRECATED`, ghi lý do.
+4. **Lưu trữ**: chuyển log cũ vào `docs/memory/archive/`, unit liên quan thành `ARCHIVED`.
+5. **Đồng bộ registry** và báo cáo: đã gộp gì, deprecate gì, chuyển gì, còn gì vượt ngưỡng.
 
-### Bước 4: Registry Sync (Cập Nhật Trạng Thái Registry)
-- Cập nhật lại file `unit_registry.json` để giữ danh mục luôn chính xác 100%.
+Bước 2–4 sửa dữ liệu luật của người dùng: trình bày danh sách thay đổi dự kiến trước, làm sau khi người dùng đồng ý.

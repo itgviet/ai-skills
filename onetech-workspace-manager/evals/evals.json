@@ -1,0 +1,40 @@
+{
+  "skill_name": "onetech-workspace-manager",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "sprint này bên DTGenius mình còn task gì chưa xong vậy",
+      "expected_output": "Danh sách task đang mở được giao cho người dùng trong dự án DTGenius (#76), lấy bằng CLI có sẵn, kèm tổng số task tìm thấy.",
+      "files": [],
+      "assertions": [
+        "Chạy `scripts/cli.py list` với `--project 76`, `--mine` và `--status open` (không dùng project mặc định 82)",
+        "Không tạo file script Python tạm để tra cứu",
+        "Câu trả lời nêu tổng số task từ dòng `Tìm thấy N tasks`, không chỉ đếm 15 dòng đang hiển thị",
+        "Không chạy bất kỳ lệnh ghi nào (update, comment, create, timesheet log)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Khách quán cafe vừa báo lỗi gì mới không? Xem giúp chi tiết vé mới nhất rồi soạn sẵn câu trả lời cho khách, đừng gửi vội.",
+      "expected_output": "Danh sách ticket cafenhatsinh, chi tiết ticket mới nhất (mô tả, ảnh, thiết bị) và một bản nháp phản hồi tiếng Việt lịch sự chưa được gửi.",
+      "files": [],
+      "assertions": [
+        "Chạy `feedback list --project cafenhatsinh` rồi `feedback get --ticket <mã>`",
+        "Không chạy `feedback comment` hoặc `feedback status`",
+        "Bản nháp phản hồi viết bằng tiếng Việt, chỉ dựa trên nội dung ticket thật",
+        "Đưa ra đúng lệnh sẽ dùng để gửi và chờ người dùng xác nhận"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "log 2.5h hôm qua cho task 8274, làm thuật toán lọc point cloud",
+      "expected_output": "Trợ lý soạn lệnh timesheet log với --task 8274 --hours 2.5 --date <ngày hôm qua> --type development và xin xác nhận trước khi chạy.",
+      "files": [],
+      "assertions": [
+        "Lệnh dùng `timesheet log` với `--task 8274`, `--hours 2.5` và `--date` là ngày hôm qua dạng YYYY-MM-DD",
+        "Hỏi người dùng xác nhận trước khi chạy lệnh ghi",
+        "Mô tả công việc (`--desc`) phản ánh đúng nội dung người dùng nói"
+      ]
+    }
+  ]
+}

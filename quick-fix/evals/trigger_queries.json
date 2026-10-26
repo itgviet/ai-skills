@@ -1,0 +1,22 @@
+[
+  {"query": "màn thanh toán bên cafenhatsinh bấm Tất toán xong bị trắng màn hình, log có TypeError: Cannot read properties of undefined (reading 'total') ở OrderSummary.tsx, fix giúp", "should_trigger": true},
+  {"query": "sao tổng tiền hóa đơn lại lệch 1đ so với cộng tay vậy", "should_trigger": true, "note": "không nói chữ bug"},
+  {"query": "nút In với nút Hủy trên màn POS 1336 dính sát nhau quá, khách hay bấm nhầm, chỉnh lại chỗ này", "should_trigger": true, "note": "UI tweak"},
+  {"query": "build android fail rồi: e: Unresolved reference: BuildConfig ở app/src/main/java/.../SyncWorker.kt", "should_trigger": true},
+  {"query": "npm run lint đang báo 12 lỗi no-unused-vars trong src/features/menu, dọn giúp mình", "should_trigger": true, "note": "code repair"},
+  {"query": "ticket CAFENHATSINH-584 khách báo đổi ngôn ngữ sang tiếng Anh mà tiêu đề màn Báo cáo vẫn tiếng Việt", "should_trigger": true, "note": "bug từ ticket khách; dùng kèm onetech để đọc ticket"},
+  {"query": "the /api/orders endpoint returns 500 when the note field is empty, can you look", "should_trigger": true},
+  {"query": "hàm calcDiscount trong pricing.py viết rối quá, refactor gọn lại nhưng giữ nguyên hành vi", "should_trigger": true, "note": "micro refactor"},
+  {"query": "app ISSX scan mã QR 2 lần liên tiếp thì tạo 2 bản ghi trùng", "should_trigger": true},
+  {"query": "dark mode thì chữ trong ô input gần như không đọc được", "should_trigger": true},
+  {"query": "làm tính năng đặt bàn trước cho cafenhatsinh: khách chọn giờ, bàn, nhận thông báo xác nhận", "should_trigger": false, "note": "tính năng mới → feature-spec"},
+  {"query": "mình muốn chuyển toàn bộ lưu trữ đơn hàng từ LocalStorage sang Firestore, lên kế hoạch giúp", "should_trigger": false, "note": "đổi kiến trúc/migration → feature-spec"},
+  {"query": "spec T-03 trong docs/specs/pos/tasks.md đã duyệt rồi, code task đó đi", "should_trigger": false, "note": "task đã có spec → dev-executor"},
+  {"query": "review giúp PR feat/inventory-sync trước khi merge vào develop", "should_trigger": false, "note": "review → techlead-auditor"},
+  {"query": "chia story 'quản lý kho nguyên liệu' thành task cho sprint sau", "should_trigger": false, "note": "→ pm-decomposer"},
+  {"query": "xóa giúp mấy đơn test trên Firestore production của nhatsinhsite", "should_trigger": false, "note": "dữ liệu thật → production-safety-guardrail"},
+  {"query": "viết tài liệu kiến trúc cho repo dtg để onboard bạn mới", "should_trigger": false, "note": "→ tech-doc-generator"},
+  {"query": "chuẩn bị release 2.3.0, lập test plan và quyết định có ship được không", "should_trigger": false, "note": "→ release-quality-gate"},
+  {"query": "task 7972 trên OneTech đang ở trạng thái gì", "should_trigger": false, "note": "→ onetech-workspace-manager"},
+  {"query": "thiết kế lại toàn bộ màn Dashboard cho đẹp và chuyên nghiệp hơn", "should_trigger": false, "note": "thiết kế UI lớn → pro-uiux-design / feature-spec"}
+]

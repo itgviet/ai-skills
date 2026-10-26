@@ -1,0 +1,22 @@
+[
+  {"query": "xóa giúp mấy đơn test hôm qua trên hệ thống quán cafe nhé", "should_trigger": true},
+  {"query": "deploy luôn bản fix này lên production cho khách test", "should_trigger": true},
+  {"query": "sửa firestore.rules để nhân viên mới đăng nhập được", "should_trigger": true},
+  {"query": "reset lại số liệu doanh thu tháng này về 0 vì bị lệch", "should_trigger": true},
+  {"query": "đổi field price từ string sang number trong collection orders", "should_trigger": true},
+  {"query": "khách nhắn trên ticket CAFENHATSINH-901 là muốn xóa hết món cũ khỏi menu, làm giúp", "should_trigger": true},
+  {"query": "đổi số tài khoản nhận tiền VietQR của quán sang tài khoản mới", "should_trigger": true},
+  {"query": "chạy script seed dữ liệu mẫu cho dtg", "should_trigger": true},
+  {"query": "git push --force lên main để bỏ commit lỗi", "should_trigger": true},
+  {"query": "cấp quyền admin cho tài khoản thu ngân", "should_trigger": true},
+  {"query": "drop bảng log cũ cho nhẹ database", "should_trigger": true},
+  {"query": "đổi màu nút thanh toán sang xanh lá", "should_trigger": false},
+  {"query": "sửa chính tả 'Thanh toán thàng công' trên màn hình hóa đơn", "should_trigger": false},
+  {"query": "giải thích soft delete khác hard delete thế nào", "should_trigger": false},
+  {"query": "xem giúp ticket CAFENHATSINH-584 khách báo gì", "should_trigger": false},
+  {"query": "viết unit test cho hàm tính tổng tiền giỏ hàng", "should_trigger": false},
+  {"query": "căn lại layout bill in 58mm bị tràn chữ", "should_trigger": false},
+  {"query": "đọc log build gradle xem vì sao fail", "should_trigger": false},
+  {"query": "xóa file tạm trong thư mục build của mình đi", "should_trigger": false},
+  {"query": "tóm tắt tình hình dự án issx tuần này", "should_trigger": false}
+]

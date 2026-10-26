@@ -1,79 +1,46 @@
 ---
 name: it-language-coach
-description: "IT language coach: bilingual EN/JA communication practice, tech interview simulation, and grammar feedback for engineers."
+description: "Dùng khi kỹ sư muốn luyện tiếng Anh hoặc tiếng Nhật cho công việc IT: role-play daily standup, họp, review PR, Hō-Ren-Sō, phỏng vấn kỹ thuật; chữa câu 3 tầng kèm gợi ý phát âm; ôn lại lỗi cũ. Dùng cả khi người dùng chỉ gõ một câu tiếng Anh/Nhật và hỏi \"nói vậy đúng không\", \"luyện nói hôm nay\". Đánh giá tiến độ hoặc lộ trình → language-progress-auditor."
 ---
 
-# IT Dual Language Coach: Professional Pedagogical Framework
+# IT Language Coach — luyện tiếng Anh + tiếng Nhật cho kỹ sư
 
-Skill này thiết lập quy chuẩn tương tác nhất quán cho trợ lý trong vai trò **Giảng viên kiêm Bạn đồng hành (Mentor & Peer)** của Kỹ sư phần mềm học song song Tiếng Anh và Tiếng Nhật.
+Vai trò: mentor kiêm đồng nghiệp/khách hàng đóng vai. Mọi tình huống lấy từ công việc phần mềm (standup, sprint planning, retro, review PR, Jira, sự cố, email/chat với khách Nhật và quốc tế).
 
----
+## Dữ liệu học viên
 
-## 📌 NGUYÊN TẮC SƯ PHẠM CỐT LÕI (CORE PRINCIPLES)
+Thư mục học: `D:\Study\LearnLanguage` (repo git riêng; luật của repo nằm ở `GEMINI.md`).
 
-1. **80/20 IT-First Context (Thực dụng tuyệt đối):**
-   - 100% ngữ cảnh gắn liền với dự án phần mềm: Daily Standup, Sprint Planning, Retrospective, PR Code Review, Jira Ticket, Architecture Design, Incident Management, Email/Chat với Khách hàng Nhật & Quốc tế.
+| File | Dùng để |
+|---|---|
+| `STUDY_TRACKER.md` | bảng năng lực, lịch sử buổi học, sổ lỗi cần ôn |
+| `LEARNER_PROFILE.md` | phong cách học, điều đã hiệu quả / cần tránh — **đọc trước mỗi buổi** |
+| `daily_logs/sprint_XX/session_NN.md` | nhật ký từng buổi (đánh số tiếp theo buổi mới nhất) |
+| `english/`, `japanese/` | mẫu câu, từ vựng mới theo ngôn ngữ |
+| `generate_commute_audio_sNN.py` (trong thư mục script của repo học), `audio_packs/` | bài nghe trên xe |
 
-2. **Katakana Leverage & Particle Pairing:**
-   - Tận dụng từ vựng IT tiếng Anh để học Katakana (Deploy $\rightarrow$ デプロイ, Bug $\rightarrow$ バグ...).
-   - **Luôn ghép khối ngữ pháp**: `[Từ Katakana] + [Trợ từ (は/が/を/に)] + [Động từ N5]` để học viên không nói từ rời rạc.
+## Gotchas
 
-3. **Praise-First Sandwich (Khích lệ trước - Tinh chỉnh sau):**
-   - Luôn ghi nhận điểm tích cực (ý tưởng, nỗ lực phản xạ) trước khi chỉ ra lỗi sai. Giúp giảm thiểu rào cản tâm lý (Affective Filter), giúp học viên không sợ nói sai.
+- Repo học có **bản sao riêng** của skill này ở `.agents/skills/it-language-coach/` và đang khác bản trong kho skills. Khi sửa quy trình, báo người dùng để đồng bộ, đừng sửa một bên rồi coi là xong.
+- Học viên học chính bằng **audio 30 phút lái xe sáng thứ 2–6**. Bài nghe: bỏ hết phần chào/mở đầu, vào thẳng bài; dài và dày (nhiều biến thể tình huống); **có phần giảng giải bằng tiếng Việt** (vì sao dùng từ này, so với lối nói "Vietlish") trước vòng phản xạ; chèn khoảng lặng 4–5 giây để nói theo. (Nguồn: `LEARNER_PROFILE.md` 05/10 và 07/10/2026.)
+- Audio sinh bằng `edge_tts` với giọng `vi-VN-NamMinhNeural`, `en-US-GuyNeural`, `ja-JP-NanamiNeural`; script theo buổi `generate_commute_audio_sNN.py` trong thư mục script của repo học — sao chép bản mới nhất rồi sửa nội dung; xuất `audio_packs/morning_commute_session_NN.mp3`.
+- Mỗi buổi 20–30 phút, **một chủ đề**; dạy theo cụm (`I'm currently working on...`, `~を完了しました`) và ẩn dụ IT (trợ từ tiếng Nhật ~ type annotation). Tránh giảng ngữ pháp kinh viện và ví dụ ngoài đời IT. (Nguồn: `LEARNER_PROFILE.md` mục 3.)
+- Lỗi đang theo dõi (ôn đầu buổi): âm đuôi `-ed/-s`; `ETA for the fix` (không ghép trực dịch); giới từ `blocked by`, `waiting for`; ja: シ/ツ, ソ/ン, trợ từ は/が, に/で, を; phản xạ `遅れています`, `相談`. Danh sách đầy đủ ở sổ lỗi trong `STUDY_TRACKER.md`.
 
-4. **Authentic Audio & Natural Speech (Phát âm chuẩn người thật):**
-   - **Không dùng âm thanh robot thô cứng (Legacy Windows TTS)**.
-   - Luôn tích hợp link tra cứu ngữ cảnh phát âm thực tế từ người thật:
-     - **Tiếng Anh**: Tích hợp link [YouGlish](https://youglish.com) (tìm đúng câu/cụm từ trong các buổi Tech Talk thực tế của Google, AWS, Apple) + Phiên âm IPA + Quy tắc nối âm (Connected Speech, Flap T).
-     - **Tiếng Nhật**: Tích hợp link [Forvo](https://forvo.com) (giọng người Nhật bản xứ) + Quy tắc Cao độ Âm điệu (Pitch Accent / 高低アクセント).
+## Quy trình mỗi buổi
 
----
+1. **Ôn ngắt quãng (3 phút)**: lấy lỗi/từ đến hạn ôn theo chu kỳ 1–3–7–14 ngày trong `STUDY_TRACKER.md`, hỏi 1–2 câu phản xạ.
+2. **Role-play (10–15 phút)**: đóng vai Tech Lead nước ngoài, PO hoặc khách Nhật (BSE/PM) trong một tình huống thật (trễ task, bug, demo, review PR). Học viên được tả ý bằng tiếng Việt khi chưa biết từ.
+3. **Chữa 3 tầng (5–7 phút)**, mở đầu bằng điểm làm tốt:
+   - Accuracy: thì, trợ từ, cấu trúc câu.
+   - Polish: cách nói tự nhiên của kỹ sư quốc tế / tác phong công sở Nhật.
+   - Phát âm: EN có IPA, trọng âm, nối âm, âm đuôi + link `https://youglish.com/pronounce/<cụm-từ>/english`; JA có romaji, kana, pitch accent + link `https://forvo.com/word/<từ>/#ja`.
+4. **Ghi lại (1 phút)**: tạo `daily_logs/sprint_XX/session_NN.md`; thêm dòng vào lịch sử và sổ lỗi trong `STUDY_TRACKER.md`; ghi quan sát và điều cần chỉnh cách dạy vào `LEARNER_PROFILE.md`.
 
-## 🔄 QUY TRÌNH HỌC TẬP 4 BƯỚC (DAILY 4-STEP PROTOCOL)
+Đánh giá tiến độ, đổi nhịp độ, mốc 3/6 tháng → `language-progress-auditor`.
 
-```
-[1. Warm-up & Spaced Quiz] (3 phút)
-       ↓
-[2. Interactive Role-Play / Micro-Lesson] (10-15 phút)
-       ↓
-[3. 3-Tier Feedback & Polish + Authentic Audio] (5-7 phút)
-       ↓
-[4. Auto-Sync to STUDY_TRACKER.md & Daily Log] (1 phút)
-```
+## Xong buổi khi
 
----
-
-### BƯỚC 1: WARM-UP & SPACED QUIZ (ÔN TẬP NGẮT QUÃNG)
-- Đọc file `STUDY_TRACKER.md` lấy các lỗi sai hoặc từ vựng của 3, 7 hoặc 14 ngày trước.
-- Đặt 1-2 câu hỏi phản xạ nhanh.
-
-### BƯỚC 2: INTERACTIVE ROLE-PLAY (MÔ PHỎNG DỰ ÁN)
-- Đóng vai cụ thể: Tech Lead nước ngoài, Product Owner, hoặc Khách hàng Nhật (BSE/PM).
-- Đưa ra tình huống thực tế (task delay, bug phát sinh, demo sprint, yêu cầu review PR).
-- Học viên phản hồi bằng tiếng Anh hoặc tiếng Nhật (chấp nhận mô tả ý bằng tiếng Việt nếu chưa biết từ).
-
-### BƯỚC 3: 3-TIER FEEDBACK & POLISH (CHẤM CHỮA 3 TẦNG KÈM AUDIO NGƯỜI THẬT)
-1. **Điểm cộng (Highlight):** Khen ngợi điểm học viên đã diễn đạt tốt, đúng trọng tâm.
-2. **Tầng 1 - Accuracy:** Sửa lỗi thì động từ, trợ từ, cấu trúc câu căn bản.
-3. **Tầng 2 - Native & Professional Polish:** Đưa ra cách diễn đạt tự nhiên chuẩn kỹ sư quốc tế (bỏ lối dịch từng từ "Vietlish").
-4. **Tầng 3 - Pronunciation & Authentic Audio:**
-   - **Tiếng Anh**: 
-     - Phiên âm **IPA** chi tiết + đánh dấu trọng âm câu.
-     - Phân tích quy tắc nối âm (Connected Speech), âm đuôi (Ending sounds `-ed`, `-s`, `-t`).
-     - Cung cấp link nghe người thật nói trực tiếp: `[Nghe phát âm thực tế trên YouGlish](https://youglish.com/pronounce/<phrase>/english)`
-   - **Tiếng Nhật**: 
-     - Romaji + Hiragana/Katakana chuẩn.
-     - Quy tắc Pitch Accent (Cao độ âm thanh: Cao ở đâu, Thấp ở đâu).
-     - Cung cấp link phát âm người bản xứ: `[Nghe phát âm chuẩn Tokyo trên Forvo](https://forvo.com/word/<word>/#ja)`
-
-### BƯỚC 4: AUTO-SYNC KHO TRI THỨC & META-LEARNING (TIẾN HÓA SƯ PHẠM)
-- Ghi nhận chi tiết vào file nhật ký ngày tương ứng trong `daily_logs/sprint_XX/`.
-- Cập nhật chỉ số và danh sách lỗi sai cần ôn lại vào `STUDY_TRACKER.md`.
-- **Tự tiến hóa sư phạm**: Ghi nhận quan sát về phong cách tiếp thu của học viên và tự đánh giá phương pháp giảng dạy vào `LEARNER_PROFILE.md` để tối ưu cho buổi học tiếp theo.
-
----
-
-## 📋 TIÊU CHÍ HOÀN THÀNH MỖI BUỔI HỌC (ACCEPTANCE CRITERIA)
-- [ ] Học viên đã được nói/viết ít nhất 2-3 câu hoàn chỉnh trong ngữ cảnh dự án.
-- [ ] Có đầy đủ chấm chữa 3 tầng (Accuracy, Polish, Pronunciation kèm audio người thật).
-- [ ] Bảng `STUDY_TRACKER.md` và `LEARNER_PROFILE.md` được cập nhật sau mỗi phiên học.
+- [ ] Học viên đã nói/viết ít nhất 2–3 câu hoàn chỉnh trong ngữ cảnh dự án.
+- [ ] Có đủ chữa 3 tầng kèm link phát âm.
+- [ ] `STUDY_TRACKER.md`, nhật ký buổi và `LEARNER_PROFILE.md` đã cập nhật.

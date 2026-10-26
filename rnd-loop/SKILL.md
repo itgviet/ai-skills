@@ -1,8 +1,10 @@
 ---
 name: rnd-loop
-version: 1.3.0
-last_updated: 2026-10-14
 description: "Quy trình R&D chung cho mọi dự án: charter → baseline → giả thuyết → thí nghiệm → cổng chống hồi quy → registry → report → retro. Dùng khi người dùng yêu cầu R&D, nghiên cứu, thử nghiệm, tối ưu/cải thiện một thuật toán hoặc chất lượng (độ chính xác, tốc độ, chất lượng output), đánh giá 'đã đủ tốt chưa', so sánh phương án, hoặc hỏi lịch sử/tiến độ một task R&D. Có registry lịch sử, lab notebook, dashboard và playbook tự cải thiện."
+compatibility: "Cần Python 3.11+ (chỉ stdlib)."
+metadata:
+  version: "1.3.0"
+  last_updated: "2026-10-14"
 ---
 
 # rnd-loop — Quy trình R&D chung, tự cải thiện
@@ -22,11 +24,17 @@ flowchart LR
 
 | Thứ | Đường dẫn |
 |---|---|
-| Script | `<skill-dir>/scripts/rnd.py` — Claude: `~/.claude/skills/rnd-loop/scripts/rnd.py`, Gemini: `~/.gemini/config/skills/rnd-loop/scripts/rnd.py`, gốc: `D:\ITGVietAssistant\skills\rnd-loop\scripts\rnd.py` |
-| Playbook chung mọi dự án | `memory/rnd_playbook.md` — Claude: `~/.claude/shared-memory/rnd_playbook.md`, Gemini: `~/.gemini/config/memory/rnd_playbook.md` |
+| Script | `<skill-dir>/scripts/rnd.py` — Claude: `~/.claude/skills/rnd-loop/scripts/rnd.py`, Gemini: `~/.gemini/config/skills/rnd-loop/scripts/rnd.py`, gốc: `$ITGVIET_HOME/skills/rnd-loop/scripts/rnd.py` (`$ITGVIET_HOME` mặc định `D:\ITGVietAssistant`) |
+| Playbook chung mọi dự án | `$ITGVIET_HOME/memory/rnd_playbook.md` — Claude: `~/.claude/shared-memory/rnd_playbook.md`, Gemini: `~/.gemini/config/memory/rnd_playbook.md` |
 | Dữ liệu task (trong repo dự án, git-tracked) | `rnd/<task>/charter.toml`, `registry.jsonl`, `notebook.md`, `runs/`, `reports/`; `rnd/dashboard.html` |
 
 Script chỉ dùng stdlib, Python ≥ 3.11. Chạy từ gốc repo dự án (hoặc bất kỳ thư mục con nào).
+
+## Gotchas
+
+- Khi thí nghiệm chạy trong worktree: **code** chỉ sửa trong worktree; ở checkout chính chỉ chạy `rnd.py run/note` và sửa trạng thái giả thuyết trong charter, để registry/notebook giữ cả run bị bác. (Nguồn: fix `rnd-researcher` d2b4eea.)
+- Evaluator thử nghiệm và fixture (`eval.py`, `eval_bad.py`…) để trong repo dự án, không để trong `scripts/` của skill — đã từng commit nhầm vào kho skills. (Nguồn: 3c7e60c.)
+- Playbook nằm ở `$ITGVIET_HOME/memory/` (junction `~/.claude/shared-memory`), không phải `docs/memory/`.
 
 ## Bước 0 — Đọc trước khi làm
 
@@ -102,7 +110,7 @@ Cuối mỗi đợt, trả lời 3 câu và ghi lại:
    → thêm/gộp vào `rnd_playbook.md`. Tìm mục trùng trước, **gộp thay vì thêm** (giữ ≤ 40 mục).
 3. **Quy trình vướng ở đâu** (bước thừa, thiếu, script thiếu tính năng) → **đề xuất** diff cho skill này
    cho người dùng duyệt. Không tự sửa SKILL.md / rnd.py khi chưa được đồng ý. Khi đồng ý: sửa trong
-   `D:\ITGVietAssistant\skills\rnd-loop`, tăng `version`, commit vào repo `ai-skills`.
+   `$ITGVIET_HOME/skills/rnd-loop`, tăng `metadata.version`, commit vào repo `ai-skills`.
 
 ## Khi người dùng chỉ hỏi "đã đủ tốt chưa?"
 

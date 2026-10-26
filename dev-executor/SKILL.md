@@ -1,90 +1,83 @@
 ---
 name: dev-executor
-version: 2.0.0
-last_updated: 2026-10-12
-description: "Developer execution: zero-mockup implementation, unit/E2E test generation, and production-grade terminal verification."
+description: "Dùng khi triển khai code thật cho một tính năng/task đã rõ yêu cầu: viết code production (không mock, không dữ liệu giả), viết unit/E2E test (Maestro, ma trận độ phân giải ADB cho mobile) và tự chạy build/test trong terminal tới khi PASS rồi mới báo xong. Dùng cả khi người dùng chỉ nói \"code task này\", \"implement đi\". Tính năng mới chưa có spec → feature-spec trước; sửa lỗi nhỏ → quick-fix."
+metadata:
+  version: "2.0.0"
+  last_updated: "2026-10-12"
 ---
 
 # Dev Executor: Autonomous Production-Grade Engineering Loop (`dev-executor`)
 
-Skill này quy định quy trình kỹ thuật bắt buộc cho Developer Subagent khi nhận nhiệm vụ lập trình sản phẩm hoặc nâng cấp tính năng.
+Quy trình kỹ thuật khi lập trình tính năng hoặc nâng cấp sản phẩm từ yêu cầu/spec đã rõ.
 
 ```mermaid
 flowchart TD
-    A[Nhận Yêu cầu / Spec] --> B[Phân tích Codebase & Kiến trúc Dữ liệu]
-    B --> C[Thiết kế State Machine & Local Storage CRUD Thực tế]
-    C --> D[Lập trình Tính năng Hoàn Chỉnh - TUYỆT ĐỐI KHÔNG MOCKUP]
-    D --> E[Sinh Unit Test & Deep E2E State Verification]
-    E --> F[Thực thi Test Command trong Terminal]
-    F -->|Fail| G[Đọc Log Lỗi Tận Gốc -> Tự Sửa Mã Nguồn]
-    G --> F
-    F -->|Pass| H[Audit Toàn Diện 10 Tiêu Chí Production & Báo Cáo]
+    A[Nhận yêu cầu / spec] --> B[Đọc codebase & mô hình dữ liệu]
+    B --> C[Thiết kế state & tầng lưu trữ thật]
+    C --> D[Code tính năng hoàn chỉnh, không mockup]
+    D --> E[Viết unit test + E2E]
+    E --> F[Chạy test trong terminal]
+    F -->|Fail| G[Đọc log, sửa nguyên nhân gốc] --> F
+    F -->|Pass| H[Tự kiểm theo gate production & báo cáo]
 ```
 
----
+## Gotchas
 
-## 🛑 1. QUY TẮC CỐT LÕI: ZERO-MOCKUP MANDATE (CẤM DỮ LIỆU GIẢ)
+- **Chưa chạy test thì chưa xong:** chỉ báo hoàn thành khi lệnh build/test đã chạy trong terminal và PASS (learned_patterns RULE-001, RULE-ENG-001). Không chạy được (thiếu thiết bị, thiếu secret) thì nói rõ phần nào chưa verify.
+- **Không giấu lỗi** bằng try-catch rỗng hay fallback giả để test xanh (RULE-ENG-001).
+- **Git:** mỗi task một nhánh `<prefix>/<ticket-id>-<mô-tả>` tách từ base mới nhất, commit theo Conventional Commits, không commit `.env`, `out/`, `dist/`, `.firebase/`, `node_modules/` (RULE-GIT-001). Đọc `references/git-standards.md` khi cần tạo nhánh, đặt tên nhánh hotfix/release, viết commit hoặc mở PR.
+- **Secret:** keystore Android (`*.jks`), service-account JSON, `.env` production nằm ở `D:\SecureVault\<Project>\`; project trỏ tới bằng đường dẫn tuyệt đối trong file config đã gitignore (ví dụ `android/keystore.properties`). Build release lỗi vì thiếu key thì sửa đường dẫn đó, không copy secret vào repo.
+- **Windows/PowerShell:** dùng cmdlet chuẩn, không dùng alias Unix trong PowerShell (reflexion_log REFLECT-2026-001); lọc log gradle/npm dài bằng `Select-String "BUILD|ERROR|FAIL"` trước khi đọc (RULE-PERF-001).
+- **UI ID:** màn hình/nút/input chính có `id`/`data-testid` theo tiền tố `screen-*`, `btn-*`, `input-*`... (RULE-UI-002), vì Maestro/Playwright và analytics dựa vào các ID này.
+- **Không cài package toàn cục** (`npm install -g`, `pip install` vào Python hệ thống) khi người dùng chưa đồng ý (RULE-SEC-001).
+- **ADB:** sau khi đổi `wm size`/`wm density` để test, luôn reset (`adb shell wm size reset && adb shell wm density reset`), nếu không thiết bị/emulator của người dùng bị kẹt ở độ phân giải test.
 
-Tuyệt đối cấm tạo ứng dụng kiểu "bề mặt demo" (surface mockup). Mọi màn hình và tính năng phải đáp ứng:
+## 1. Không mockup, không dữ liệu giả
 
-1. **100% Real Interactive State & CRUD:**
-   - Mọi nút bấm, danh mục, bộ lọc, thẻ chi tiết đều phải có chức năng thực tế khi người dùng nhấp vào.
-   - Cung cấp đầy đủ vòng đời CRUD (Thêm, Xem chi tiết, Sửa, Xóa) cho mọi đối tượng cốt lõi (Ví tiền, Giao dịch, Danh mục/Hũ, Ngân sách).
-2. **Persistent Storage Engine:**
-   - Dữ liệu PHẢI được lưu trữ vĩnh viễn (LocalStorage / IndexedDB / SQLite / MMKV).
-   - Tắt ứng dụng, mở lại, hoặc đổi thiết bị KHÔNG được mất dữ liệu người dùng.
-   - Hỗ trợ Xuất dữ liệu thật (Real CSV Export, JSON Backup) và Nhập file khôi phục thật.
-3. **Dynamic Computation (Tính Toán Động):**
-   - Biểu đồ, thanh tiến độ, bản đồ nhiệt (Heatmap), số dư khả dụng, và tỷ lệ phần trăm PHẢI được tính toán từ các giao dịch thực tế trong cơ sở dữ liệu, TUYỆT ĐỐI KHÔNG hardcode số liệu mẫu.
-4. **Drill-Down Detail Views:**
-   - Khi nhấp vào bất kỳ Hũ/Danh mục nào, hệ thống phải mở màn hình xem chi tiết lịch sử và phân tích của riêng Hũ đó.
-5. **Real Settings & Security Controls:**
-   - Cung cấp trang Cài đặt thực sự: Đổi đơn vị tiền tệ (VND, USD, EUR, JPY), Khóa mã PIN bảo mật, Quản lý danh sách Ví, Xóa sạch dữ liệu (Factory Reset) theo chuẩn GDPR/Google Play.
+Lý do: bản "bề mặt demo" trông xong nhưng vỡ ngay khi người dùng bấm thật, và phải làm lại từ tầng dữ liệu.
 
----
+1. **Tương tác thật:** mọi nút, bộ lọc, thẻ chi tiết đều có hành vi khi bấm; đối tượng cốt lõi có đủ CRUD.
+2. **Lưu trữ bền vững:** dữ liệu ghi vào storage thật của nền tảng (LocalStorage/IndexedDB/SQLite/MMKV/Firestore...), tắt mở lại app không mất. Có export/backup thì phải xuất file thật và nhập lại được.
+3. **Số liệu tính động:** biểu đồ, tiến độ, số dư, phần trăm tính từ dữ liệu trong DB, không hardcode.
+4. **Drill-down:** bấm vào một mục tổng hợp mở được màn chi tiết của riêng mục đó.
+5. **Cài đặt thật:** các tùy chọn trong Settings phải có tác dụng; nếu có "xóa toàn bộ dữ liệu" thì xóa thật và có xác nhận.
 
-## 📋 2. TIÊU CHUẨN NGHIỆM THU KỸ THUẬT (PRODUCTION ACCEPTANCE GATES)
+Seed data lần đầu cài là được, miễn người dùng sửa/xóa được và không trộn với dữ liệu thật.
 
-Mỗi lần bàn giao mã nguồn, Dev Agent phải tự kiểm tra và đáp ứng:
+## 2. Gate nghiệm thu production
 
-| Tiêu chuẩn | Yêu cầu bắt buộc |
+| Tiêu chuẩn | Yêu cầu |
 | :--- | :--- |
-| **Data Integrity** | Không xảy ra tình trạng NaN, null pointer, hoặc lệch số dư khi tính toán. Mọi phép cộng trừ tiền tệ phải qua Engine chuẩn hóa. |
-| **Empty State** | Khi người dùng xóa hết giao dịch hoặc vừa cài mới, giao diện phải có Empty State hướng dẫn trực quan, không được vỡ layout. |
-| **Input Validation** | Bàn phím số và máy tính mini phải chặn phép chia cho 0, chặn số âm không hợp lệ, chặn nhập chuỗi rác. |
-| **Filter & Search** | Bộ lọc thời gian (Tuần này, Tháng này, Tất cả) và lọc theo Ví/Hũ phải phản hồi tức thì (< 50ms). |
-| **Accessibility & Touch** | Nút bấm tối thiểu 44x44px, độ tương phản chuẩn WCAG 2.1 AA (≥ 4.5:1), hỗ trợ Dark Mode và Light Mode hoàn chỉnh. |
+| Toàn vẹn dữ liệu | Không NaN/null/lệch số dư; phép tính tiền qua một hàm chuẩn hóa (số nguyên đơn vị nhỏ nhất hoặc decimal), không float trần. |
+| Empty state | Cài mới hoặc xóa hết dữ liệu vẫn có màn trống hướng dẫn, không vỡ layout. |
+| Validate input | Chặn chia cho 0, số âm không hợp lệ, chuỗi rác. |
+| Lọc & tìm kiếm | Phản hồi tức thì (< 50ms với dữ liệu cục bộ). |
+| Accessibility | Vùng chạm ≥ 44×44px, tương phản ≥ 4.5:1 (WCAG 2.1 AA), Dark/Light mode đầy đủ. |
 
----
+## 3. Quy trình 5 bước
 
-## 🔄 3. QUY TRÌNH THỰC THI 5 BƯỚC
+1. **Đọc kiến trúc:** state, schema, user journey hiện có.
+2. **Tầng dữ liệu:** storage, seed lần đầu, xử lý đồng bộ.
+3. **Tính năng & UI:** dựng màn hình theo `pro-uiux-design`, nối hai chiều View ↔ Storage.
+4. **Kiểm thử phản biện:** unit test + E2E mô phỏng chuỗi tương tác thật (thêm → sửa → lọc → xóa → hoàn tác → đổi theme → xuất file).
+5. **Bàn giao:** báo cáo kèm lệnh test đã chạy, output tóm tắt và diff.
 
-1. **Context & Architecture Audit:** Rà soát kiến trúc State, mô hình dữ liệu (Schema), và luồng người dùng (User Journey).
-2. **Data Layer Implementation:** Thiết lập tầng lưu trữ cục bộ, hàm khởi tạo dữ liệu mẫu lần đầu (Seed Data), và bộ xử lý sự kiện đồng bộ.
-3. **Feature & UI Depth Engineering:** Xây dựng trọn vẹn các màn hình theo chuẩn `pro-uiux-design`, kết nối logic 2 chiều giữa View và Storage.
-4. **Adversarial Verification Loop:** Chạy Unit Test và E2E Test tự động mô phỏng chuỗi tương tác phức tạp (Thêm -> Sửa -> Lọc -> Xóa -> Hoàn tác -> Đổi Theme -> Xuất File).
-5. **Quality Handover:** Xuất báo cáo nghiệm thu kỹ thuật, cung cấp bằng chứng chạy thực tế kèm diff chi tiết.
+## 4. Mobile: Maestro E2E + ma trận độ phân giải ADB
 
----
+Với React Native / Android native, unit test không đủ vì không bắt được lỗi layout và luồng thật trên thiết bị.
 
-## 📱 4. QUY CHUẨN KIỂM THỬ MOBILE E2E & MA TRẬN ĐA ĐỘ PHÂN GIẢI (MAESTRO & ADB MATRIX)
+**Maestro (`e2e/*.yaml`)** — chạy trên APK debug/release, không sửa mã nguồn:
+- Mở app → kiểm Home & theme → `takeScreenshot`.
+- Nhập liệu qua form/dialog/máy tính, chuyển tab, kiểm số liệu cập nhật.
+- Lưu ảnh vào `e2e/screenshots/` làm bằng chứng nghiệm thu.
 
-Đối với các dự án Mobile (React Native, Android Native), cấm tuyệt đối việc chỉ dựa vào Unit Test. Bắt buộc áp dụng bộ đôi **Maestro CLI** & **ADB Resolution Matrix**:
+**Ma trận `adb shell wm size` / `wm density`:**
 
-### 1. Kịch bản Maestro E2E Declarative Flow (`e2e/*.yaml`):
-- Sử dụng Maestro CLI chạy trực tiếp trên file APK release/debug mà không cần sửa đổi mã nguồn.
-- Bao phủ trọn vẹn luồng người dùng chính (User Journey):
-  * Mở app -> Xác thực màn hình Home & Theme chuẩn.
-  * Tự động chụp ảnh bằng chứng `takeScreenshot`.
-  * Thực hiện chuỗi nhập liệu tương tác (máy tính, form, dialog).
-  * Chuyển tab, kiểm tra cập nhật số liệu và hiển thị dữ liệu mới.
-- Lưu ảnh chụp màn hình vào thư mục `e2e/screenshots/` phục vụ nghiệm thu.
+| Thiết bị mô phỏng | Size | DPI |
+| :--- | :--- | :--- |
+| HD giá rẻ | 720x1280 | 320 |
+| FHD+ 20:9 | 1080x2400 | 420 |
+| Flagship 2K (tai thỏ) | 1440x3120 | 560 |
+| Tablet 10" | 1600x2560 | 320 |
 
-### 2. Ma trận Kiểm thử Đa Độ Phân Giải (ADB Window Manager Matrix):
-- Tự động thay đổi kích thước và mật độ điểm ảnh qua lệnh `adb shell wm` để kiểm tra độ thích ứng giao diện:
-  * **HD Giá rẻ:** `720x1280` (DPI: 320).
-  * **FHD+ Phổ thông (tỉ lệ 20:9):** `1080x2400` (DPI: 420).
-  * **Flagship 2K (Tai thỏ / Đục lỗ):** `1440x3120` (DPI: 560).
-  * **Tablet 10-inch:** `1600x2560` (DPI: 320).
-- Sau khi kiểm thử, bắt buộc reset về mặc định: `adb shell wm size reset && adb shell wm density reset`.
-- **Tiêu chí Pass:** Không bị tai thỏ đè nút/tiêu đề, nội dung luôn nằm trong Safe Area, các nút bấm chính (FAB / CTA) không bị bàn phím ảo hay thanh điều hướng che khuất.
+Pass khi: tai thỏ không đè nút/tiêu đề, nội dung nằm trong safe area, FAB/CTA không bị bàn phím ảo hay thanh điều hướng che. Xong thì reset (xem Gotchas).

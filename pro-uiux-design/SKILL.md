@@ -1,137 +1,50 @@
 ---
 name: pro-uiux-design
-version: 3.0.0
-author: itgviet
-last_updated: 2026-09-27
-description: "UI/UX design standards: design tokens, Material 3, platform-native aesthetics, SVG icons, and responsive layouts."
+description: "Dùng khi thiết kế hoặc chỉnh giao diện (web, Android/iOS, Flutter, Compose) cần trông chuyên nghiệp: design token màu/khoảng cách/typography, Material 3, icon SVG, layout responsive, UI ID theo taxonomy, và tự kiểm tra để tránh kiểu UI \"AI-cliché\". Dùng cả khi người dùng chỉ nói \"màn này xấu quá\", \"làm lại UI\", \"thêm dark mode\". Ảnh minh họa hoặc asset game → visual-artist."
+metadata:
+  version: "3.0.0"
+  author: "itgviet"
+  last_updated: "2026-09-27"
 ---
 
-# SKILL: Professional UI/UX Design System & Execution Protocol (`pro-uiux-design`)
+# [SKILL-DEV-002] Pro UI/UX Design — giao diện chuyên nghiệp, không "AI-cliché"
 
-## 🎯 Mục đích & Triết lý Thiết kế
+Chuẩn giao diện cho web, Android/iOS, Flutter, Compose. Ưu tiên: (1) design system của dự án nếu đã có, (2) quy ước nền tảng (Material 3 trên Android, Apple HIG trên iOS/macOS, Fluent trên Windows), (3) mặc định trong skill này.
 
-Skill **`pro-uiux-design`** (v3.0.0) quy định bộ tiêu chuẩn giao diện người dùng (UI) và trải nghiệm người dùng (UX) chuẩn sản phẩm thương mại thế giới. Triết lý cốt lõi gồm 5 trụ cột:
+## Gotchas
 
-1. **Anti-AI-Cliché & Anti-Emoji Aesthetics:** CẤM dùng Emoji hệ thống (`⚡`, `📁`, `🖥️`, `📤`, `📄`) làm icon chính. BẮT BUỘC dùng hệ thống **Vector SVG Icons** đồng bộ (Lucide / Feather / SF Symbols / Heroicons).
-2. **Human-Centered & Platform-Native:** Tôn trọng đặc tính của từng nền tảng (Apple Human Interface Guidelines trên iOS/macOS, Microsoft Fluent Design trên Windows 11, Material 3 trên Android).
-3. **Precision Iconography & Geometry:** Nét stroke icon mỏng tinh tế (1.5px - 2.0px), viewBox 24x24px, bo góc stroke mượt mà (`stroke-linecap="round"`).
-4. **Precision Information Density:** Bố cục chặt chẽ, chuẩn hóa 8pt grid system.
-5. **Resilient Multi-State Engineering:** Mỗi component đều có đủ 5 trạng thái bắt buộc: `Default`, `Hover/Active`, `Shimmer/Loading`, `Empty`, và `Error/Retry`.
+- **Dùng lại icon/badge sẵn có của app** cho cùng một khái niệm, kể cả trong mockup; không tự vẽ ký hiệu mới. Trước khi làm mockup, grep component hiện có. (Nguồn: InsightScanX CMS 2026-10-19 — mockup dùng ⚠ trong khi app dùng `AlertCircle` cho issue ở mọi nơi.)
+- Mọi màn hình, overlay, sheet, modal, toast, dialog, nút quan trọng, input phải có `id`/`data-testid` theo tiền tố `screen-* tab-* overlay-* sheet-* modal-* toast-* dialog-* btn-* input-*` (RULE-UI-002). App có UI phức tạp duy trì `docs/specs/<module>/ui_screen_registry.md`. Đọc [references/ui-id-taxonomy.md](references/ui-id-taxonomy.md) khi đặt ID hoặc tạo registry màn hình.
+- Vùng chạm trên Android: tối thiểu **48dp** (Material 3, mục kiểm của audit Google Play cho SafeBudget); iOS 44pt.
+- Token màu trong [references/tokens-and-icons.md](references/tokens-and-icons.md) chỉ là mặc định khi dự án chưa có palette; không thay palette của dự án đang chạy.
 
----
+## Mặc định khi dự án chưa có design system
 
-## 🛑 1. Ma Trận Đối Chiếu: AI-Cliché UI vs. Professional Human UI
+| Mục | Tránh | Dùng |
+|---|---|---|
+| Icon | Emoji (`⚡ 📁 🖥️`) làm icon, icon lệch cỡ | SVG stroke 1.5–2px, viewBox 24, `stroke-linecap="round"` (Lucide/Feather/SF Symbols); container 36–40px |
+| Màu | Nền `#000000`, chữ neon, gradient tràn lan | Nền slate (`#0B0F17`/`#151D2A` tối, `#F8FAFC` sáng), 1 màu nhấn; tương phản chữ ≥ 4.5:1 (WCAG AA) |
+| Độ nổi | Bóng đen đậm, viền phát sáng | Viền 1px (`rgba(255,255,255,0.08)` / `#E2E8F0`), bóng rất nhẹ |
+| Chữ | Cỡ tùy hứng | Thang tỉ lệ 1.25; line-height 1.2 tiêu đề, 1.5 thân bài; tiêu đề tracking `-0.02em` |
+| Khoảng cách | 11px, 13px, căn giữa mọi thứ | Lưới 4/8: 4, 8, 12, 16, 24, 32, 48 |
+| Bo góc | 30px khắp nơi | 6–8px nút/input, 10–14px card/modal, 999px chỉ cho pill/badge |
 
-| Tiêu chí | ❌ AI-Cliché UI (CẤN TRÁNH TUYỆT ĐỐI) | ✅ Professional Human UI (TIÊU CHUẨN BẮT BUỘC) |
-| :--- | :--- | :--- |
-| **Iconography (Biểu tượng)** | Dùng Unicode Emoji ngẫu nhiên (`⚡`, `📁`, `🖥️`, `📤`, `📄`). Icon to nhỏ không đồng nhất. | **Crisp Vector SVG System:** SVG monochrome stroke 1.5px/2px (Lucide/SF Symbols), viewBox 24x24px, container 36px/40px chuẩn hóa. |
-| **Bảng màu (Palette)** | Dark mode đen xì (`#000000`), chữ hồng/xanh neon phát sáng tràn lan. | **Semantic Slate & Zinc Colors:** Base Surface `#0B0F17` / `#151D2A`, Accent Blue `#3B82F6` tinh tế, độ tương phản WCAG 2.1 AA (≥ 4.5:1). |
-| **Độ nổi & Layering** | Drop-shadow đen sì mờ đục (`0 20px 40px rgba(0,0,0,0.5)`), viền phát sáng chói mắt. | **Subtle Borders & Layering:** Viền mỏng 1px (`rgba(255,255,255,0.08)` hoặc `#E2E8F0`), Ambient Shadow cực mỏng (`0 1px 3px rgba(0,0,0,0.05)`). |
-| **Typography** | Font size chọn đại, thiếu letter-spacing, không có nhịp điệu dòng (line-height). | **Optical Typographic Hierarchy:** Tỉ lệ Major Third (1.25), Tight tracking (`-0.02em`) cho Title, Line-height 1.2 cho Title và 1.5 cho Body text. |
-| **Spacing & Grid** | Paddings ngẫu nhiên (11px, 13px), căn giữa tất cả mọi thứ (Center text overload). | **Strict 8pt Grid System:** Khoảng cách chuẩn hóa 4px, 8px, 12px, 16px, 24px, 32px, 48px. Lùi dòng theo hướng đọc tự nhiên (F/Z pattern). |
-| **Bo góc (Geometry)** | Bo góc quá đà (`border-radius: 30px`) gây lãng phí diện tích hiển thị. | **Modern Geometry:** Corner Radius vừa vặn (6px - 8px cho Button/Input, 10px - 14px cho Card/Modal, 999px chỉ dùng cho Pill/Badge). |
+Snippet SVG và bảng token Dart: [references/tokens-and-icons.md](references/tokens-and-icons.md) — đọc khi cần viết icon hoặc file token.
+App quản lý chi tiêu/ngân sách: đọc [references/finance-app-ux.md](references/finance-app-ux.md) (kiến trúc 4 tab, drill-down, undo).
 
----
+## Trạng thái và tương tác
 
-## 🎨 2. Quy Chuẩn SVG Iconography (Vector Icon Standards)
+- Mỗi component có đủ: Default, Hover/Pressed, Loading (shimmer), Empty, Error kèm Retry.
+- Không có phần tử "chết": thứ gì trông bấm được thì phải phản hồi khi bấm.
+- Hành động nhạy cảm (xóa, reset) có dialog xác nhận hoặc toast kèm **Hoàn tác**.
 
-### 2.1 Quy tắc Icon (Icon System Rules)
-1. **Không Dùng Emoji:** Tất cả emoji trên giao diện web và app đều phải thay thế bằng icon Vector SVG stroke chuẩn.
-2. **Stroke Width & Cap:** Tất cả SVG icons sử dụng `stroke-width="2"` hoặc `1.5`, `stroke-linecap="round"` và `stroke-linejoin="round"`.
-3. **Container Padding:** Icon được bọc trong Container hình vuông 36x36px hoặc 40x40px với background tinted 10% primary opacity (`rgba(59, 130, 246, 0.1)`).
+## Tự kiểm trước khi bàn giao
 
-### 2.2 Thư viện SVG Standard Snippets
-```html
-<!-- Lightning / Power Icon -->
-<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-</svg>
-
-<!-- Folder Sync Icon -->
-<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-</svg>
-
-<!-- Screen Share Monitor Icon -->
-<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-  <line x1="8" y1="21" x2="16" y2="21"></line>
-  <line x1="12" y1="17" x2="12" y2="21"></line>
-</svg>
-
-<!-- Upload Tray Icon -->
-<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-  <polyline points="17 8 12 3 7 8"></polyline>
-  <line x1="12" y1="3" x2="12" y2="15"></line>
-</svg>
-```
-
----
-
-## 🏛️ 3. Hệ Thống Token Thiết Kế (Design System Tokens)
-
-### 3.1 Semantic Color Palette Tokens
-
-```dart
-abstract class AppDesignTokens {
-  // --- DARK MODE SURFACES ---
-  static const Color darkBaseBackground    = Color(0xFF0B0F17); // Deep Slate
-  static const Color darkCardSurface       = Color(0xFF151D2A); // Elevated Surface
-  static const Color darkInteractiveHover  = Color(0xFF1E293B); // Hover Surface
-  static const Color darkSubtleBorder      = Color(0x14FFFFFF); // 8% White Stroke
-
-  // --- LIGHT MODE SURFACES ---
-  static const Color lightBaseBackground   = Color(0xFFF8FAFC); // Cool Off-White
-  static const Color lightCardSurface      = Color(0xFFFFFFFF); // Pure White Panel
-  static const Color lightInteractiveHover = Color(0xFFF1F5F9); // Light Gray Hover
-  static const Color lightSubtleBorder     = Color(0xFFE2E8F0); // Crisp Light Border
-
-  // --- BRAND ACCENTS ---
-  static const Color primaryBlue           = Color(0xFF3B82F6); // Electric Royal Blue
-  static const Color primaryBlueHover      = Color(0xFF2563EB); // Darker Blue
-  static const Color primaryIndigo         = Color(0xFF6366F1); // Indigo Accent
-
-  // --- FEEDBACK & STATUS TOKENS ---
-  static const Color statusSuccess         = Color(0xFF10B981); // Emerald Green
-  static const Color statusWarning         = Color(0xFFF59E0B); // Amber Yellow
-  static const Color statusError           = Color(0xFFEF4444); // Rose Red
-}
-```
-
----
-
-## 🧭 5. Kiến Trúc UX Chiều Sâu & Tính Năng Toàn Diện (Deep UX Architecture)
-
-Để đảm bảo sản phẩm không dừng lại ở mức "giao diện bề mặt", mọi ứng dụng thương mại bắt buộc phải có:
-
-1. **Kiến Trúc Điều Hướng Chuẩn (Standard 4-Tab Bar):**
-   - **Tab 1: Sổ Thu Chi (Dashboard & Feed):** Danh sách giao dịch, lọc theo ngày/ví/hũ, tìm kiếm nhanh, nút thêm nhanh.
-   - **Tab 2: Phân Tích & Báo Cáo (Analytics & Charts):** Biểu đồ tỷ lệ Vector SVG động, cơ cấu chi tiêu, cảnh báo vượt hạn mức, xuất file báo cáo.
-   - **Tab 3: Phương Pháp Luận / Chuyên Mục Sâu (Methodology / Reflection):** Nội dung giá trị thực tiễn (như 4 câu hỏi Kakeibo, đánh giá hành vi chi tiêu).
-   - **Tab 4: Cài Đặt & Trung Tâm Dữ Liệu (Settings & Vault):** Khóa bảo mật PIN, quản lý ví, sao lưu/khôi phục, đổi đơn vị tiền tệ, chính sách quyền riêng tư và xóa sạch dữ liệu.
-2. **Chi Tiết Hóa Dữ Liệu (Drill-Down Detail):**
-   - Khi bấm vào bất kỳ danh mục/hũ/ví nào, phải mở ra Modal hoặc màn hình con hiển thị danh sách các khoản chi của riêng mục đó kèm nút điều chỉnh ngân sách.
-3. **Thao Tác Tức Thì Kèm Phục Hồi (Immediate Action & Reversible UX):**
-   - Mọi hành động nhạy cảm (Xóa giao dịch, Khởi tạo lại) đều phải có Dialog xác nhận hoặc Toast thông báo kèm nút "HOÀN TÁC" (Undo).
-4. **Không Để Lại Thành Phần "Chết":**
-   - Bất kỳ nút, icon hay thẻ nào xuất hiện trên màn hình đều phải có phản hồi khi người dùng chạm vào (Active state, Modal, Drawer, hoặc Action sheet).
-
----
-
-## 📋 6. Quy Trình Kiểm Thử Tự Động UI/UX (Self-Audit Protocol)
-
-Trước khi nghiệm thu bất kỳ giao diện nào do AI sinh ra, AI **PHẢI TỰ CHẠY CHECKLIST 12 ĐIỂM**:
-
-- [ ] **1. Anti-Emoji Check:** ĐÃ THAY THẾ toàn bộ Emoji unicode bằng Vector SVG stroke icons chuẩn.
-- [ ] **2. Anti-AI Colors:** Không có gradient chói mắt bừa bãi, không có shadow đen mờ đục đè lên đĩa.
-- [ ] **3. Semantic Colors:** Màu nền, card surface, text color và icon color tuân thủ đúng bảng màu Semantic Tokens.
-- [ ] **4. Contrast Ratio:** Chữ và nền đạt độ tương phản tối thiểu **4.5:1** (Chuẩn WCAG 2.1 AA).
-- [ ] **5. Grid & Padding:** Tất cả paddings, margins và gaps đều chia hết cho **4px/8px**.
-- [ ] **6. Typography Scale:** Text size tuân thủ bảng Typographic Hierarchy.
-- [ ] **7. 5-State Support:** Component đã xử lý đủ 5 trạng thái (`Default`, `Hover/Active`, `Shimmer/Loading`, `Empty`, `Error`).
-- [ ] **8. Touch Target:** Nút bấm trên mobile đạt tối thiểu 44x44px.
-- [ ] **9. Hover & Active Feedback:** Nút bấm và card có hiệu ứng scale 0.98 mượt mà.
-- [ ] **10. Zero Dead UI Element:** 100% các nút và thẻ đều có tính năng tương tác thực tế, không có mockup chết.
-- [ ] **11. Drill-Down Detail:** Cho phép xem chi tiết từng danh mục/hũ khi bấm vào thẻ.
-- [ ] **12. Real Persistence:** Dữ liệu lưu vĩnh viễn trên LocalStorage, hỗ trợ xuất CSV/JSON thật.
+- [ ] Không còn emoji làm icon; icon trùng khái niệm dùng đúng icon sẵn có của app.
+- [ ] Màu, nền, chữ theo token (của dự án, hoặc mặc định ở trên); tương phản ≥ 4.5:1.
+- [ ] Padding/margin/gap chia hết cho 4.
+- [ ] Đủ 5 trạng thái cho component có dữ liệu.
+- [ ] Vùng chạm ≥ 48dp (Android) / 44pt (iOS).
+- [ ] ID/`data-testid` đúng tiền tố RULE-UI-002.
+- [ ] Mọi nút/thẻ đều có hành vi thật; dữ liệu lưu thật, không mock (khi đang làm code, không phải mockup).
+- [ ] Chụp màn hình cả light và dark (nếu app có dark mode) và tự xem lại trước khi báo xong.

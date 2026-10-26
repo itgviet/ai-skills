@@ -1,325 +1,84 @@
 ---
 name: quick-fix
-version: 3.0.0
-author: itgviet
-last_updated: 2026-10-07
-description: "Rapid bug fixing and targeted refactoring with root cause analysis and multi-stack empirical verification."
+description: "Dùng khi người dùng báo lỗi, crash, sai hiển thị, sai dữ liệu hoặc nhờ sửa/refactor nhỏ trong phạm vi khoảng 1–5 file (\"fix giúp\", \"sao lại lỗi\", \"bug\", \"chỉnh lại chỗ này\"), kể cả khi không nói chữ bug: khóa scope, tìm nguyên nhân gốc, sửa, tự review, chạy build/test theo stack và báo cáo bàn giao. Tính năng mới hoặc thay đổi kiến trúc → feature-spec; task đã có spec → dev-executor."
+metadata:
+  version: "3.0.0"
+  author: "itgviet"
+  last_updated: "2026-10-07"
 ---
 
 # SKILL: Universal Quick Fix & Rapid Improvement Protocol (v3.0.0)
 
-## 🎯 Mục đích & Phạm vi
+Quy trình cho sửa lỗi, chỉnh hành vi, tinh chỉnh UI và refactor nhỏ trên mọi tech stack, không cần spec đầy đủ.
 
-Skill này quy định quy trình xử lý chuẩn hóa cho các tác vụ **Quick Fix & Cải tiến nhanh** (sửa lỗi, chỉnh sửa hành vi, tinh chỉnh UI, refactor nhỏ). Quy trình thiết kế theo chuẩn **Multi-Perspective & Multi-Stack AI Workflow** nhằm giúp mọi AI Coding Agent (Antigravity, Claude, Cursor, Codex, Copilot...) tự động tuân thủ nguyên tắc chất lượng cao nhất trên **BẤT KỲ NGÔN NGỮ / TECH STACK NÀO** mà không bị quá tải bởi các quy trình spec rườm rà.
+## Gotchas
 
----
+- **Branch isolation (RULE-GIT-001):** trước khi sửa, chạy `git branch --show-current`. Nếu nhánh đang thuộc bug/feature khác: stash hoặc commit việc dở → `git checkout develop && git pull origin develop` → `git checkout -b fix/<ticket-id>-<topic>`. Vì commit đè lên nhánh của việc khác làm lẫn hai thay đổi, không review/revert riêng được.
+- **Windows/PowerShell:** máy chạy Windows; lệnh PowerShell dùng cmdlet chuẩn (`Get-ChildItem`, `Select-String`), không dùng alias Unix — đã từng gây lỗi cú pháp/timeout (reflexion_log REFLECT-2026-001).
+- **Log build dài:** lọc trước khi đọc (`... | Select-String "BUILD|ERROR|FAIL"` hoặc skill `context-compressor`), vì log gradle/npm hàng trăm dòng làm loãng context (RULE-PERF-001).
+- **Không giấu lỗi:** không dùng try-catch rỗng hay trả dummy fallback để test xanh (RULE-ENG-001) — lỗi sẽ quay lại ở production và khó lần hơn.
+- **Secret:** keystore, service-account JSON, `.env` production nằm ở `D:\SecureVault\<Project>\`, project trỏ tới bằng đường dẫn tuyệt đối trong config đã gitignore. Khi build lỗi vì thiếu secret, sửa đường dẫn config, không copy secret vào repo.
+- **Test DOM pass ≠ UI đúng:** `expect(btn).toBeInTheDocument()` chỉ chứng minh phần tử tồn tại, không chứng minh layout không vỡ. Đổi UI thì phải chụp ảnh và tự mở ảnh ra xem (Phase 4).
+- **UI POS/Mobile (cafenhatsinh):** breakpoint cần kiểm là Mobile 360–390px, Tablet 768px, POS 1336px. Thêm nút vào container có sẵn thì cộng chiều rộng ở breakpoint nhỏ nhất; không nhét ≥ 3 nút chữ dài trên một hàng < 320px — thao tác phụ (In, Sửa, Hủy) dùng icon button 24×24 trong vùng chạm 28–36px kèm `title`/`aria-label`; mỗi vùng chỉ 1 primary action; nút Hủy/Xóa màu đỏ không đặt sát nút chính vì dễ chạm nhầm trên màn cảm ứng.
 
-## 🚦 Ma trận Quyết định Scope (Scope Decision Matrix)
+## Ma trận Quyết định Scope
 
-AI **PHẢI** kiểm tra điều kiện trước khi thực hiện tác vụ:
+Kiểm tra trước khi làm; nếu rơi vào cột phải thì dừng và chuyển sang `feature-spec`.
 
-| Tiêu chí | ✅ Dùng `quick-fix` | 🛑 CHUYỂN SANG FEATURE SPEC (`feature-spec`) |
+| Tiêu chí | ✅ `quick-fix` | 🛑 `feature-spec` |
 | :--- | :--- | :--- |
-| **Số lượng file thay đổi** | Tối đa **1–5 files** | > 5 files hoặc thay đổi nhiều layer lớn |
-| **Bản chất tác vụ** | Fix bug cụ thể, sửa logic sai, UI tweak, minor UX | Thêm tính năng mới, tạo màn hình mới |
-| **Cơ sở dữ liệu / Schema** | Không đổi schema / DB migration phức tạp | Có DB Migration / Thay đổi Schema lớn |
-| **API Contract** | Giữ nguyên hoặc mở rộng tương thích ngược (Non-breaking) | Đổi Breaking API Contract |
-| **Rủi ro ảnh hưởng** | Cục bộ hoặc liên kết 2 bên (Cross-repo fix) | Tái cấu trúc toàn hệ thống (System-wide revamp) |
+| Số file thay đổi | 1–5 file | > 5 file hoặc nhiều layer |
+| Bản chất | Fix bug, sửa logic, UI tweak, UX nhỏ | Tính năng mới, màn hình mới |
+| DB / Schema | Không migration | Có migration / đổi schema |
+| API contract | Giữ nguyên hoặc mở rộng tương thích ngược | Breaking change |
+| Rủi ro | Cục bộ hoặc 2 bên (cross-repo fix) | Tái cấu trúc toàn hệ thống |
 
----
+Thao tác xóa/sửa dữ liệu thật, deploy production, auth, thanh toán → chạy `production-safety-guardrail` trước.
 
-## 🤖 Ma trận Chế độ Thực thi: Solo Fast Mode vs Multi-Agent Swarm Mode
+## Quy trình 6 bước
 
-Để khắc phục hiện tượng **Thiên kiến xác nhận (Confirmation Bias)** và **Nghẽn cổ chai ngữ cảnh (Context Bloat)**, AI tự động lựa chọn 1 trong 2 chế độ thực thi:
+### Phase 1 — Triage & khóa scope
+1. Phân loại: 🐛 bug fix · 🔧 code repair (type/lint/import/deprecation) · 🎨 UI/UX tweak · ♻️ micro refactor (< 100 dòng).
+2. Liệt kê file được phép sửa và file không được đụng.
+3. Kiểm tra branch (xem Gotchas).
+4. Chọn chế độ: 1 repo → **Solo**; ≥ 2 repo hoặc lỗi phân tán Client–Server → **Swarm**. Đọc `references/multi-repo-swarm.md` khi chọn Swarm.
+5. Yêu cầu mập mờ hoặc có nhiều cách giải: dừng và hỏi người dùng 1–3 câu, mỗi câu kèm phương án `(Recommended)`, vì sửa theo đoán sai tốn gấp đôi thời gian. Yêu cầu rõ thì tóm tắt scope 1–2 dòng rồi làm tiếp.
 
-| Tiêu chí phân loại | ⚡ CHẾ ĐỘ 1: SOLO FAST MODE | 🐝 CHẾ ĐỘ 2: MULTI-AGENT SWARM MODE |
-| :--- | :--- | :--- |
-| **Phạm vi Repository** | **1 Repository duy nhất** | **$\ge$ 2 Repositories** (Cross-Repo: Mobile + Backend, Web + API...) |
-| **Độ phức tạp** | Micro bug, linter fix, UI tweak, 1-3 files | Bug hợp đồng API, Race Condition, Concurrency, Lifecycle ngắt quãng |
-| **Cơ chế AI** | **1 Agent đơn đóng nhiều vai** (Persona Shifting) | **Actor-Critic Swarm Architecture** (Điều phối đa đặc vụ) |
-| **Ưu điểm** | Tốc độ tức thì (< 1 phút), siêu tiết kiệm token | Triệt tiêu thiên kiến xác nhận, chạy song song, context cô đọng |
-| **Công cụ kích hoạt** | Tool thông thường (`replace_file_content`, `run_command`) | `invoke_subagent`, `manage_subagents`, `send_message` |
+### Phase 2 — Tìm nguyên nhân gốc
+- Đọc log/stack trace và đọc file liên quan thực tế (không đoán từ tên file).
+- Ghi ra 3 dòng: **Hiện tượng** · **Nguyên nhân gốc** (file:dòng, hàm) · **Rủi ro lan** (module nào khác bị ảnh hưởng).
 
----
+### Phase 3 — Sửa code
+- Minimal diff: chỉ sửa dòng cần để xử lý nguyên nhân gốc.
+- Theo đúng naming, indent, import pattern của dự án.
+- Không để lại `console.log`/`print()`, comment rác, import thừa.
+- Swarm: chốt contract ở Phase 2 rồi giao việc cho worker từng repo.
 
-## 🐝 Kiến trúc Đa Đặc vụ (Multi-Agent Swarm & Actor-Critic Architecture)
+### Phase 4 — Tự phản biện
+Chưa tuyên bố xong ngay sau khi sửa. Solo: tự đóng vai reviewer soi `git diff`; Swarm: critic độc lập review.
+1. Đối chiếu từng yêu cầu của người dùng/ticket → đã đáp ứng chưa, có bỏ sót không.
+2. Soát diff: log thừa, null/KeyError/ReferenceError, leak.
+3. Contract: schema backend khớp model client không; có đổi hành vi tính năng khác không.
+4. Biên & bất đồng bộ: double-call/retry (idempotency), kill app, mạng yếu, ngắt giữa chừng.
+5. Có đổi UI: chụp ảnh (Playwright) ở ít nhất POS/Desktop 1280–1336px và Mobile 390px, rồi mở từng ảnh ra xem (Claude Code: `Read` file ảnh · Antigravity: `view_file`). Kiểm: rớt dòng làm lệch chiều cao card, nút dính chùm, primary CTA có nổi bật, Mobile có tràn ngang. Chỉ gửi ảnh cho khách khi chính mình đã thấy ổn.
 
-Khi kích hoạt **Multi-Agent Swarm Mode**, hệ thống vận hành theo mô hình phân tầng chặt chẽ:
+### Phase 5 — Kiểm thử tự động
+Phát hiện stack và chạy lệnh tương ứng; Swarm thì chạy song song từng repo.
 
-```
-                                ┌────────────────────────────────────────┐
-                                │     👑 1. SUPERVISOR / TRIAGE AGENT    │
-                                │   Khóa Scope • API Contract • Routing  │
-                                └───────────────────┬────────────────────┘
-                                                    │
-                 ┌──────────────────────────────────┴──────────────────────────────────┐
-                 │ dispatch song song (`invoke_subagent`)                              │ dispatch song song (`invoke_subagent`)
-     ┌───────────▼──────────────┐                                          ┌───────────▼──────────────┐
-     │ 💻 2A. SUBAGENT: BACKEND │                                          │ 📱 2B. SUBAGENT: CLIENT  │
-     │ Workspace: Server/API    │                                          │ Workspace: Mobile/Web    │
-     │ Sửa code & chạy test     │                                          │ Sửa code & chạy test     │
-     └───────────┬──────────────┘                                          └───────────┬──────────────┘
-                 │                                                                     │
-                 └──────────────────────────────────┬──────────────────────────────────┘
-                                                    │ Bàn giao Git Diff chéo
-                                         ┌──────────▼──────────┐
-                                         │  🧐 3. CRITIC AGENT │
-                                         │ (Adversarial Review)│
-                                         │ Soi lỗi chéo 2 bên  │
-                                         │ Bắt race condition  │
-                                         └──────────┬──────────┘
-                                                    │ APPROVED
-                                         ┌──────────▼──────────┐
-                                         │  📦 4. DELIVERY     │
-                                         │ Báo cáo đa chiều    │
-                                         └─────────────────────┘
-```
-
-### 👥 Phân định Vai trò Trong Swarm:
-1. 👑 **Supervisor Agent (Parent Agent):**
-   - Tiếp nhận bug report, phân tích root cause liên hệ thống, thiết lập API Contract chuẩn mực.
-   - Chia nhỏ task và điều phối song song cho các Domain Subagents qua `invoke_subagent`.
-   - Giữ context sạch sẽ, không bị phình to bởi các log trung gian.
-2. 💻 **Domain Specialist Subagents (Actors):**
-   - **Backend Worker:** Chuyên sâu vào API, DB ORM, Job Queue, chạy test suite server (`pytest`, `go test`, `mvn test`...).
-   - **Client Worker:** Chuyên sâu vào Mobile (Swift, Kotlin, React Native) hoặc Web UI, xử lý event, state store, chạy type-check (`tsc`) và UI test.
-   - Làm việc trong workspace độc lập, sửa code theo chuẩn Minimal Diff.
-3. 🧐 **Adversarial Critic Subagent (Reviewer & Security/QA Lead):**
-   - **QUY TẮC BẤT DI BẤT DỊCH:** Critic **KHÔNG THAM GIA VIẾT CODE**, đóng vai trò phản biện độc lập.
-   - Nhiệm vụ duy nhất: Tìm ra lỗ hổng, race condition, data loss, lỗi lệch contract giữa 2 bên, và hiện tượng "vá triệu chứng".
-   - Chỉ khi Critic cấp quyền **PASS**, Supervisor mới cho phép commit/merge.
-
----
-
-## 👥 5 Góc nhìn Vai trò Cốt lõi (Multi-Role Perspectives)
-
-Mọi thay đổi code (dù chạy Solo hay Multi-Agent) phải đáp ứng đồng thời 5 tiêu chuẩn vai trò:
-
-```
-                  ┌────────────────────────────────────────┐
-                  │ 👔 1. QUẢN LÝ (Project Manager / PM)  │
-                  │ Scope Lock • DoD • Zero Scope Creep    │
-                  └──────────────────┬─────────────────────┘
-                                     │
-    ┌────────────────────────────────┼────────────────────────────────┐
-    │                                │                                │
-┌───┴───────────────────────┐ ┌──────┴──────────────────────┐ ┌───────┴──────────────────────┐
-│ 💻 2. LẬP TRÌNH VIÊN      │ │ 🧪 3. TESTER / QC           │ │ 🎨 4. DESIGNER / UX          │
-│ Root Cause • Minimal Diff │ │ Regression Check • Proof    │ │ Visual & UX Consistency      │
-│ No Symptom Patching       │ │ Empirical Verification      │ │ Platform Guidelines          │
-└───┬───────────────────────┘ └──────┬──────────────────────┘ └───────┬──────────────────────┘
-    │                                │                                │
-    └────────────────────────────────┼────────────────────────────────┘
-                                     │
-                  ┌──────────────────┴─────────────────────┐
-                  │ 🤝 5. KHÁCH HÀNG / STAKEHOLDER         │
-                  │ Business Value • Transparent Report    │
-                  └────────────────────────────────────────┘
-```
-
-1. 👔 **Quản lý (PM/Scrum Master):** Khóa phạm vi (Scope Lock), đảm bảo hoàn thành nhanh, không "tiện tay" sửa lan sang phần khác (Scope Creep), báo cáo tiến độ minh bạch.
-2. 💻 **Lập trình viên (Developer/Tech Lead):** Phân tích nguyên nhân gốc (Root Cause First), không "vá víu" triệu chứng (No Symptom Patching), giữ nguyên kiến trúc và style code của dự án.
-3. 🧪 **Tester / QC:** Đảm bảo không nảy sinh lỗi cũ (Zero Regression), tự kiểm thử bằng bằng chứng thực tế (Empirical Proof), kiểm tra các trường hợp biên (Edge cases).
-4. 🎨 **Designer / UX:** Đảm bảo tính nhất quán giao diện (Visual & UX Consistency), phản hồi mượt mà, không làm vỡ layout responsive hay màu sắc chuẩn của Design System.
-5. 🤝 **Khách hàng (Stakeholder):** Đảm bảo giá trị sử dụng không bị ảnh hưởng tiêu cực, nhận báo cáo dễ hiểu bằng ngôn ngữ tự nhiên (non-technical summary).
-
----
-
-## 🔄 Quy trình 6 Bước Thực thi (6-Phase Execution Pipeline)
-
-```mermaid
-graph TD
-    P1["Phase 1: Triage, Scope Lock & Mode Selection"] --> P2["Phase 2: Context & Root Cause Analysis"]
-    P2 --> P3["Phase 3: Implementation (Solo or Parallel Subagents)"]
-    P3 --> P4["Phase 4: Adversarial Audit Gate (Actor-Critic)"]
-    P4 --> P5["Phase 5: Multi-Stack Automated Verification"]
-    P5 --> P6["Phase 6: Multi-Stakeholder Delivery Report"]
-```
-
----
-
-### 📍 PHASE 1: Triage, Scope Lock & Mode Selection (Phân loại & Chọn Chế độ)
-
-AI tự động xác định loại tác vụ, thiết lập ranh giới và chọn chế độ thực thi:
-
-1. **Phân loại tác vụ:**
-   - 🐛 **Bug Fix:** Lỗi crash, logic sai, tính toán sai, đồng bộ dữ liệu lỗi.
-   - 🔧 **Code Repair:** Lỗi type error, linter, import hỏng, deprecation.
-   - 🎨 **UI/UX Tweak:** Chỉnh style, layout, responsive, spacing, text.
-   - ♻️ **Micro Refactor:** Tối ưu hiệu năng nhỏ, đơn giản hóa đoạn code rối (dưới 100 dòng).
-2. **Thiết lập ranh giới (Scope Boundary):**
-   - Xác định danh sách các file được phép sửa (Target Files).
-   - Đánh dấu các file **CẤM** đụng vào để tránh side-effect.
-3. **Kiểm tra Cô lập Nhánh (Branch Isolation & Git Governance Checkpoint):**
-   > [!CAUTION]
-   > **TUÂN THỦ [RULE-GIT-001] — CẤM SỬA CHUNG NHÁNH VỚI BUG KHÔNG LIÊN QUAN:**
-   > - Trước khi sửa bất kỳ dòng code nào, AI phải kiểm tra branch hiện tại (`git branch --show-current`).
-   > - Nếu nhánh hiện tại đang thuộc về một bug/feature khác KHÔNG LIÊN QUAN:
-   >   1. `git stash` hoặc commit hoàn tất phần việc cũ.
-   >   2. Chuyển về base (`develop`): `git checkout develop && git pull origin develop`.
-   >   3. Tạo nhánh mới riêng biệt: `git checkout -b fix/<kebab-case-topic>`.
-   >   4. Tiến hành sửa trên nhánh mới đó, tuyệt đối không commit đè lên nhánh cũ.
-4. **Lựa chọn Chế độ Thực thi:**
-   - Nếu tác vụ liên quan đến $\ge 2$ repo/workspace hoặc logic phân tán Client-Server $\rightarrow$ Chọn **Multi-Agent Swarm Mode**.
-   - Nếu tác vụ cục bộ trong 1 repo duy nhất $\rightarrow$ Chọn **Solo Fast Mode**.
-5. **Xác nhận & Làm rõ Yêu cầu (Requirement Alignment Checkpoint):**
-   - **Trường hợp A (Yêu cầu rõ ràng, đủ thông tin):** Tóm tắt ngắn gọn ranh giới công việc và tự động chuyển sang Phase 2.
-   - **Trường hợp B (Yêu cầu mập mờ, thiếu thông tin hoặc có nhiều phương án giải quyết):**
-     > [!CAUTION]
-     > **CẤM ĐOÁN MỜ & CẤM TỰ SỬA KHI THIẾU THÔNG TIN:**
-     > AI **PHẢI DỪNG LẠI HỎI NGƯỜI DÙNG** để làm rõ trước khi đụng vào code. Đặt tối đa 1–3 câu hỏi tập trung kèm giải pháp `(Recommended)`.
-
----
-
-### 📍 PHASE 2: Deep Context & Root Cause Analysis (Điều tra Nguyên nhân Gốc)
-
-> [!IMPORTANT]
-> **TẮT CƠ CHẾ ĐOÁN MỜ / MASKING SYMPTOM:**
-> Không bao giờ sửa code khi chưa đọc hiểu file thực tế. Không sử dụng try-catch rỗng để nuốt lỗi hay trả về dummy fallback.
-
-1. **Thu thập thông tin:**
-   - Đọc kỹ log lỗi, stack trace, hoặc mô tả bug của người dùng.
-   - Đọc các file liên quan bằng lệnh xem file đầy đủ (không đọc lướt 15-20 dòng đầu).
-2. **Xác định Root Cause Matrix:**
-   - **Hiện tượng (Symptom):** [Lỗi hiển thị hoặc crash như thế nào?]
-   - **Nguyên nhân gốc (Root Cause):** [Dòng code nào, hàm nào, hoặc logic nào thực sự gây ra lỗi?]
-   - **Rủi ro tiềm ẩn (Risk):** [Thay đổi này có thể tác động đến component/module nào khác?]
-
----
-
-### 📍 PHASE 3: Implementation (Thực thi Code Chuẩn xác)
-
-1. **Nguyên tắc sửa code:**
-   - **Minimal Diff:** Chỉ sửa đúng những dòng code cần thiết để khắc phục Root Cause.
-   - **Pattern Matching:** Tuân thủ 100% naming convention, indent, import pattern và coding style hiện có của dự án.
-   - **No Unused Code:** Không để lại `console.log`, `print()`, code comment thừa, hoặc import không dùng.
-   - 🎨 **[RULE-UI-BUDGET] Space Budgeting & Fitts's Law Rule (Bắt buộc cho Frontend/UI):**
-     * **Tính toán Dung lượng Không gian (Space Budgeting):** Khi thêm bất kỳ button, badge, hay control mới vào một container có sẵn, BẮT BUỘC tính tổng pixel chiều rộng trên breakpoint nhỏ nhất (Mobile 360-390px, Tablet 768px, POS 1336px).
-     * **CẤM Nhồi nhét Hàng ngang Hẹp:** Tuyệt đối không nhét $\ge 3$ nút có text dài trên cùng một hàng ngang hẹp (< 320px). Với các thao tác phụ trợ (In ấn, Sửa, Hủy), BẮT BUỘC dùng Icon Button chuẩn hóa (viewBox 24x24, container 28-36px) kèm `title` tooltip và `aria-label`.
-     * **Phân cấp Thị giác (Visual Hierarchy):** Mỗi vùng chỉ có 1 Primary Action nổi bật nhất (Pha chế / Tất toán / Bắt đầu), các nút phụ trợ có kiểu dáng thanh nhã (Outline/Subtle Surface).
-     * **Khoảng cách An toàn (Touch Safety):** Nút nguy hiểm (Hủy / Xóa - màu đỏ) TUYỆT ĐỐI KHÔNG ĐƯỢC đặt dính sát nút Action chính để tránh chạm nhầm trên màn hình cảm ứng POS/Mobile.
-2. **Điều phối theo Chế độ:**
-   - **Solo Mode:** Thực hiện chỉnh sửa trực tiếp bằng các khối edit tập trung.
-   - **Multi-Agent Swarm Mode:** Supervisor gọi `invoke_subagent` giao việc cụ thể cho từng Subagent Worker trên từng repo, kèm theo Contract đã thống nhất ở Phase 2.
-
----
-
-### 📍 PHASE 4: Adversarial Audit Gate (Tự Review & Phản biện Độc lập)
-
-> [!IMPORTANT]
-> **TRIỆT TIÊU THIÊN KIẾN XÁC NHẬN (CONFIRMATION BIAS):**
-> Sau khi sửa code xong, AI **KHÔNG ĐƯỢC TUYÊN BỐ HOÀN THÀNH NGAY**.
-> DOM TEST PASS $\neq$ GIAO DIỆN HOÀN HẢO. `expect(btn).toBeInTheDocument()` chỉ chứng minh thẻ HTML có trong RAM, KHÔNG chứng minh giao diện cân đối, không bị vỡ layout trước mắt người dùng!
-
-- **Trong Solo Mode:** AI tự đóng vai **Senior Code Reviewer / QC Lead** soi lại git diff và tự soi ảnh chụp thực tế.
-- **Trong Multi-Agent Mode:** Supervisor điều phối **Critic Subagent** độc lập để thực hiện kiểm toán chéo (Adversarial Review).
-
-#### 🛡️ 5 Ma trận Kiểm định Bắt buộc:
-1. **Đối chiếu Yêu cầu Ban đầu (Requirements Traceability Matrix):**
-   - Rà soát lại 100% các mục yêu cầu trong lời gọi của người dùng / ticket.
-   - ❓ *Từng yêu cầu đã được đáp ứng đầy đủ chưa? Có mục nào bị bỏ sót hay làm sai lệch không?*
-2. **Tự Code Review (`git diff` Self-Review):**
-   - Đọc lại toàn bộ đoạn code vừa thay đổi.
-   - ❓ *Có để lại `console.log`, `print()`, code comment rác hoặc import dư thừa không?*
-   - ❓ *Có đoạn code nào tiềm ẩn rủi ro NullPointer / KeyError / ReferenceError / Memory Leak không?*
-3. **Phân tích Hợp đồng & Tác động (Contract & Impact Assessment):**
-   - ❓ *Response schema của Backend có khớp 100% với model giải mã của Mobile/Frontend không?*
-   - ❓ *Có làm thay đổi hành vi (behavior) của các tính năng không liên quan khác không?*
-4. **Kịch bản Trường hợp Biên & Bất đồng bộ (Concurrency & Edge-Case Checklist):**
-   - ❓ *Đã xử lý an toàn tính lũy đẳng (Idempotency) khi gọi lặp lại (double-call, retry) chưa?*
-   - ❓ *Đã xử lý trường hợp kill app, mạng yếu, ngắt kết nối giữa chừng, đổi trạng thái chưa?*
-5. 👁️ **[GATE-UI-INSPECTION] Tự Soi Bằng Mắt Ảnh Chụp Màn Hình (Visual Self-Audit):**
-   - Khi có thay đổi UI/UX, BẮT BUỘC chụp ảnh bằng chứng (Playwright/Puppeteer) ở tối thiểu 2 breakpoint: POS/Desktop (1280-1336px) và Mobile (390px).
-   - AI **BẮT BUỘC PHẢI DÙNG TOOL `view_file` ĐỂ TỰ MỞ VÀ SOI TỪNG BỨC ẢNH VỪA CHỤP**:
-     * ❓ *Có bị rớt dòng (line wrap) không mong muốn làm lệch chiều cao giữa các card cạnh nhau không?*
-     * ❓ *Có các nút bấm dính chùm vào nhau không? Khoảng cách giữa các nút có đồng đều không?*
-     * ❓ *Nút thao tác chính (Primary CTA) có rõ ràng, nổi bật không?*
-     * ❓ *Trên màn hình nhỏ (Mobile), các nút có vừa vặn một hàng không hay bị tràn ngang?*
-   - **Chỉ khi AI tự nhìn thấy ảnh thực tế đẹp, cân đối, sạch sẽ mới được phép gửi bằng chứng cho khách hàng.**
-
----
-
-### 📍 PHASE 5: Multi-Stack Automated Verification Gate (Kiểm thử Tự động Đa Hệ thống)
-
-AI **BẮT BUỘC** tự động phát hiện Tech Stack của dự án và chạy các lệnh kiểm thử tương ứng. Trong Multi-Agent Mode, các lệnh kiểm thử được chạy **song song** trên từng môi trường dự án.
-
-#### 🔍 1. Ma trận Lệnh Kiểm thử Theo Tech Stack:
-
-| Tech Stack / Ecosystem | 1. Biên dịch & Type-Check | 2. Linter & Static Analysis | 3. Unit & Regression Test |
+| Stack | Build / type-check | Lint | Test |
 | :--- | :--- | :--- | :--- |
-| **Node.js / TS / React / Next / Vue** | `npm run type-check` (hoặc `tsc --noEmit`) | `npm run lint` (hoặc `npx eslint .`) | `npm test` (hoặc `npx vitest` / `jest`) |
-| **Python (Django / FastAPI / Flask)** | `mypy .` (hoặc `pyright`) | `ruff check .` (hoặc `flake8`) | `pytest` (hoặc `python manage.py test`) |
-| **Java / Kotlin (Spring / Android)** | `./gradlew compileJava` (hoặc `mvn compile`) | `./gradlew checkstyle` (hoặc `mvn spotbugs:check`) | `./gradlew test` (hoặc `mvn test`) |
-| **C# / .NET (ASP.NET / Unity)** | `dotnet build` | `dotnet format --verify-no-changes` | `dotnet test` |
-| **Go (Golang)** | `go build ./...` | `go vet ./...` (hoặc `golangci-lint run`) | `go test -v ./...` |
-| **Rust** | `cargo check` | `cargo clippy` | `cargo test` |
-| **C / C++** | `cmake --build build` (hoặc `make`) | `cppcheck .` (hoặc `clang-tidy`) | `ctest` |
-| **iOS / Swift** | `xcodebuild build` | `swiftlint` | `xcodebuild test` |
-| **PHP (Laravel / Symfony)** | `vendor/bin/phpstan` | `vendor/bin/phpcs` | `php artisan test` (hoặc `phpunit`) |
+| Node / TS / React / Next / Vue | `npm run type-check` hoặc `tsc --noEmit` | `npm run lint` | `npm test` / `npx vitest` |
+| Python | `mypy .` / `pyright` | `ruff check .` | `pytest` |
+| Java / Kotlin / Android | `./gradlew compileJava` / `mvn compile` | `./gradlew checkstyle` | `./gradlew test` / `mvn test` |
+| C# / .NET | `dotnet build` | `dotnet format --verify-no-changes` | `dotnet test` |
+| Go | `go build ./...` | `go vet ./...` | `go test ./...` |
+| Rust | `cargo check` | `cargo clippy` | `cargo test` |
+| iOS / Swift | `xcodebuild build` | `swiftlint` | `xcodebuild test` |
+| PHP | `vendor/bin/phpstan` | `vendor/bin/phpcs` | `php artisan test` / `phpunit` |
 
-#### 🔄 2. Vòng lặp Tự sửa Lỗi Kiểm thử (Auto-Remediation Loop):
-Nếu bất kỳ lệnh verify nào thất bại (Exit Code $\neq$ 0):
-1. Đọc trực tiếp log lỗi thực tế.
-2. Phân tích nguyên nhân gốc và điều chỉnh code chính xác.
-3. Chạy lại lệnh verify đến khi đạt **100% Pass / Green**.
+Ưu tiên script có sẵn trong `package.json`/`Makefile`/CI của dự án hơn bảng trên. Lệnh fail (exit ≠ 0): đọc log lỗi, sửa nguyên nhân, chạy lại tới khi xanh. Không báo hoàn thành khi chưa chạy (learned_patterns RULE-001); nếu không chạy được (thiếu thiết bị, thiếu secret) thì nói rõ bước nào chưa verify.
 
-#### 📱 3. Kịch bản Kiểm thử Thủ công Bắt buộc (Manual Verification Protocol):
-Khi tác vụ có tương tác trực tiếp của người dùng hoặc thuộc nhóm Frontend/Mobile/UI/Integration:
-AI **BẮT BUỘC** phải cung cấp **Hướng dẫn Kiểm thử Thủ công (Manual Verification Steps)** chi tiết trong Báo cáo Bàn giao (Phase 6), gồm:
-1. **Mục tiêu & Điều kiện kiểm thử:** Môi trường, tài khoản, màn hình kiểm tra.
-2. **Các bước thao tác từng bước (Step-by-step):** Đánh số rõ ràng (Bước 1, Bước 2, Bước 3...).
-3. **Kết quả kỳ vọng chi tiết (Expected Result):** Cho từng thao tác, nêu rõ điểm khác biệt sau khi fix.
-4. **Các trường hợp ngoại lệ cần thử (Negative / Edge Cases):** Hủy giữa chừng, mất mạng, đổi tham số, xóa dữ liệu.
+Tác vụ có UI/Mobile/Integration: viết thêm hướng dẫn kiểm thử thủ công (môi trường, các bước đánh số, kỳ vọng từng bước, ca ngoại lệ) trong báo cáo.
 
----
-
-### 📍 PHASE 6: Multi-Stakeholder Delivery Report (Báo cáo Bàn giao Đa Chiều)
-
-Sau khi hoàn thành và verify thành công, AI tổng hợp báo cáo đa góc nhìn cho người dùng:
-
-```markdown
-### 📋 BÁO CÁO HOÀN THÀNH (QUICK FIX REPORT)
-
-#### 👔 1. Quản lý (Scope & DoD)
-- **Tech Stack:** [Node.js / Python / Java / Go / C# / C++ / Rust / Swift / PHP]
-- **Chế độ thực thi:** [Solo Fast Mode / Multi-Agent Swarm Mode]
-- **Git Branch:** `[branch_name]` (Tuân thủ `[RULE-GIT-001]`)
-- **Commit Message:** `[type(scope): subject]` (Conventional Commits)
-- **Danh sách file đã sửa:** `[file_path_1]`, `[file_path_2]`
-- **Trạng thái:** ✅ Hoàn thành đúng Scope, không đụng vào module ngoài.
-
-#### 💻 2. Lập trình viên (Technical Summary & Self-Audit)
-- **Root Cause:** [Mô tả ngắn gọn nguyên nhân gốc rễ kỹ thuật]
-- **Giải pháp:** [Giải pháp kỹ thuật đã áp dụng]
-- **Kết quả Tự Review / Critic Review:** ✅ Đã kiểm toán git diff, loại bỏ rác/log thừa, đảm bảo tính lũy đẳng (idempotent) và no-side-effect.
-
-#### 🧪 3. Tester / QC (Verification Evidence & Traceability)
-- **Đối chiếu Yêu cầu:** 100% yêu cầu ban đầu đã được đáp ứng.
-- **Kiểm thử tự động:**
-  - Build/Type-check: Pass ✅
-  - Lint/Static Analysis: Pass ✅
-  - Unit/Regression test: Pass ✅
-- **Edge cases đã rà soát:** [Ví dụ: null/undefined, mạng chậm, kill app, race condition...]
-- **📱 Hướng dẫn Kiểm thử Thủ công (Manual Verification Steps):**
-  - **Môi trường & Điều kiện:** [Thiết bị/Trình duyệt, màn hình, tài khoản...]
-  - **Bước 1:** [Thao tác mở màn hình/popup...] $\rightarrow$ *Kỳ vọng:* [Hiển thị đúng...]
-  - **Bước 2:** [Thao tác tương tác với tính năng đã fix...] $\rightarrow$ *Kỳ vọng:* [Hành vi đúng như yêu cầu...]
-  - **Bước 3:** [Thao tác lưu/submit/đối chiếu dữ liệu...] $\rightarrow$ *Kỳ vọng:* [Dữ liệu lưu chuẩn xác, không lỗi...]
-  - **Trường hợp ngoại lệ (Edge case):** [Thao tác hủy/bỏ chọn/thử lỗi...] $\rightarrow$ *Kỳ vọng:* [Xử lý an toàn...]
-
-#### 🎨 4. Designer / UX (Visual & Interaction)
-- **Tác động UI/UX:** [Ví dụ: Giữ nguyên Layout, nhất quán màu sắc/spacing, không vỡ Responsive]
-
-#### 🤝 5. Khách hàng (Business Impact)
-- **Tóm tắt ngắn gọn:** [Mô tả 1-2 câu dễ hiểu về thay đổi này mang lại lợi ích cho người dùng cuối]
-```
-
----
-
-## 🛠️ Hướng dẫn Tích hợp với các AI Agents (Cross-AI Compatibility)
-
-Skill này được thiết kế để tương thích tốt trên nhiều môi trường AI khác nhau:
-
-- **Antigravity / Gemini:** Tự động kích hoạt skill qua đường dẫn `.skill/QUICK_FIX.md` hoặc `.agents/skills/quick-fix/SKILL.md`. Tự động dùng `invoke_subagent` khi phát hiện bài toán Multi-Repo/Fullstack.
-- **Claude Desktop / Claude Code:** Đặt file tại `.claude/skills/quick-fix.md` hoặc thêm System Prompt chỉ định tuân thủ quy trình.
-- **Cursor / Copilot / Windsurf:** Đặt file tại `.cursorrules` hoặc `.github/copilot-instructions.md` bằng cách quote nội dung ma trận quy trình.
+### Phase 6 — Báo cáo bàn giao
+Dùng mẫu `assets/report-template.md` (5 góc nhìn: quản lý, dev, QC, UX, khách hàng). Mọi kết quả test trong báo cáo phải là lệnh đã chạy thật kèm output tóm tắt.

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# /// script
+# requires-python = ">=3.9"
+# dependencies = ["openpyxl>=3.1"]
+# ///
 """
 VCB Batch Transfer Payroll Converter (Converter Bảng Lương sang File Lô VCB)
 Converts raw payroll data (XLSX, CSV, JSON) to 100% exact Vietcombank Batch Transfer Format (File Lô Mẫu VCB).
@@ -7,13 +11,21 @@ Converts raw payroll data (XLSX, CSV, JSON) to 100% exact Vietcombank Batch Tran
 
 import sys
 import os
+import csv
 import json
 import re
+import argparse
 import unicodedata
 from pathlib import Path
-import openpyxl
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-from openpyxl.utils import get_column_letter
+
+try:
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+except ImportError:  # dry-run with JSON/CSV input works without openpyxl
+    openpyxl = None
+
+OPENPYXL_HINT = "Thiếu openpyxl. Cài: pip install openpyxl  (hoặc chạy: uv run scripts/convert_payroll.py ...)"
 
 # Load Bank Mapping Database
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -138,12 +150,8 @@ def convert_payroll_to_vcb(
         # Resolve CITAD Bank Code or Vietcombank
         transfer_type, bank_target_code = resolve_bank_code_and_type(bank_raw)
         
-        amount = rec.get("amount", 0)
-        try:
-            amount_val = float(re.sub(r'[^0-9.]', '', str(amount)))
-        except ValueError:
-            amount_val = 0.0
-            
+        amount_val = parse_amount(rec.get("amount", 0))
+
         base_desc_raw = str(rec.get("description", "Thanh toan luong")).strip()
         base_desc_no_accent = remove_vietnamese_accent(base_desc_raw)
         
@@ -227,7 +235,17 @@ def load_records_from_file(file_path: str) -> list[dict]:
     if path.suffix.lower() == '.json':
         with open(path, 'r', encoding='utf-8') as f:
             return json.load(f)
-    elif path.suffix.lower() in ['.xlsx', '.xls']:
+    elif path.suffix.lower() == '.csv':
+        # Read every cell as text so leading zeros in account numbers survive
+        with open(path, 'r', encoding='utf-8-sig', newline='') as f:
+            return [
+                {str(k).strip().lower(): v for k, v in row.items() if k}
+                for row in csv.DictReader(f)
+                if any((v or '').strip() for v in row.values())
+            ]
+    elif path.suffix.lower() == '.xlsx':
+        if openpyxl is None:
+            raise RuntimeError(OPENPYXL_HINT)
         wb = openpyxl.load_workbook(path, data_only=True)
         ws = wb.active
         rows = list(ws.iter_rows(values_only=True))
@@ -247,18 +265,110 @@ def load_records_from_file(file_path: str) -> list[dict]:
     else:
         raise ValueError(f"Unsupported file format: {path.suffix}")
 
+def parse_amount(raw) -> float:
+    """Parse a VND amount; shared by convert_payroll_to_vcb and summarize so preview == file.
+
+    Accepts 7500000, "7.500.000", "7,500,000", "7 500 000 đ", "7.500.000,50", "7500000.0".
+    Anything ambiguous returns 0.0, which summarize() reports as a warning.
+    """
+    if isinstance(raw, (int, float)):
+        return float(raw)
+    s = re.sub(r'[^0-9.,]', '', str(raw))
+    if re.fullmatch(r'\d+', s):
+        return float(s)
+    for sep, dec in (('.', ','), (',', '.')):
+        m = re.fullmatch(rf'(\d{{1,3}}(?:\{sep}\d{{3}})+)(?:\{dec}(\d+))?', s)
+        if m:
+            return float(m.group(1).replace(sep, '') + ('.' + m.group(2) if m.group(2) else ''))
+    m = re.fullmatch(r'(\d+)[.,](\d{1,2})', s)
+    if m:
+        return float(f"{m.group(1)}.{m.group(2)}")
+    return 0.0
+
+
+def summarize(records: list[dict]) -> dict:
+    """Preview what convert_payroll_to_vcb will write, plus warnings a human must clear."""
+    rows, warnings = [], []
+    for idx, rec in enumerate(records, 1):
+        raw_amount = rec.get("amount", 0)
+        amount = parse_amount(raw_amount)
+        acc = str(rec.get("account_no", "")).strip()
+        bank_raw = str(rec.get("bank", "")).strip()
+        transfer_type, bank_code = resolve_bank_code_and_type(bank_raw)
+        name = remove_vietnamese_accent_upper(str(rec.get("name", "")))
+        rows.append({"stt": idx, "name": name, "account_no": acc, "transfer_type": int(transfer_type),
+                     "bank": bank_code, "amount": amount})
+        if amount <= 0:
+            warnings.append(f"Dòng {idx}: số tiền '{raw_amount}' đọc ra {amount:g}")
+        elif amount != int(amount):
+            warnings.append(f"Dòng {idx}: số tiền '{raw_amount}' có phần lẻ ({amount:g}) — VND không có xu")
+        if not acc.isdigit():
+            warnings.append(f"Dòng {idx}: số tài khoản '{acc}' không chỉ gồm chữ số")
+        if not name:
+            warnings.append(f"Dòng {idx}: thiếu tên người hưởng")
+        if transfer_type == "2" and not re.fullmatch(r'\d{8}', bank_code):
+            warnings.append(f"Dòng {idx}: không tìm được mã Citad cho ngân hàng '{bank_raw}'")
+    return {"rows": len(rows), "total_amount": sum(r["amount"] for r in rows),
+            "warnings": warnings, "records": rows}
+
+
+def main(argv=None) -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    parser = argparse.ArgumentParser(
+        description="Chuyển bảng lương (JSON/CSV/XLSX) sang file lô chuyển tiền Vietcombank (.xlsx).",
+        epilog="Cột đầu vào: name, account_no, bank, amount, description (tùy chọn), cus_ref (tùy chọn).\n"
+               "Ví dụ: python scripts/convert_payroll.py --input luong.csv --debit-account 0123456789 --dry-run\n"
+               "Exit code: 0 OK, 1 lỗi đọc/ghi, 2 có cảnh báo (dùng --allow-warnings để vẫn xuất), 3 thiếu openpyxl.",
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("legacy", nargs="*", help=argparse.SUPPRESS)  # old form: <input> [output] [debit_account]
+    parser.add_argument("--input", help="File bảng lương: .json, .csv hoặc .xlsx")
+    parser.add_argument("--output", default=None, help="File .xlsx xuất ra (mặc định: File_Lo_VCB_Out.xlsx)")
+    parser.add_argument("--debit-account", default=None, help="Số tài khoản công ty trích nợ (bắt buộc khi xuất file)")
+    parser.add_argument("--dry-run", action="store_true", help="Chỉ in tóm tắt JSON (số dòng, tổng tiền, cảnh báo), không ghi file")
+    parser.add_argument("--allow-warnings", action="store_true", help="Vẫn xuất file khi còn cảnh báo (chỉ dùng sau khi người dùng đã xem)")
+    args = parser.parse_args(argv)
+
+    legacy = args.legacy
+    input_file = args.input or (legacy[0] if legacy else None)
+    output_file = args.output or (legacy[1] if len(legacy) > 1 else "File_Lo_VCB_Out.xlsx")
+    debit_acc = args.debit_account or (legacy[2] if len(legacy) > 2 else None)
+    if not input_file:
+        parser.error("thiếu --input")
+
+    try:
+        records = load_records_from_file(input_file)
+    except RuntimeError as e:
+        print(f"[ERROR] {e}", file=sys.stderr)
+        return 3
+    except Exception as e:
+        print(f"[ERROR] Không đọc được file bảng lương: {e}", file=sys.stderr)
+        return 1
+
+    summary = summarize(records)
+    if args.dry_run:
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
+        return 2 if summary["warnings"] else 0
+
+    if not debit_acc:
+        parser.error("thiếu --debit-account (tài khoản công ty trích nợ); không dùng giá trị mặc định cho lệnh chi tiền")
+    if summary["warnings"] and not args.allow_warnings:
+        print(json.dumps({"warnings": summary["warnings"]}, ensure_ascii=False, indent=2), file=sys.stderr)
+        print("[STOP] Còn cảnh báo — sửa dữ liệu nguồn hoặc chạy lại với --allow-warnings sau khi người dùng xác nhận.", file=sys.stderr)
+        return 2
+    if openpyxl is None:
+        print(f"[ERROR] {OPENPYXL_HINT}", file=sys.stderr)
+        return 3
+    try:
+        convert_payroll_to_vcb(records, output_file, debit_acc)
+    except Exception as e:
+        print(f"[ERROR] Failed to convert payroll file: {e}", file=sys.stderr)
+        return 1
+    print(json.dumps({"output": output_file, "rows": summary["rows"], "total_amount": summary["total_amount"]},
+                     ensure_ascii=False))
+    return 0
+
+
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        input_file = sys.argv[1]
-        output_file = sys.argv[2] if len(sys.argv) > 2 else "File_Lo_VCB_Out.xlsx"
-        debit_acc = sys.argv[3] if len(sys.argv) > 3 else "1052233438"
-        
-        try:
-            records = load_records_from_file(input_file)
-            convert_payroll_to_vcb(records, output_file, debit_acc)
-        except Exception as e:
-            print(f"[ERROR] Failed to convert payroll file: {e}", file=sys.stderr)
-            sys.exit(1)
-    else:
-        print("VCB Payroll Exporter CLI")
-        print("Usage: python convert_payroll.py <input_file.json|xlsx> [output_file.xlsx] [debit_account]")
+    sys.exit(main())

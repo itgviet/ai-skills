@@ -1,148 +1,78 @@
 ---
 name: release-quality-gate
-description: "Release Quality Gate: IEEE 829 test audit portal generation, multi-environment verification, and Go/No-Go decision."
+description: "Dùng khi chuẩn bị phát hành hoặc nghiệm thu một bản build: lập bộ test case chuẩn IEEE 829/ISTQB (JSON), gộp bằng chứng từ test tự động, sinh portal HTML để QA chạy và ghi kết quả, rồi đưa quyết định Go/No-Go. Dùng khi người dùng nói \"chuẩn bị release\", \"UAT\", \"test plan\", \"ship được chưa\". Review code → techlead-auditor; chính sách store → store-policy-compliance."
+compatibility: "Cần Node.js 18+ (chỉ dùng module có sẵn)."
 ---
+
 
 # Universal Release Quality Gate & Interactive Portal Protocol
 
-Kỹ năng này cung cấp giải pháp đóng gói chuẩn hóa để **QA/QC Lead**, **DevOps**, hoặc **AI Agent** tự động thiết lập và vận hành **Cổng Kiểm Soát Phát Hành (Release Gate)** cho bất kỳ dự án công nghệ nào (Node.js, Python, Go, Java, PHP, Mobile App, Microservices, AI/ML System).
+Lập bộ test case cho một đợt phát hành, sinh portal HTML một file để QA chạy và ghi kết quả, rồi ra quyết định Go/No-Go. Dùng được cho mọi stack (web, API, mobile, microservice).
 
----
+## Gotchas
 
-## 1. Triết Lý & Kiến Trúc Thiết Kế (Universal Architecture)
+Các điểm dưới đây kiểm tra trực tiếp từ `scripts/generate_portal.js`:
 
-Portal kiểm thử và cổng duyệt phát hành được thiết kế theo tư duy **Zero-Dependency & Decoupled State**:
+- **Không có `--help`**: tham số lạ bị bỏ qua và script vẫn chạy với dữ liệu mẫu, ghi `Release_Quality_Gate_Portal.html` vào thư mục hiện tại. Luôn truyền `--input` và `--output`.
+- **Tham số phải dạng `--name=value`** (`--input=./testcases.json`). Dạng có dấu cách (`--input ./testcases.json`) không được nhận và script âm thầm dùng `templates/sample_cases.json`.
+- **File evidence không tồn tại thì bị bỏ qua không báo**; evidence JSON lỗi chỉ in `[WARN]`. Sau khi sinh portal, kiểm tra trạng thái các case đã đổi đúng chưa.
+- **localStorage thắng dữ liệu mới:** trạng thái đã lưu trong trình duyệt (key theo `projectName` + `version`) ghi đè `status`/`actual`/`evidence` của bản portal vừa sinh. Sinh lại portal với evidence mới mà cùng project/version thì QA vẫn thấy kết quả cũ → bấm nút reset trên portal hoặc tăng `version`.
+- **Không hoàn toàn offline:** portal tải Tailwind, FontAwesome và Google Fonts từ CDN; máy không có mạng sẽ mở được nhưng mất style.
+- **Script không tự đính kèm ảnh chụp màn hình;** muốn có bằng chứng ảnh thì ghi đường dẫn ảnh (ví dụ `e2e/screenshots/home.png`) vào trường `evidence`.
+- **Case ghi dữ liệu (mutation) không chạy trên Prod** — gắn `environment` là `Local`/`Staging`; cần chạy trên Prod thì qua `production-safety-guardrail` trước.
 
-```mermaid
-flowchart TD
-    subgraph Input ["1. Dữ Liệu Đầu Vào (Cross-Stack)"]
-        A["File Testcase Cấu Hình (JSON / YAML / Markdown)"]
-        B["Logs / Báo Cáo Test Tự Động (Jest, PyTest, Playwright, Maestro CLI, ADB Matrix, Postman)"]
-    end
+## Quy tắc Go/No-Go (đúng như portal tính)
 
-    subgraph SkillEngine ["2. Bộ Máy release-quality-gate"]
-        C["scripts/generate_portal.js (Zero-Dependency Node.js CLI)"]
-        D["Bộ Tiêu Chuẩn IEEE 829 & ISTQB Core Schema"]
-        E["Thuật Toán Quyết Định Go / No-Go Decision Gate"]
-    end
+`READY FOR PRODUCTION RELEASE` khi đồng thời: mọi case `priority: "P0"` hoặc `isBlocker: true` đều `PASSED`, không case nào `FAILED`, và tỷ lệ PASSED ≥ 90% tổng số case. Ngược lại hiển thị `RELEASE BLOCKED`. Case `BLOCKED`/`UNTESTED` không tính là fail nhưng kéo tỷ lệ pass xuống.
 
-    subgraph Output ["3. Sản Phẩm Bàn Giao (Universal Artifacts)"]
-        F["Single-file Interactive HTML Portal<br/>(Chạy offline, tự lưu localStorage)"]
-        G["Báo cáo Xuất Bản CSV (Excel) & In ấn PDF"]
-        H["Hồ Sơ Nghiệm Thu Go/No-Go Cho Ban Lãnh Đạo"]
-    end
+## Quy trình
 
-    A --> C
-    B --> C
-    D --> C
-    E --> C
-    C --> F
-    F --> G
-    F --> H
+| Bước | Ai làm | Việc | Đầu ra |
+|---|---|---|---|
+| 1. Lập ma trận | QA lead / agent | Đọc tính năng/API trong repo (và spec `docs/specs/<app_id>/` nếu có), soạn test case P0–P3 | `testcases.json` |
+| 2. Sinh portal | Dev / CI | Chạy script (xem dưới) | `Release_Quality_Gate.html` |
+| 3. Kiểm thử | QA + automation | Chạy test tự động, gộp evidence, test tay trên portal | Trạng thái + bằng chứng |
+| 4. Go/No-Go | QA lead + tech lead | Đọc huy hiệu trên portal | Không còn P0 tồn đọng, pass ≥ 90% |
+| 5. Lưu vết | Release manager | Xuất CSV / In PDF, đính vào release tag hoặc task OneTech | Biên bản nghiệm thu |
+
+## Chạy script
+
+Đường dẫn tính từ thư mục skill; chạy từ thư mục gốc dự án để file output nằm trong dự án.
+
+```bash
+node <skill-dir>/scripts/generate_portal.js --input=./testcases.json --output=./Release_Quality_Gate.html
+node <skill-dir>/scripts/generate_portal.js --input=./testcases.json --evidence=./reports/test-results.json --output=./Release_Quality_Gate.html
 ```
 
-### Các Đặc Điểm Vượt Trội:
-1. **Single-File Zero Dependency**: File HTML sinh ra hoàn toàn độc lập, sử dụng CDN Tailwind CSS và FontAwesome, không cần dựng web server hay backend. Mở trực tiếp bằng Chrome, Edge, Safari hoặc in PDF.
-2. **Cơ Chế Lưu Trữ Kép (Dual Persistence)**:
-   - Tự động lưu tiến độ kiểm thử vào `localStorage` trình duyệt theo phiên bản và tên dự án.
-   - Hỗ trợ nút `Backup JSON` và `Restore JSON` để chuyển giao phiên test giữa các thành viên QA/Dev.
-3. **Go/No-Go Decision Engine**:
-   - Tự động hiển thị huy hiệu: `READY FOR PRODUCTION RELEASE` nếu **100% Blocker (P0) PASSED** và tỷ lệ Pass $\ge 90\%$.
-   - Tự động cảnh báo đỏ: `RELEASE BLOCKED` nếu còn bất kỳ lỗi P0 hoặc ca kiểm thử thất bại.
-4. **Phân Tách Môi Trường (Dual-Environment)**:
-   - Gắn nhãn rõ ràng: `Local`, `Staging`, `Prod`, `Safe Prod` để ngăn chặn rủi ro chạy nhầm ca test ghi phá hủy dữ liệu (mutation) lên Production.
+`<skill-dir>`: Claude Code `~/.claude/skills/release-quality-gate` · Antigravity `~/.gemini/config/skills/release-quality-gate`.
 
----
+Định dạng evidence được nhận: mảng `[...]`, hoặc `{"results": [...]}`, hoặc `{"cases": [...]}`. Mỗi phần tử khớp theo `id` của test case, dùng các trường: `status` (hoặc `passed: true/false`), `actual` (hoặc `response`), `evidence` (hoặc `detail`, hoặc `durationMs`). Output của Jest/PyTest/Playwright cần chuyển sang dạng này trước.
 
-## 2. Cấu Trúc Schema Dữ Liệu Chuẩn (Universal ISTQB Schema)
+## Schema `testcases.json`
 
-Bất kỳ dự án nào cũng chỉ cần cung cấp 1 file JSON theo cấu trúc sau:
+Ví dụ đầy đủ: `templates/sample_cases.json` (đọc khi soạn bộ case mới).
 
 ```json
 {
-  "projectName": "Tên Dự Án (VD: CRM E-Commerce Platform)",
+  "projectName": "Tên dự án",
   "version": "1.2.0",
   "releaseDate": "2026-10-01",
-  "targetDomain": "https://app.example.com",
+  "targetDomain": "https://staging.example.com",
   "checklistSections": [
-    {
-      "id": "infra",
-      "title": "Hạ tầng & DevOps",
-      "items": [
-        { "id": "CHK-01", "name": "DB Migrations đã chạy thành công", "env": "prod", "checked": false }
-      ]
-    }
+    { "id": "infra", "title": "Hạ tầng & DevOps",
+      "items": [ { "id": "CHK-01", "name": "DB migration đã chạy", "env": "prod", "checked": false } ] }
   ],
   "testCases": [
-    {
-      "id": "AUTH-01",
-      "module": "Authentication",
-      "priority": "P0",
-      "title": "Đăng nhập với Google OAuth 2.0",
-      "preconditions": "Tài khoản Google hợp lệ",
-      "steps": "1. Bấm Đăng nhập Google\n2. Chọn email @company.com",
-      "expected": "Cấp JWT Cookie và chuyển hướng vào trang chính trong < 2s",
-      "actual": "",
-      "status": "PASSED",
-      "environment": "Prod",
-      "isBlocker": true,
-      "evidence": "HTTP 200 OK - Redirect /dashboard (duration 240ms)"
-    }
+    { "id": "AUTH-01", "module": "Authentication", "priority": "P0", "isBlocker": true,
+      "title": "Đăng nhập Google OAuth", "preconditions": "Tài khoản Google hợp lệ",
+      "steps": "1. Bấm Đăng nhập Google\n2. Chọn email", "expected": "Vào trang chính < 2s",
+      "actual": "", "status": "UNTESTED", "environment": "Staging", "evidence": "" }
   ]
 }
 ```
 
----
+`status`: `PASSED` · `FAILED` · `BLOCKED` · `UNTESTED`. `priority`: `P0`–`P3`.
 
-## 3. Cách Sử Dụng Cho Một Dự Án Bất Kỳ
+## Dùng portal
 
-### Cách 1: Khởi Tạo Portal Từ File JSON Mẫu
-Khi chuẩn bị đợt Release mới trong bất kỳ thư mục dự án nào:
-```bash
-node skills/release-quality-gate/scripts/generate_portal.js \
-  --input=./testcases.json \
-  --output=./Release_Quality_Gate.html
-```
-
-### Cách 2: Tự Động Ghép Bằng Chứng Từ Test Tự Động (Evidence Merge)
-Nếu dự án có chạy test tự động (Jest, PyTest, Playwright, Maestro CLI, ADB Matrix) xuất ra file JSON / screenshot kết quả:
-```bash
-node skills/release-quality-gate/scripts/generate_portal.js \
-  --input=./testcases.json \
-  --evidence=./reports/test-results.json \
-  --output=./Release_Quality_Gate.html
-```
-*Script sẽ tự động so khớp `id` của testcase, cập nhật trạng thái `PASSED/FAILED`, đính kèm ảnh chụp màn hình đa độ phân giải (`e2e/screenshots/*.png`) và điền chi tiết `evidence` vào portal.*
-
-### Cách 3: Yêu Cầu AI Trực Tiếp Thực Hiện
-Chỉ cần chat với Agent:
-> *"Hãy áp dụng skill release-quality-gate để tạo bảng kiểm thử nghiệm thu release cho dự án này."*
-
-Agent sẽ:
-1. Đọc kiến trúc và các API/tính năng trong repository hiện tại.
-2. Tự động soạn thảo danh sách testcase toàn diện phân loại theo P0/P1/P2.
-3. Chạy lệnh sinh file HTML Portal ngay tại thư mục gốc của dự án.
-
----
-
-## 4. Quy Trình 5 Bước Nghiệm Thu Phát Hành (Release Gate Workflow)
-
-| Bước | Người Thực Hiện | Thao Tác | Tiêu Chí Đầu Ra |
-|---|---|---|---|
-| **1. Khởi tạo Ma trận** | QA Lead / AI Agent | Soạn thảo danh sách testcase cho phiên bản sắp phát hành. | File `testcases.json` đầy đủ các module và mức độ ưu tiên. |
-| **2. Sinh Portal** | CI/CD hoặc Developer | Chạy script `generate_portal.js`. | File `Release_Quality_Gate.html` sẵn sàng. |
-| **3. Thực thi Kiểm thử** | QA Team & Automation | Chạy tự động và kiểm thử thủ công trên Staging/Prod. Đánh dấu trạng thái trên UI portal. | Cập nhật kết quả, bằng chứng hình ảnh/log. |
-| **4. Đánh giá Go/No-Go** | QA Lead & Tech Lead | Kiểm tra huy hiệu Go/No-Go trên đỉnh portal. | Không còn P0 Blocker tồn đọng, tỷ lệ pass $\ge 90\%$. |
-| **5. Lưu vết & Ký duyệt** | Release Manager | Bấm nút **Xuất CSV** và **In / Xuất PDF**. | Đính kèm file PDF/CSV vào Jira/GitLab Release Tag. |
-
----
-
-## 5. Hướng Dẫn Vận Hành Portal HTML Cho Đội Ngũ QA
-
-- **Bộ lọc đa chiều**: Lọc tức thì theo Ô tìm kiếm, Mức độ ưu tiên (`P0 Blocker`, `P1`, `P2`, `P3`), Môi trường (`Prod`, `Staging`, `Local`), Phân hệ nghiệp vụ.
-- **Cập nhật nhanh**: Thay đổi trạng thái (`PASS`, `FAIL`, `BLOCK`, `UNTESTED`) trực tiếp trên dropdown, gõ ghi chú thực tế vào ô input $\rightarrow$ Tự động lưu tức thì vào trình duyệt.
-- **Xuất dữ liệu**:
-  - `Xuất CSV (Excel)`: Tạo file `.csv` định dạng chuẩn UTF-8 BOM, mở trực tiếp bằng Microsoft Excel không bao giờ bị lỗi font tiếng Việt.
-  - `Backup JSON`: Tải file `.json` chứa toàn bộ tiến độ test để gửi cho đồng nghiệp hoặc lưu trữ.
-  - `Restore JSON`: Nạp lại trạng thái đã test trước đó trên máy tính khác.
-  - `In / Xuất PDF`: Chế độ tối ưu trang in tự động ẩn thanh công cụ, chia trang thông minh cho biên bản nghiệm thu.
+Lọc theo ô tìm kiếm, priority, môi trường, module; đổi trạng thái và ghi chú trực tiếp (tự lưu vào trình duyệt). `Backup JSON`/`Restore JSON` để chuyển phiên test sang máy khác. `Xuất CSV` là UTF-8 BOM nên Excel mở không lỗi tiếng Việt. `In / Xuất PDF` ẩn thanh công cụ để làm biên bản.

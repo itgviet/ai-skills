@@ -10,3 +10,6 @@ synced/
 
 # Claude app trash for removed synced skills
 .trash/
+
+# agentskills.io eval run outputs (iteration-N/, grading.json, benchmark.json)
+*-workspace/

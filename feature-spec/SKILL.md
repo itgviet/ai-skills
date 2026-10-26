@@ -1,293 +1,66 @@
 ---
 name: feature-spec
-version: 2.0.0
-author: itgviet
-last_updated: 2026-09-23
-description: "Spec-Driven Development protocol: generate and maintain requirements, technical design, task plans, and two-way sync."
+description: "Dùng khi bắt đầu một tính năng mới, thay đổi kiến trúc hoặc mở rộng scope cần đặc tả: viết/cập nhật requirements.md, design.md, tasks.md trong docs/specs/<app_id>/, chờ người dùng duyệt, thực thi theo từng task có cổng kiểm thử và đồng bộ ngược spec khi code thay đổi. Dùng cả khi người dùng chỉ nói \"làm tính năng X\", \"lên kế hoạch cho...\" mà phạm vi vượt vài file. Sửa bug hoặc chỉnh nhỏ → quick-fix."
+metadata:
+  version: "2.0.0"
+  author: "itgviet"
+  last_updated: "2026-09-23"
 ---
 
 # SKILL: Universal Feature & Architecture Specification & Execution Protocol (`feature-spec`)
 
-## 🎯 Mục đích & Phạm vi
+Quy trình cho thay đổi lớn: tính năng/màn hình/module mới, thay đổi kiến trúc, DB migration, refactor phức tạp hoặc tác động > 5 file. Gồm hai phần: **tạo đặc tả** (requirements → design → tasks) và **thực thi đặc tả** (chạy task → cổng kiểm thử → tự audit → bàn giao).
 
-Skill **`feature-spec`** (hợp nhất từ `spec-create` & `spec-run`) là quy trình chuẩn hóa toàn diện từ A-Z dành cho các thay đổi lớn: **tính năng mới, tạo màn hình mới, thay đổi kiến trúc, DB migration, refactor phức tạp, hoặc tác vụ tác động > 5 files**. 
+## Gotchas
 
-Quy trình bao quát 2 trụ cột chính:
-1. **Spec Creation (Tạo đặc tả):** Requirements $\rightarrow$ Technical Design $\rightarrow$ Execution Task Plan.
-2. **Spec Execution (Thực thi đặc tả):** Task Run $\rightarrow$ Multi-Stack Verification Gates $\rightarrow$ Checkpoint Audits $\rightarrow$ Delivery & User Manual Confirmation.
+- **Vị trí spec:** `docs/specs/<app_id>/requirements.md`, `design.md`, `tasks.md` trong repo dự án (RULE-SDD-001). Không dùng `.kiro/specs/` hay `spec/` như bản cũ của skill này. Nếu CLAUDE.md/AGENTS.md của dự án quy định chỗ khác thì theo dự án.
+- **Spec là tài liệu sống:** mỗi khi code thay đổi so với spec (mở rộng scope, đổi schema, thêm API), cập nhật ngược `requirements.md` → `design.md` → `tasks.md`. Bàn giao mà spec chưa khớp code bị tính FAIL quality gate (RULE-SDD-001). Thay đổi cấu trúc lớn thì cập nhật cả `SYSTEM_ARCHITECTURE_AND_USER_GUIDE.md`/`README.md` của dự án.
+- **Task ≤ 4 giờ**, mỗi task có AC kiểm thử được, liệt kê file cần sửa và phụ thuộc (RULE-PM-001, learned_patterns RULE-003).
+- **UI ID:** mọi màn hình, nút, input chính có `id`/`data-testid` theo tiền tố `screen-*`, `tab-*`, `modal-*`, `sheet-*`, `btn-*`, `input-*`... (RULE-UI-002). Dự án nhiều màn hình duy trì `docs/specs/<module>/ui_screen_registry.md`.
+- **ADR:** thay đổi tech stack, schema hoặc thư viện lõi thì ghi ADR (RULE-ENG-001).
+- **Không thêm dependency mới** khi người dùng chưa đồng ý; ưu tiên thư viện đã có trong `package.json`/`pyproject.toml`/`build.gradle`..., vì mỗi dependency mới là chi phí bảo trì và rủi ro bảo mật lâu dài.
+- **Branch:** mỗi tính năng một nhánh `feat/<ticket-id>-<topic>` tách từ base mới nhất (RULE-GIT-001).
 
----
+## Chọn quy trình
 
-## 🚦 Ma trận Phân định Quy trình (Skill Decision Matrix)
-
-AI **PHẢI** đối chiếu trước khi bắt đầu công việc:
-
-| Tiêu chí | ⚡ Dùng `quick-fix` | 🏗️ DÙNG `feature-spec` |
+| Tiêu chí | `quick-fix` | `feature-spec` |
 | :--- | :--- | :--- |
-| **Phạm vi file** | 1 – 5 files | **> 5 files** hoặc ảnh hưởng nhiều module / toàn hệ thống |
-| **Bản chất tác vụ** | Fix bug, sửa UI/UX nhỏ, refactor đơn lẻ | **Tính năng mới, Màn hình mới, Module mới, Refactor lớn** |
-| **DB & Schema** | Không thay đổi CSDL | **Có thay đổi Schema / DB Migration** |
-| **API Contract** | Giữ nguyên API Contract | **Tạo API mới hoặc đứt gãy/thay đổi API Contract cũ** |
-| **Quy trình** | Sửa trực tiếp + Verify + Confirm | **Lập Specs 3 giai đoạn $\rightarrow$ Confirm Specs $\rightarrow$ Run Tasks** |
+| Phạm vi | 1–5 file | > 5 file / nhiều module |
+| Bản chất | Fix bug, UI nhỏ, refactor đơn lẻ | Tính năng, màn hình, module mới; refactor lớn |
+| DB & schema | Không đổi | Có migration |
+| API | Giữ nguyên | API mới hoặc breaking |
 
----
+Thao tác chạm dữ liệu thật, deploy production, auth hoặc thanh toán → chạy `production-safety-guardrail` trước.
 
-## 👥 5 Góc nhìn Vai trò trong Đặc tả & Thực thi (Multi-Role Perspective)
+## Phần A — Tạo đặc tả
 
-Mọi tính năng lớn khi thiết kế và thực thi PHẢI đảm bảo đầy đủ 5 góc nhìn:
+### Giai đoạn 1: Requirements
+Yêu cầu mập mờ hoặc có nhiều hướng: dừng và hỏi người dùng 1–3 câu trắc nghiệm, mỗi câu có phương án `(Recommended)`, vì spec viết trên giả định sai sẽ kéo sai cả design và tasks.
+Tạo `docs/specs/<app_id>/requirements.md` theo mẫu `assets/requirements.md` (đọc mẫu khi bắt đầu giai đoạn này). Phải có: in/out of scope, FR/NFR, trạng thái UI, AC dạng Given-When-Then.
 
-1. 👔 **Quản lý (PM/Scrum Master):** 
-   - Phân định rõ In-Scope vs Out-of-Scope.
-   - Quản lý Milestone / Checkpoints rõ ràng.
-   - Định nghĩa tiêu chuẩn hoàn thành (Definition of Done - DoD).
-2. 💻 **Lập trình viên / Kiến trúc sư (Tech Lead / Architect):**
-   - Đọc code hiện có trước khi thiết kế (không bịa đặt, tuân thủ pattern/coding style hiện tại).
-   - Thiết kế CSDL (Schema & Migration), API Contract (Response transformation matching).
-   - Kiểm soát over-engineering: Đơn giản hóa solution, ưu tiên reuse code/component/libraries hiện có trong `package.json` / `pyproject.toml` / `pom.xml` / `build.gradle` / v.v.
-3. 🧪 **Tester / QC:**
-   - Ma trận Acceptance Criteria (Given-When-Then).
-   - Kiểm thử đa tầng (Multi-level verification): Unit test, Lint, Type-check, Integration & Edge cases (null/undefined, network offline, 4xx/5xx).
-4. 🎨 **Designer / UX:**
-   - Đặc tả giao diện & UI States: Default, Loading, Empty, Error, Disabled, Offline.
-   - Cấm hardcode user-facing copy, dùng Localization System / i18n contract đồng bộ cho tất cả ngôn ngữ app hỗ trợ.
-5. 🤝 **Khách hàng / Business (Stakeholder):**
-   - Đảm bảo giải pháp trực tiếp giải quyết đúng điểm đau (pain point) và mang lại giá trị thực tế.
-   - Báo cáo bàn giao minh bạch, dễ hiểu kèm Hướng dẫn Kiểm thử Thủ công (Manual Confirmation Guide).
+### Giai đoạn 2: Technical Design
+Đọc code hiện có trước khi thiết kế và ghi các file đã đọc vào mục Codebase Audit — thiết kế không dựa trên code thật thường đụng pattern sẵn có. Kiểm tra dependency manifest để tái sử dụng.
+Tạo `design.md` theo mẫu `assets/design.md`: kiến trúc & data flow, schema + migration/rollback, state machine, API contract (khớp interface client sau khi API client tự transform), localization key, error/edge case.
 
----
+### Giai đoạn 3: Execution Task Plan
+Tạo `tasks.md` theo mẫu `assets/tasks.md`: bảng task có checkpoint và scope lock theo file, ma trận truy vết AC → task → test.
 
-## 🔄 Quy trình 6 Giai đoạn Hợp nhất (`feature-spec`)
+### 🛑 Gate 1: Người dùng duyệt
+Trình bày tóm tắt ba file và chờ người dùng duyệt rồi mới sang Phần B, vì đây là điểm rẻ nhất để đổi hướng.
 
-```mermaid
-graph TD
-    subgraph "PHẦN A: SPEC CREATION (TẠO ĐẶC TẢ)"
-        G1["Giai đoạn 1: Requirements Spec"] --> G2["Giai đoạn 2: Technical Design Spec"]
-        G2 --> G3["Giai đoạn 3: Execution Task Plan"]
-        G3 --> GateConfirm["🛑 GATE 1: User Approval & Confirmation"]
-    end
-    
-    subgraph "PHẦN B: SPEC EXECUTION (THỰC THI & KIỂM THỬ)"
-        GateConfirm --> G4["Giai đoạn 4: Iterative Task Execution & Auto Gates"]
-        G4 --> G5["Giai đoạn 5: Self-Audit & Traceability Gate"]
-        G5 --> G6["Giai đoạn 6: Handoff & Manual User Confirmation"]
-    end
-```
+## Phần B — Thực thi đặc tả
 
----
+### Giai đoạn 4: Chạy từng task
+Vòng lặp: chọn task → đánh dấu `in_progress` → sửa code trong scope lock → chạy cổng kiểm thử → fail thì sửa và chạy lại → pass thì đánh dấu `completed` và commit → tới checkpoint thì dừng báo cáo.
 
-### 📌 GIAI ĐOẠN 1: REQUIREMENTS (Đặc tả Yêu cầu)
+Cổng kiểm thử sau mỗi task: build/type-check, lint, unit/regression test của stack. Ưu tiên script có sẵn trong dự án (`package.json`, `Makefile`, CI); bảng lệnh theo stack nằm ở skill `quick-fix` (Phase 5). Không đánh dấu xong khi chưa chạy (learned_patterns RULE-001).
 
-> [!CAUTION]
-> **CHECKPOINT XÁC NHẬN YÊU CẦU BAN ĐẦU:**
-> Nếu yêu cầu ban đầu của người dùng mập mờ, thiếu thông tin hoặc có nhiều hướng tiếp cận, AI **PHẢI DỪNG LẠI HỎI NGƯỜI DÙNG** (đặt 1-3 câu hỏi trắc nghiệm / lựa chọn kèm gợi ý `Recommended`).
+### Giai đoạn 5: Tự audit trước khi báo cáo
+- [ ] Đáp ứng đủ FR, NFR, AC trong `requirements.md`.
+- [ ] Mọi text hiển thị qua localization key; đủ trạng thái Loading/Empty/Error.
+- [ ] Không phá API cũ, dữ liệu DB hiện có hay module khác.
+- [ ] Không còn file debug, secret hardcode; code khớp `design.md`.
+- [ ] Spec đã đồng bộ ngược với code (xem Gotchas).
 
-Tạo tài liệu `requirements.md` (lưu trong `.kiro/specs/[feature-name]/requirements.md` hoặc `spec/requirements.md`):
-
-```markdown
-# Requirements Spec: [Tên tính năng]
-
-## 👔 1. Bối cảnh & Mục tiêu (Context & Goals - PM Perspective)
-- **Bối cảnh:** [Vấn đề kinh doanh / kỹ thuật cần giải quyết]
-- **Mục tiêu (Goals):**
-  - [ ] Goal 1
-  - [ ] Goal 2
-- **Không nằm trong phạm vi (Out of Scope):**
-  - Item 1 — [Lý do]
-
-## 🛠️ 2. Phạm vi Repository & Module bị ảnh hưởng
-- **Repo/Package A:** [Mô tả thay đổi]
-- **Repo/Package B:** [Mô tả thay đổi]
-- **Cross-repo dependencies:** [Shared types, API contracts, etc.]
-
-## 📖 3. Thuật ngữ (Terminology)
-- **Term A:** [Định nghĩa rõ ràng]
-
-## 💻 4. Yêu cầu Chức năng (Functional Requirements - Dev Perspective)
-- **FR-01:** System SHALL [Hành vi cụ thể]
-- **FR-02:** System SHALL [Hành vi cụ thể]
-
-## 🎨 5. Yêu cầu UI/UX & Localization (Designer Perspective)
-- **UX-01:** Màn hình & luồng giao diện bị ảnh hưởng.
-- **UX-02:** Trạng thái bắt buộc: Default, Loading, Empty, Error, Disabled, Offline.
-- **L10N-01:** TẤT CẢ text hiển thị người dùng PHẢI đi qua localization system. Không hardcode text.
-
-## 🧪 6. Điều kiện Chấp nhận (Acceptance Criteria - QA Perspective)
-- **AC-01:** Given [Bối cảnh], When [Hành động], Then [Kết quả kỳ vọng]
-- **AC-UI-01:** Given [Trạng thái màn hình], When [Render], Then [Text & UI hiển thị chính xác theo i18n key]
-```
-
----
-
-### 📌 GIAI ĐOẠN 2: TECHNICAL DESIGN (Thiết kế Kỹ thuật & Kiến trúc)
-
-> [!IMPORTANT]
-> **ĐỌC CODE TRƯỚC KHI THIẾT KẾ:**
-> AI PHẢI đọc code hiện hữu (dùng `view_file` / `grep_search`), ghi lại các file đã review trong `design.md`. Phải kiểm tra dependencies (`package.json`, `pyproject.toml`, `pom.xml`, v.v.), tái sử dụng libraries và components có sẵn, KHÔNG tự thêm dependency mới khi chưa có confirm từ user.
-
-Tạo tài liệu `design.md`:
-
-```markdown
-# Technical Design Spec: [Tên tính năng]
-
-## 🔍 1. Codebase Audit (Source Code đã review)
-- `path/to/existing_file.ts`: [Ghi nhận coding style, pattern, import convention]
-- `dependencies_manifest`: [Danh sách libraries đã có sẵn để tái sử dụng]
-
-## 🏛️ 2. Kiến trúc & Data Flow
-```mermaid
-graph TB
-    Client --> API
-    API --> Service
-    Service --> DB
-```
-
-## 🗄️ 3. Thiết kế CSDL & Schema Migration
-- Tables / Collections mới hoặc chỉnh sửa.
-- Schema Migration Plan (hỗ trợ rollback).
-
-## 🔌 4. API Contract & Response Transformation
-- Endpoint: `METHOD /api/v1/resource`
-- Request Payload schema
-- Response Payload schema (Lưu ý match TypeScript Interface với data SAU khi qua API Client auto-transformation).
-
-## 🌐 5. Localization Key Contract (UI Features)
-| i18n Key | EN | VI | Usage |
-| :--- | :--- | :--- | :--- |
-| `feature.title` | Feature Title | Tiêu đề Tính năng | Title component |
-
-## 🛡️ 6. Error Handling & Edge Cases Matrix
-- Offline behavior, Network Timeout retry logic.
-- Boundary values, Empty lists, 4xx/5xx API Errors.
-```
-
----
-
-### 📌 GIAI ĐOẠN 3: EXECUTION TASK PLAN (Lập Kế hoạch Task Thực thi)
-
-Chia nhỏ công việc thành danh sách các task nhỏ, độc lập, có Checkpoint rõ ràng và **Execution-Ready cho AI Agent**:
-
-Tạo tài liệu `tasks.md`:
-
-```markdown
-# Execution Task Plan: [Tên tính năng]
-
-## 📋 Tracking Table
-| Task ID | Tên Task | Trạng thái | Checkpoint | Scope Lock (Files) |
-| :--- | :--- | :--- | :--- | :--- |
-| T-01 | Setup Schema & Entities | ⏳ pending | Checkpoint 1 | `src/models/*` |
-| T-02 | Implement API Service | ⏳ pending | Checkpoint 1 | `src/services/*` |
-| T-03 | Build UI Screen & i18n | ⏳ pending | Checkpoint 2 | `src/ui/*`, `locales/*` |
-| T-04 | Full Integration Test | ⏳ pending | Checkpoint 3 | `tests/*` |
-
-## 📐 Execution Rules & Commit Strategy
-- Thực hiện nghiêm ngặt theo thứ tự Checkpoint.
-- 1 Task = 1 Commit logic (`feat(...)` / `fix(...)`).
-- Chỉ sửa file thuộc `Scope Lock`. Nếu phát sinh file mới, phải update spec trước.
-```
-
----
-
-### 🛑 GATE 1: USER APPROVAL & CONFIRMATION
-
-> [!CAUTION]
-> **STOP & WAIT FOR USER APPROVAL:**
-> Sau khi tạo xong `requirements.md`, `design.md`, `tasks.md`, AI **PHẢI DỪNG LẠI**, trình bày tóm tắt cho người dùng và CHỜ USER CONFIRM APPROVE mới được chuyển sang Phần B (Spec Execution).
-
----
-
-### 📌 GIAI ĐOẠN 4: ITERATIVE TASK EXECUTION & AUTO GATES (Thực thi Task & Kiểm thử Tự động)
-
-Khi người dùng duyệt Specs, AI tiến hành thực thi từng task theo quy trình khép kín:
-
-```mermaid
-graph LR
-    PickTask["1. Pick Task (T-XX) & Mark in_progress"] --> CodeEdit["2. Edit Code within Scope Lock"]
-    CodeEdit --> AutoGate["3. Run Multi-Stack Auto Gate"]
-    AutoGate -- Fail --> FixCode["Fix Bug & Re-test"]
-    FixCode --> AutoGate
-    AutoGate -- Pass --> MarkDone["4. Mark completed & Commit"]
-    MarkDone --> CheckpointCheck{"Reached Checkpoint?"}
-    CheckpointCheck -- Yes --> StopCheckpoint["🛑 STOP & Report Checkpoint"]
-    CheckpointCheck -- No --> PickTask
-```
-
-#### 🛡️ Ma trận Kiểm thử Tự động Thích ứng theo Công nghệ (Stack-Agnostic Verification Matrix)
-
-AI tự động phát hiện Stack dự án và chạy bộ lệnh kiểm thử phù hợp sau MỖI TASK:
-
-| Stack / Language | 1. Type Check / Compile | 2. Linter Check | 3. Unit & Regression Test |
-| :--- | :--- | :--- | :--- |
-| **Node.js / TS** | `npm run type-check` hoặc `npx tsc --noEmit` | `npm run lint` hoặc `npx eslint .` | `npm test` hoặc `npx vitest` / `npx jest` |
-| **Python** | `mypy .` hoặc `pyright` | `ruff check .` hoặc `flake8` | `pytest` hoặc `python -m unittest` |
-| **Java / Kotlin** | `./gradlew compileJava` / `mvn compile` | `./gradlew checkstyleMain` / `mvn checkstyle:check` | `./gradlew test` / `mvn test` |
-| **Go** | `go build ./...` | `golangci-lint run` | `go test ./...` |
-| **C# / .NET** | `dotnet build` | `dotnet format --verify-no-changes` | `dotnet test` |
-| **Rust** | `cargo check` | `cargo clippy` | `cargo test` |
-| **C / C++** | `cmake --build build` / `make` | `clang-tidy` | `ctest` / custom test executable |
-| **Swift / iOS** | `swift build` / `xcodebuild build` | `swiftlint` | `swift test` / `xcodebuild test` |
-| **PHP / Laravel** | `vendor/bin/phpstan analyze` | `vendor/bin/phpcs` | `vendor/bin/phpunit` hoặc `php artisan test` |
-
----
-
-### 📌 GIAI ĐOẠN 5: SELF-AUDIT & TRACEABILITY GATE (Tự Đánh giá & Đối chiếu)
-
-Sau khi tất cả các task đã hoàn thành (`completed`), AI **PHẢI TỰ KIỂM TRA LẠI** trước khi báo cáo cho người dùng:
-
-#### 📋 Self-Audit Checklist (AI Gate Keeper)
-
-- [ ] **Requirements Alignment:** Đã đáp ứng 100% Functional Requirements (FR), Non-Functional Requirements (NFR) và Acceptance Criteria (AC) trong `requirements.md` chưa?
-- [ ] **UI/UX & Localization Check:** Tất cả text user-facing đã qua localization key chưa? Đã có đủ trạng thái Loading / Empty / Error chưa?
-- [ ] **Regression & Risk Analysis:** Thay đổi này có nguy cơ làm đứt gãy API cũ, đứt gãy DB data hiện tại, hay ảnh hưởng đến module khác không?
-- [ ] **Clean Code & Over-Engineering Audit:** Không có file debug rác, không có hardcoded secrets, code tuân thủ kiến trúc thiết kế trong `design.md`.
-
----
-
-### 📌 GIAI ĐOẠN 6: HANDOFF & MANUAL USER CONFIRMATION (Bàn giao & Hướng dẫn Confirm)
-
-Khi Self-Audit hoàn tất, AI xuất báo cáo hoàn thành cho người dùng theo cấu trúc 5 góc nhìn vai trò:
-
-```markdown
-🎉 COMPLETED FEATURE DELIVERY REPORT: [Tên tính năng]
-
-## 👔 1. Tóm tắt Quản lý (PM Summary)
-- Tất cả N tasks (T-01 đến T-N) thuộc [Feature Name] đã hoàn thành 100%.
-- File đặc tả đã cập nhật: `requirements.md`, `design.md`, `tasks.md`.
-
-## 💻 2. Thay đổi Kỹ thuật (Tech & Architecture)
-- **Commits:** [Danh sách commits đã tạo]
-- **Files modified/added:** [Danh sách files]
-- **API & DB:** [Thay đổi Schema/Endpoints nếu có]
-
-## 🧪 3. Kết quả Kiểm thử Tự động (QA Report)
-- ✅ Type Check / Compile: PASSED
-- ✅ Linter: PASSED
-- ✅ Unit & Integration Tests: PASSED (N tests passed)
-
-## 🎨 4. Trạng thái UI/UX & Localization (Designer Report)
-- ✅ Localization Keys đã thêm cho đủ ngôn ngữ: `vi`, `en`, ...
-- ✅ States UI đã test: Default, Loading, Empty, Error.
-
-## 🤝 5. Hướng dẫn Kiểm thử Thủ công cho Người dùng (Manual Confirmation Guide)
-
-**📌 Mục tiêu kiểm thử:** [Mô tả tính năng cần xác nhận]
-
-**📋 Các bước thực hiện (Step-by-Step):**
-1. [Bước 1: Ví dụ khởi động app hoặc chuyển sang màn hình X]
-2. [Bước 2: Thực hiện hành động Y]
-3. [Bước 3: Thao tác điều kiện biên/lỗi Z (nếu có)]
-
-**🎯 Kết quả kỳ vọng (Expected Results):**
-- [ ] Giao diện hiển thị đúng layout và ngôn ngữ người dùng.
-- [ ] Logic hoạt động chính xác không báo lỗi.
-- [ ] Các trạng thái Loading / Empty / Error hiển thị mượt mà.
-
-👉 **Vui lòng trải nghiệm và xác nhận (Approve) hoặc phản hồi nếu cần điều chỉnh thêm!**
-```
-
----
-
-## 🛠️ Hướng dẫn Kích hoạt Skill
-
-Bạn có thể kích hoạt skill bất kỳ lúc nào bằng các lệnh:
-- `/feature-spec` hoặc `Hãy tạo và chạy feature-spec cho tính năng [Tên tính năng]`
-- AI sẽ tự động phân tích quy trình 6 giai đoạn và đồng hành cùng bạn.
+### Giai đoạn 6: Bàn giao
+Báo cáo theo mẫu `assets/delivery.md` (5 góc nhìn + hướng dẫn kiểm thử thủ công) và chờ người dùng xác nhận.

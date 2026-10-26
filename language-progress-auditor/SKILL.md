@@ -1,57 +1,46 @@
 ---
 name: language-progress-auditor
-description: "Language progress auditor: evaluate foreign language fluency, track vocabulary retention, and generate learning roadmaps."
+description: "Dùng khi cần đánh giá hoặc điều chỉnh lộ trình học ngoại ngữ (EN/JA cho kỹ sư IT): xếp cấp độ độc lập 1–4, cập nhật STUDY_TRACKER.md, lên lịch ôn lỗi theo chu kỳ 1-3-7-14 ngày, tăng tốc hoặc giảm tải theo lịch dự án. Dùng khi người dùng hỏi \"mình tiến bộ tới đâu\", \"đánh giá tháng này\", \"đang release, giảm bài\". Buổi luyện tập thực tế → it-language-coach."
 ---
 
-# Language Progress Auditor: Dynamic Pacing & Milestone Evaluation
+# Language Progress Auditor — đánh giá và điều chỉnh lộ trình 6 tháng
 
-Skill này chịu trách nhiệm giám sát, đánh giá định lượng và thích ứng hóa lộ trình học tập 6 tháng cho kỹ sư phần mềm, đảm bảo học viên không bị bỏ lại phía sau hoặc học sai trọng tâm.
+Đo tiến độ học EN/JA của kỹ sư, lên lịch ôn lỗi, và tăng/giảm tải theo lịch dự án. Buổi luyện thực tế do `it-language-coach` làm.
 
----
+Dữ liệu: `D:\Study\LearnLanguage` — `STUDY_TRACKER.md` (dashboard: năng lực, lịch sử buổi, sổ lỗi), `LEARNER_PROFILE.md`, `ROADMAP.md`, `daily_logs/sprint_XX/session_NN.md`.
 
-## 📌 CHỨC NĂNG CỐT LÕI (CORE CAPABILITIES)
+## Gotchas
 
-1. **Baseline Calibration (Định vị đầu vào):**
-   - Đo lường chính xác các chỉ số ban đầu theo thang đo **Cấp độ Độc lập (Autonomy Levels 1–4)**.
-   - Ghi nhận chỉ số gốc vào `STUDY_TRACKER.md`.
+- Repo học có bản sao riêng của skill ở `.agents/skills/language-progress-auditor/`; nếu đổi quy trình, báo người dùng để đồng bộ hai bản.
+- Ngày bắt đầu lộ trình: **2026-10-05** (trong `STUDY_TRACKER.md`); tính mốc 3 tháng/6 tháng từ ngày này.
+- Lịch học thực tế chủ yếu là audio trên xe thứ 2–6 (xem `LEARNER_PROFILE.md`); buổi chat có thể cách nhau nhiều ngày (05/10 → 18/10). Đánh giá theo số buổi và lỗi lặp lại, không phạt vì khoảng trống ngày.
+- `STUDY_TRACKER.md` chỉ là dashboard; chi tiết từng buổi để trong `daily_logs/sprint_XX/` (sprint 2 tuần) để file tracker không phình.
 
-2. **Spaced Repetition Engine (Thuật toán lặp lại ngắt quãng):**
-   - Tự động quét `STUDY_TRACKER.md` tìm các điểm yếu (Mistakes log) và lên lịch kiểm tra lại theo chu kỳ Fibonacci:
-     - Lần 1: Sau 24 giờ.
-     - Lần 2: Sau 3 ngày.
-     - Lần 3: Sau 7 ngày.
-     - Lần 4: Sau 14 ngày (Nếu vượt qua $\rightarrow$ Đánh dấu "Mastered").
+## Thang độc lập
 
-3. **Dynamic Pacing & Difficulty Calibration (Tự động điều chỉnh tiến độ):**
-   - **Tăng tốc (Fast-track):** Khi đạt Level 3–4 liên tiếp trong 3 buổi $\rightarrow$ Đẩy nhanh vào các tình huống phức tạp (tranh biện kiến trúc hệ thống, đàm phán deadline).
-   - **Hạ tải (De-escalation):** Khi học viên báo cáo đợt cao điểm dự án (Crunch time, Release phase) $\rightarrow$ Tự động chuyển sang chế độ "Survival 1-Min Mode" (chỉ 1 mẫu câu then chốt).
+| Level | Tên | Nhận diện |
+|:---:|---|---|
+| 1 | Cần mớm lời | cần gợi ý từ khóa hoặc bản dịch mới trả lời được |
+| 2 | Tự nói nhưng ngắc ngứ | trả lời được, sai thì/trợ từ, còn dịch trong đầu |
+| 3 | Đúng chuẩn công việc | trôi chảy, đúng ngữ pháp và ngữ cảnh IT, từ vựng còn đơn giản |
+| 4 | Tự nhiên | phản xạ tự nhiên, collocation/idiom công sở IT chuẩn, tự tin |
 
-4. **Sprint-based Logging (Chống phình dữ liệu):**
-   - Lưu trữ chi tiết từng buổi học theo từng Sprint 2 tuần: `daily_logs/sprint_01/`, `daily_logs/sprint_02/`.
-   - File `STUDY_TRACKER.md` chỉ giữ vai trò Dashboard tổng quan, chứa metrics và danh sách lỗi đang theo dõi.
+## Mục tiêu 6 tháng
 
----
+| Ngôn ngữ | Tiêu chí | Mốc 3 tháng | Mốc 6 tháng |
+|---|---|---|---|
+| EN | Daily standup & scrum | Level 3 (không nhìn note) | Level 4 (tranh luận PR, kiến trúc) |
+| EN | Âm đuôi `-ed`, `-s` | tự sửa 70% | 90%, nối âm & IPA chuẩn |
+| EN | Nghe họp kỹ thuật | 60% ý chính | 85% chi tiết |
+| JA | Katakana IT trong tài liệu | đọc lướt từ quen | đọc trôi chảy spec |
+| JA | Từ vựng | 100 Katakana + 30 Kanji IT | 250+ Katakana + 80 Kanji IT |
+| JA | Hō-Ren-Sō | Level 2–3 (mẫu báo cáo cơ bản) | Level 3 (chủ động báo cáo, Q&A) |
 
-## 🎯 THANG ĐO CẤP ĐỘ ĐỘC LẬP (AUTONOMY LEVELS)
+## Quy trình
 
-Thay vì đo số giây gõ bàn phím (không thực tế qua chat), hệ thống đánh giá theo mức độ độc lập phản xạ:
-
-| Cấp độ | Tên cấp độ | Đặc điểm nhận diện |
-| :---: | :--- | :--- |
-| **Level 1** | **Dependent (Cần mớm lời)** | Cần gợi ý từ khóa hoặc cần dịch từ tiếng Việt sang thì mới hiểu và trả lời được. |
-| **Level 2** | **Hesitant (Tự phản xạ có ngắc ngứ)** | Tự trả lời được nhưng câu cú còn lủng củng, dùng sai thì/trợ từ, còn dịch máy trong đầu. |
-| **Level 3** | **Accurate & Functional (Đúng chuẩn công việc)** | Trả lời trôi chảy, đúng ngữ pháp và bối cảnh IT, diễn đạt tròn ý dù từ vựng còn đơn giản. |
-| **Level 4** | **Native & Fluent (Tự nhiên như bản xứ)** | Phản xạ tự nhiên, dùng idiom/collocation công sở IT chuẩn mực, ngữ điệu tự tin. |
-
----
-
-## 📊 BỘ CHỈ SỐ MỤC TIÊU 6 THÁNG
-
-| Ngôn ngữ | Tiêu chí đánh giá | Mốc 3 tháng | Mốc 6 tháng |
-| :--- | :--- | :--- | :--- |
-| **English** | Daily Standup & Scrum Meeting | Đạt **Level 3** (Nói lưu loát không nhìn note) | Đạt **Level 4** (Tranh biện PR & kiến trúc) |
-| **English** | Nhận diện & Sửa lỗi phát âm âm đuôi | Tự giác sửa được $70\%$ âm `-ed`, `-s` | Làm chủ $90\%$ nối âm & IPA chuẩn |
-| **English** | Nghe hiểu cuộc họp kỹ thuật | Nắm được $60\%$ ý chính | Nắm được $85\%$ chi tiết kỹ thuật |
-| **Japanese**| Nhận diện Katakana IT trong tài liệu | Đọc lướt tức thì các từ quen thuộc | Làm chủ toàn bộ từ Katakana trong Spec |
-| **Japanese**| Vốn từ Katakana & Kanji IT cốt lõi | 100 từ Katakana + 30 Kanji IT | 250+ từ Katakana + 80 Kanji IT |
-| **Japanese**| Giao tiếp công việc Hō-Ren-Sō | Đạt **Level 2–3** (Mẫu câu báo cáo cơ bản) | Đạt **Level 3** (Chủ động báo cáo & trao đổi Q&A) |
+1. **Định vị**: đọc `STUDY_TRACKER.md` và 2–3 nhật ký buổi gần nhất; chấm level hiện tại cho từng tiêu chí, có dẫn chứng (câu học viên đã nói).
+2. **Lịch ôn**: với mỗi lỗi trong sổ lỗi, ôn lại sau 1 → 3 → 7 → 14 ngày; qua mốc 14 ngày không sai → đánh dấu đã thuộc (`[x]`).
+3. **Điều chỉnh nhịp**:
+   - Đạt Level 3–4 ba buổi liên tiếp → tăng độ khó (tranh luận kiến trúc, đàm phán deadline).
+   - Học viên báo đang crunch/release → chế độ tối giản: mỗi buổi một mẫu câu then chốt.
+4. **Cập nhật** bảng năng lực và sổ lỗi trong `STUDY_TRACKER.md`; báo cáo ngắn: level hiện tại so với mốc, 3 lỗi lặp nhiều nhất, đề xuất cho 2 tuần tới.
