@@ -7,6 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from onetech_client import OneTechClient, DEFAULT_USER_ID, STORE_FILE
 from feedback_client import FeedbackHubClient
+import history_export
 
 def main():
     parser = argparse.ArgumentParser(description="OneTech Workspace & ITG Feedback Hub CLI Automation Tool")
@@ -100,7 +101,19 @@ def main():
     ts_p.add_argument("--date", type=str, default=None, help="Ngày ghi nhận (định dạng YYYY-MM-DD, mặc định: hôm nay)")
     ts_p.add_argument("--entry-id", type=int, default=None, help="ID của bản ghi timesheet khi cần xóa")
 
+    # 9. History export (chỉ đọc)
+    hist_p = subparsers.add_parser("history", help="Xuất toàn bộ lịch sử công việc (tasks, timesheet, tickets, commits, snapshots) ra data/work_history (chỉ đọc)")
+    hist_p.add_argument("--out", type=str, default=None, help="Thư mục xuất (Mặc định: data/work_history)")
+    hist_p.add_argument("--ts-start", type=str, default=history_export.TIMESHEET_START, help=f"Ngày bắt đầu timesheet (Mặc định: {history_export.TIMESHEET_START})")
+    hist_p.add_argument("--sources", type=str, default="onetech,tickets,git", help="Nguồn cần xuất, phân tách bằng dấu phẩy: onetech,tickets,git")
+
     args = parser.parse_args()
+
+    if args.command == "history":
+        out_dir = Path(args.out) if args.out else history_export.DEFAULT_OUT_DIR
+        sources = {s.strip() for s in args.sources.split(",") if s.strip()}
+        history_export.run(out_dir, sources, args.ts_start)
+        return
 
     if args.command == "feedback":
         fb_client = FeedbackHubClient()

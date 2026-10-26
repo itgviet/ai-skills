@@ -444,6 +444,53 @@ class OneTechClient:
             lambda page: page.evaluate(f"() => fetch('/api/users/me/timesheet?start={start_date}&end={end_date}', {{ credentials: 'include' }}).then(r => r.json())")
         )
 
+    def fetch_history_raw(self, ts_start: str, ts_end: str, user_id: str = DEFAULT_USER_ID) -> Dict[str, Any]:
+        """Đọc (chỉ GET) toàn bộ dữ liệu thô cho lịch sử công việc trong một phiên trình duyệt:
+        projects + tasks/sprints/members/workflow-statuses của từng dự án + timesheet."""
+        def action(page):
+            return page.evaluate("""async ([tsStart, tsEnd, me]) => {
+                // OneTech giới hạn tần suất (HTTP 429): gọi tuần tự, chờ theo Retry-After rồi thử lại
+                const failed = [];
+                const sleep = ms => new Promise(res => setTimeout(res, ms));
+                const get = async (u) => {
+                    let last = '';
+                    for (let attempt = 0; attempt < 8; attempt++) {
+                        try {
+                            const r = await fetch(u, { credentials: 'include' });
+                            if (r.ok && (r.headers.get('content-type') || '').includes('json')) return await r.json();
+                            last = 'HTTP ' + r.status;
+                            if (r.status === 429) {
+                                const ra = parseFloat(r.headers.get('retry-after') || r.headers.get('ratelimit-reset') || '');
+                                await sleep((isFinite(ra) && ra > 0 ? ra : Math.min(60, 5 * 2 ** attempt)) * 1000 + 500);
+                                continue;
+                            }
+                        } catch (e) { last = String(e); }
+                        await sleep(1000 * (attempt + 1));
+                    }
+                    failed.push({ url: u, error: last });
+                    return null;
+                };
+                const projects = (await get('/api/projects')) || [];
+                const perProject = {};
+                for (const p of projects) {
+                    const members = await get(`/api/projects/${p.id}/members`);
+                    const tasks = await get(`/api/projects/${p.id}/tasks`);
+                    const isMember = (members || []).some(m => m.userId === me);
+                    const involved = (tasks || []).some(t => t.assigneeId === me || t.reporterId === me);
+                    // sprints/workflow chỉ cần cho dự án sẽ được xuất
+                    const relevant = isMember || involved || members === null || tasks === null;
+                    perProject[p.id] = {
+                        tasks: tasks || [], members: members || [],
+                        sprints: relevant ? (await get(`/api/projects/${p.id}/sprints`)) || [] : [],
+                        workflowStatuses: relevant ? (await get(`/api/projects/${p.id}/workflow-statuses`)) || [] : [],
+                    };
+                }
+                // Timesheet: một lần gọi cho cả khoảng (API dùng start/end)
+                const timesheet = (await get(`/api/users/me/timesheet?start=${tsStart}&end=${tsEnd}`)) || [];
+                return { projects, perProject, timesheet, failed };
+            }""", [ts_start, ts_end, user_id])
+        return self._execute_browser(action)
+
     def log_time(
         self,
         task_id: int,
