@@ -24,7 +24,9 @@ Nguồn: phiên #8882 (InsightScanX, 17/11/2026): dựng sơ đồ theo chủ ch
 - **AWS CLI lỗi `charmap` khi in tag có ký tự Nhật/Việt** trên Windows. Dùng `python -X utf8 scripts/aws_inventory.py` thay vì CLI.
 - **Git Bash đôi khi làm hỏng heredoc Python** (`unexpected EOF`). Viết script ra file rồi chạy.
 - **Số $ trên sơ đồ:** dùng **AmortizedCost** (phí Savings Plan đã được chia vào máy). Không cộng thêm phí cam kết Savings Plan vào khối "cố định", vì như vậy là đếm hai lần (lỗi đã gặp ở #8882). Đọc [references/cost-overlay.md](references/cost-overlay.md) trước khi ghi $ lên sơ đồ.
-- **Chỉ đọc.** Khảo sát chỉ dùng `describe` / `list` / `get`; không tạo, sửa hay xoá tài nguyên. Cost Explorer tốn $0,01/request: báo số request trước khi chạy.
+- **Chỉ đọc.** Khảo sát chỉ dùng `describe` / `list` / `get`; không tạo, sửa hay xoá tài nguyên. Cost Explorer tốn 0,01 USD/request: báo số request trước khi chạy.
+- **Xem trên viewer.diagrams.net:** khung trình duyệt hẹp thì sơ đồ hiện rất nhỏ. Đặt viewport khoảng 1700×1100, **reload** trang rồi mới chụp; xong thì trả viewport về mặc định. Không có draw.io desktop thì không xuất được PNG; ghi rõ trong tài liệu để người dùng tự xuất.
+- **Khi sửa SKILL.md này:** không viết ký tự đô-la liền với chữ số. Trình nạp skill coi chuỗi đó là tham số và thay bằng nội dung tham số (đã gặp: "0,01 đô" thành "Production,01"). Viết "0,01 USD".
 - **Sơ đồ chia sẻ ra ngoài** (khách, đối tác): che account ID và ARN đầy đủ, không ghi IP / hostname nội bộ.
 
 ## Quy trình

@@ -27,37 +27,37 @@ Compute `#ED7100` · Storage `#7AA116` · Database `#C925D1` · Networking `#8C4
 
 ## Bảng service đã dùng
 
-✅ = đã render kiểm trên viewer.diagrams.net (17/11/2026). ◻ = tên theo thư viện aws4, **chưa render kiểm**: phải nhìn ảnh ở bước 7 trước khi tin.
+✅ = đã render kiểm trên viewer.diagrams.net (17–18/11/2026). ◻ = tên theo thư viện aws4, **chưa render kiểm**: phải nhìn ảnh ở bước 7 trước khi tin.
 
 | `service` | Kiểu | Tên | Màu | |
 |---|---|---|---|---|
 | ec2 | resIcon | `ec2` | compute | ✅ |
 | batch | resIcon | `batch` | compute | ✅ |
 | ecr | resIcon | `ecr` | compute | ✅ (không phải `elastic_container_registry`) |
-| lambda | resIcon | `lambda` | compute | ◻ |
+| lambda | resIcon | `lambda` | compute | ✅ |
 | ecs | resIcon | `ecs` | compute | ◻ |
 | fargate | resIcon | `fargate` | compute | ◻ |
 | ebs | resIcon | `elastic_block_store` | storage | ✅ |
 | s3 | resIcon | `s3` | storage | ✅ |
 | efs | resIcon | `elastic_file_system` | storage | ◻ |
 | rds | resIcon | `rds` | database | ◻ |
-| dynamodb | resIcon | `dynamodb` | database | ◻ |
+| dynamodb | resIcon | `dynamodb` | database | ✅ |
 | elasticache | resIcon | `elasticache` | database | ◻ |
 | sqs | resIcon | `sqs` | integration | ✅ (không phải `simple_queue_service`) |
 | sns | resIcon | `sns` | integration | ◻ |
 | eventbridge | resIcon | `eventbridge` | integration | ✅ |
 | step_functions | resIcon | `step_functions` | integration | ◻ |
-| api_gateway | resIcon | `api_gateway` | networking | ◻ |
+| api_gateway | resIcon | `api_gateway` | networking | ✅ |
 | cloudfront | resIcon | `cloudfront` | networking | ✅ |
 | route_53 | resIcon | `route_53` | networking | ✅ |
 | nat | shape | `nat_gateway` | networking | ✅ |
 | vpc_endpoint | shape | `endpoints` | networking | ✅ |
 | waf | resIcon | `waf` | security | ✅ |
 | guardduty | resIcon | `guardduty` | security | ✅ |
-| kms | resIcon | `key_management_service` | security | ◻ |
+| kms | resIcon | `key_management_service` | security | ✅ |
 | secrets_manager | resIcon | `secrets_manager` | security | ◻ |
 | iam | resIcon | `identity_and_access_management` | security | ◻ |
-| cognito | resIcon | `cognito` | security | ◻ |
+| cognito | resIcon | `cognito` | security | ✅ |
 | config | resIcon | `config` | management | ✅ |
 | cloudwatch | resIcon | `cloudwatch_2` | management | ✅ |
 | systems_manager | resIcon | `systems_manager` | management | ◻ |
