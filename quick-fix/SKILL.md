@@ -1,6 +1,6 @@
 ---
 name: quick-fix
-description: "Dùng khi người dùng báo lỗi, crash, sai hiển thị, sai dữ liệu hoặc nhờ sửa/refactor nhỏ trong phạm vi khoảng 1–5 file (\"fix giúp\", \"sao lại lỗi\", \"bug\", \"chỉnh lại chỗ này\"), kể cả khi không nói chữ bug: khóa scope, tìm nguyên nhân gốc, sửa, tự review, chạy build/test theo stack và báo cáo bàn giao. Tính năng mới hoặc thay đổi kiến trúc → feature-spec; task đã có spec → dev-executor."
+description: "Dùng khi người dùng báo lỗi, crash, sai hiển thị, sai dữ liệu, build / lint / test báo lỗi, hoặc nhờ sửa/refactor nhỏ trong phạm vi khoảng 1–5 file (\"fix giúp\", \"sao lại lỗi\", \"bug\", \"chỉnh lại chỗ này\", \"lint báo N lỗi\"), kể cả khi không nói chữ bug hay chỉ hỏi vì sao kết quả sai (\"sao tổng tiền lại lệch\"): khóa scope, tìm nguyên nhân gốc, sửa, tự review, chạy build/test theo stack và báo cáo bàn giao. Tính năng mới hoặc thay đổi kiến trúc → feature-spec; task đã có spec → dev-executor."
 metadata:
   version: "3.0.0"
   author: "itgviet"
