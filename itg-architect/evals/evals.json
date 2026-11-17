@@ -1,0 +1,39 @@
+{
+  "skill_name": "itg-architect",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Vẽ cho tôi sơ đồ kiến trúc AWS của InsightScanX (repo hạ tầng D:/Projects/NCISSX/isx-infra, profile isx-vietnt, vùng ap-northeast-1 và ap-southeast-1), đúng icon AWS, để đối chiếu với spec quản lý chi phí.",
+      "expected_output": "Agent hỏi ngắn mục đích/mức sơ đồ (đề xuất L1 + L2), liệt kê Terraform root, chạy aws_inventory.py chỉ đọc (hoặc dừng xin aws login nếu hết phiên), lập bảng tài nguyên có cột chủ chi phí và nguồn khai báo, dựng model.json, render bằng drawio_render.py, kiểm ảnh, viết docs/ARCHITECTURE.md theo template.",
+      "files": [],
+      "assertions": [
+        "Không có lệnh AWS nào ngoài describe/list/get (và tối đa 1 request Cost Explorer có báo trước)",
+        "Bảng tài nguyên có cột 'Nguồn khai báo' và đánh dấu tài nguyên tạo tay",
+        "model.json chỉ dùng service có trong references/drawio-aws4.md; drawio_render.py --check trả errors rỗng",
+        "Phát hiện máy dùng chung stage + dev (dev-stage-onetech) là pool, không gán cho một môi trường",
+        "Không cộng phí cam kết Savings Plan vào phần cố định khi đã dùng AmortizedCost"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Sơ đồ draw.io của tôi có mấy icon SQS và ECR hiện thành ô vuông màu trơn, sửa giúp.",
+      "expected_output": "Agent nhận ra tên resIcon sai (simple_queue_service / elastic_container_registry), đổi sang sqs / ecr theo bảng tham chiếu, render lại và kiểm ảnh.",
+      "files": [],
+      "assertions": [
+        "Dùng resIcon=mxgraph.aws4.sqs và resIcon=mxgraph.aws4.ecr",
+        "Có bước kiểm lại hiển thị sau khi sửa"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Viết tài liệu hạ tầng cho hệ thống: chạy những gì trên AWS, môi trường nào dùng chung với môi trường nào, kèm sơ đồ.",
+      "expected_output": "Kích hoạt itg-architect; đầu ra ARCHITECTURE.md đủ 8 mục của template, có mục 7 'Khác biệt giữa khai báo và thực tế'.",
+      "files": [],
+      "assertions": [
+        "Có mục khác biệt giữa Terraform và thực tế",
+        "Ghi ngày khảo sát và profile/vùng đã dùng",
+        "Không chép nội dung skill bên thứ 3; chỉ liên kết deploy-on-aws:aws-architecture-diagram nếu nhắc tới"
+      ]
+    }
+  ]
+}

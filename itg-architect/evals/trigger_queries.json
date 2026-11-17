@@ -1,0 +1,22 @@
+[
+  {"query": "vẽ sơ đồ hạ tầng AWS của dự án này", "should_trigger": true},
+  {"query": "tạo architecture diagram chuẩn AWS icon cho hệ thống", "should_trigger": true},
+  {"query": "tôi cần tài liệu infra có sơ đồ kiến trúc hệ thống", "should_trigger": true},
+  {"query": "hệ thống đang chạy những gì trên AWS, vẽ ra giúp", "should_trigger": true},
+  {"query": "cập nhật sơ đồ kiến trúc sau khi thêm Batch GPU", "should_trigger": true},
+  {"query": "sơ đồ VPC, subnet, NAT của production", "should_trigger": true},
+  {"query": "đối chiếu Terraform với tài nguyên thật rồi vẽ sơ đồ", "should_trigger": true},
+  {"query": "vẽ sơ đồ AWS có ghi chi phí từng khối để đối chiếu spec cost", "should_trigger": true},
+  {"query": "make a draw.io AWS diagram of our account", "should_trigger": true},
+  {"query": "icon AWS trong sơ đồ draw.io bị trắng, sửa giúp", "should_trigger": true},
+  {"query": "vẽ sequence diagram cho API đăng nhập", "should_trigger": false},
+  {"query": "vẽ ERD database của backend", "should_trigger": false},
+  {"query": "viết tài liệu kỹ thuật cho codebase này", "should_trigger": false},
+  {"query": "thiết kế hạ tầng mới trên AWS cho app chưa deploy", "should_trigger": false},
+  {"query": "sửa Terraform để thêm VPC endpoint", "should_trigger": false},
+  {"query": "phân tích hoá đơn AWS tháng này tăng vì sao", "should_trigger": false},
+  {"query": "vẽ flowchart quy trình duyệt nghỉ phép", "should_trigger": false},
+  {"query": "deploy ứng dụng lên AWS giúp tôi", "should_trigger": false},
+  {"query": "review code PR này", "should_trigger": false},
+  {"query": "làm slide giới thiệu kiến trúc cho khách (đã có sơ đồ)", "should_trigger": false}
+]
