@@ -5,7 +5,11 @@ from pathlib import Path
 
 # Add script dir to sys.path
 sys.path.insert(0, str(Path(__file__).parent))
-from onetech_client import OneTechClient, DEFAULT_USER_ID, STORE_FILE
+from onetech_client import OneTechClient, DEFAULT_USER_ID, STORE_FILE, log_dashboard_event
+
+# "open" = work not yet delivered: Review means coded and waiting for customer acceptance,
+# so it is excluded together with Done and Cancel.
+CLOSED_STATUSES = {"REVIEW", "DONE", "CANCEL", "CANCELLED"}
 from feedback_client import FeedbackHubClient
 import history_export
 
@@ -24,7 +28,7 @@ def main():
     list_p = subparsers.add_parser("list", help="Liệt kê tasks OneTech (Siêu tốc từ cache, dùng --live để lấy trực tiếp)")
     list_p.add_argument("--project", type=int, default=None, help="Project ID (ví dụ: 82, 76)")
     list_p.add_argument("--sprint", type=int, default=None, help="Sprint ID")
-    list_p.add_argument("--status", type=str, default=None, choices=["todo", "in_progress", "review", "done", "open"], help="Lọc trạng thái: todo | in_progress | review | done | open (chưa hoàn thành)")
+    list_p.add_argument("--status", type=str, default=None, choices=["todo", "in_progress", "review", "done", "open"], help="Lọc trạng thái: todo | in_progress | review | done | open (chưa làm xong: bỏ Review/Done/Cancel)")
     list_p.add_argument("--search", type=str, default=None, help="Tìm kiếm từ khóa trong tiêu đề hoặc nội dung")
     list_p.add_argument("--mine", action="store_true", help="Chỉ lấy task gán cho tôi")
     list_p.add_argument("--live", action="store_true", help="Bỏ qua cache, gọi trực tiếp qua browser")
@@ -50,6 +54,10 @@ def main():
     update_p.add_argument("--status", type=str, choices=["todo", "in_progress", "implementing", "review", "done", "cancel"], help="Trạng thái mới")
     update_p.add_argument("--sprint", type=int, help="Sprint ID mới")
     update_p.add_argument("--priority", type=str, choices=["low", "medium", "high", "critical"], help="Mức ưu tiên mới")
+    update_p.add_argument("--due-date", type=str, default=None, help="Hạn chót mới (YYYY-MM-DD hoặc ISO)")
+    update_desc = update_p.add_mutually_exclusive_group()
+    update_desc.add_argument("--description", type=str, help="Mô tả mới (Markdown, thay toàn bộ mô tả cũ)")
+    update_desc.add_argument("--description-file", type=str, help="Đọc mô tả mới từ file UTF-8 (tránh lỗi dấu ngoặc kép khi truyền qua PowerShell)")
 
     # 5. Create
     create_p = subparsers.add_parser("create", help="Tạo task mới / bug mới trên OneTech")
@@ -235,7 +243,7 @@ def main():
             if args.status:
                 st = args.status.lower()
                 if st == "open":
-                    tasks = [t for t in tasks if str(t.get("status", "")).upper() != "DONE"]
+                    tasks = [t for t in tasks if str(t.get("status", "")).upper() not in CLOSED_STATUSES]
                 else:
                     tasks = [t for t in tasks if str(t.get("status", "")).lower() == st]
             # Tìm kiếm từ khóa
@@ -260,7 +268,7 @@ def main():
             if args.status:
                 st = args.status.lower()
                 if st == "open":
-                    tasks = [t for t in tasks if str(t.get("status", "")).lower() != "done"]
+                    tasks = [t for t in tasks if str(t.get("status", "")).upper() not in CLOSED_STATUSES]
                 else:
                     tasks = [t for t in tasks if str(t.get("status", "")).lower() == st]
             if args.search:
@@ -325,6 +333,7 @@ def main():
 
             res = client.add_comment(args.task_id, msg)
             print(f"[THÀNH CÔNG] Đã đăng bình luận vào Task #{args.task_id} (ID #{res.get('id')})")
+            log_dashboard_event("TASK_COMMENT", f"Comment on #{args.task_id}", {"task_id": args.task_id, "comment_id": res.get("id"), "text": msg[:200]})
         elif args.delete:
             res = client.delete_comment(args.task_id, args.delete)
             print(f"[THÀNH CÔNG] Đã xóa bình luận #{args.delete} của Task #{args.task_id}")
@@ -345,7 +354,15 @@ def main():
         if args.status: payload["status"] = args.status
         if args.sprint is not None: payload["sprintId"] = args.sprint
         if args.priority: payload["priority"] = args.priority
-        if hasattr(args, "description") and args.description:
+        if args.due_date:
+            d = args.due_date.replace('/', '-')
+            if len(d) == 10:
+                d = f"{d}T12:00:00.000Z"
+            payload["dueDate"] = d
+        if args.description_file:
+            with open(args.description_file, encoding="utf-8") as f:
+                payload["description"] = f.read()
+        elif args.description:
             payload["description"] = args.description.replace("\\n", "\n")
 
         if not payload:
@@ -396,6 +413,7 @@ def main():
             print(f"[LỖI] OneTech phản hồi không hợp lệ: {res}")
             return
         print(f"[THÀNH CÔNG] Đã tạo Task mới #{new_id}: {res.get('title')}")
+        log_dashboard_event("TASK_CREATE", f"Đã tạo mới Task #{new_id}: {res.get('title')}", {"task_id": new_id, "project_id": args.project})
 
         if args.image and new_id:
             print(f"Đang upload ảnh đính kèm: {args.image}...")
@@ -419,6 +437,7 @@ def main():
 
         res = client.add_comment(args.task_id, msg)
         print(f"[THÀNH CÔNG] Đã đăng comment vào Task #{args.task_id} (Comment ID #{res.get('id')})")
+        log_dashboard_event("TASK_COMMENT", f"Comment on #{args.task_id}", {"task_id": args.task_id, "comment_id": res.get("id"), "text": msg[:200]})
 
     elif args.command == "timesheet":
         if args.action == "today":
@@ -486,6 +505,10 @@ def main():
             print(f"[THÀNH CÔNG] Đã log {args.hours}h ({args.type}) vào Task #{args.task} ngày {args.date or 'hôm nay'}!")
             if desc:
                 print(f"Ghi chú: {desc}")
+            log_dashboard_event("TIMESHEET_LOG", f"Logged {args.hours}h ({args.type}) on #{args.task} for {args.date or 'today'}",
+                                {"task_id": args.task, "hours": args.hours, "date": args.date, "activity_type": args.type,
+                                 "description": desc[:200], "entry_id": (res or {}).get("id") if isinstance(res, dict) else None})
+            _dashboard_timesheet_changed(args.date)
 
         elif args.action == "delete":
             if not args.entry_id:
@@ -494,8 +517,39 @@ def main():
             ok = client.delete_time_entry(args.entry_id)
             if ok:
                 print(f"[THÀNH CÔNG] Đã xóa bản ghi timesheet #{args.entry_id}!")
+                log_dashboard_event("TIMESHEET_DELETE", f"Deleted time entry #{args.entry_id}", {"entry_id": args.entry_id, "task_id": args.task, "date": args.date})
+                _dashboard_timesheet_changed(args.date)
             else:
                 print(f"[LỖI] Không thể xóa bản ghi timesheet #{args.entry_id}.")
+
+def _dashboard_timesheet_changed(date_str=None):
+    """Hours changed on OneTech outside the dashboard: drop the engine's 10-minute cache and ask the dashboard
+    (port 8989, DASHBOARD_PORT) to mirror that week now, in a detached process so this command returns at once."""
+    import os
+    import subprocess
+    from datetime import date, datetime, timedelta
+    try:
+        cache = STORE_FILE.parent / "timesheet_cache.json"
+        if cache.exists():
+            cache.unlink()
+    except OSError:
+        pass
+    try:
+        d = datetime.strptime(date_str, "%Y-%m-%d").date() if date_str else date.today()
+    except ValueError:
+        d = date.today()
+    mon = d - timedelta(days=d.weekday())
+    url = (f"http://127.0.0.1:{os.environ.get('DASHBOARD_PORT', '8989')}/api/timesheet/refresh"
+           f"?start={mon.isoformat()}&end={(mon + timedelta(days=6)).isoformat()}")
+    code = ("import urllib.request as u\n"
+            f"u.urlopen(u.Request({url!r}, method='POST', data=b'{{}}', headers={{'Content-Type': 'application/json'}}), timeout=180)\n")
+    try:
+        flags = getattr(subprocess, "DETACHED_PROCESS", 0) | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+        subprocess.Popen([sys.executable, "-c", code], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                         creationflags=flags, close_fds=True)
+    except OSError:
+        pass                                                    # dashboard not installed here: the 10-minute job catches up
+
 
 if __name__ == "__main__":
     main()

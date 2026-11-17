@@ -16,10 +16,12 @@ Skill này chuyên trách quản lý tự động hóa toàn diện 2 hệ thố
 - **`list`/`task` đọc cache `$ITGVIET_HOME/data/tasks_store.json`, không phải dữ liệu live.** Khi người dùng vừa đổi gì trên web hoặc cần số liệu chính xác, thêm `--live` hoặc chạy `sync --project <id>` trước. `sync` mặc định project 82 nếu không truyền `--project`.
 - **Mặc định ngầm là project 82 (insightScanX).** `sync`, `create` và `feedback link --onetech-project` đều default 82 — luôn truyền `--project`/`--onetech-project` khi làm với dự án khác (DTGenius là 76), nếu không task sẽ rơi nhầm dự án.
 - **`list` chỉ hiển thị 15 task mặc định** (đổi từ 50 ở commit `d2f5895`). Khi trả lời "còn bao nhiêu task" hãy đọc dòng tổng `Tìm thấy N tasks` hoặc dùng `--limit`.
-- **Trạng thái OneTech map sang workflowStatusId cố định**: `todo`→405, `in_progress`→406, `implementing`→407, `review`→408, `done`→409, `cancel`→405 + `bugStatus=closed`. Dùng đúng tên trong `update --status`, không tự gửi ID.
+- **workflowStatusId khác nhau theo từng dự án** (DTGenius #76: To Do 333 · In Progress 334 · Review 336 · Done 337 · Closed 429; insightScanX #82: 405 · 406 · 408 · 409 · Closed 417). `create`/`update --status` tự tra ID theo tên cột qua `/api/projects/<id>/workflow-statuses`; `cancel` → cột `Closed` + `bugStatus=closed`. Không tự gửi ID cứng. Trước bản sửa 2026-11-04, script gán ID của #82 cho mọi dự án nên task DTGenius chuyển trạng thái bằng CLI mang `workflowStatusId=408`.
+- **`list --status open` = việc chưa làm xong**: bỏ cả Done lẫn Cancel.
 - **`create --assignee` nhận User ID (UUID)**; alias được hiểu sẵn chỉ có `dinhpl`/`dinh` và `vietnt`/`viet`/`me`. Người khác cần UUID thật — không đoán.
 - **Feedback Hub phân trang.** `feedback list` đọc `pageSize=300` và theo `nextPageToken` (fix `34cfa20` + bản sửa đang làm); nếu tự gọi API thì phải theo token, không sẽ mất ticket cũ.
 - **Timesheet API dùng tham số `start`/`end`** (không phải `startDate`/`endDate` — fix `34cfa20`). OneTech trả HTTP 429 khi gọi dồn dập: `history` mất vài phút là bình thường, đừng chạy song song nhiều lệnh.
+- **"Unauthorized"/401 khi dashboard engine đang chạy KHÔNG có nghĩa là phiên hết hạn — không bắt người dùng đăng nhập lại.** Engine (localhost:8988) giữ profile `data/playwright_profile` mở liên tục trong một Chromium nền (cổng OneTech); Chrome khóa kho cookie của profile đang dùng, nên một trình duyệt thứ hai mở cùng profile không đọc được phiên và OneTech trả 401. `OneTechClient._execute_browser` đã tự xin engine nhường profile (`POST /api/onetech/gateway/lease`, trả lại khi xong) từ 2026-11-09. Gặp 401: (1) kiểm tra phiên thật bằng `curl -s -X POST localhost:8988/api/sync-test -H "Content-Type: application/json" -d "{}"` — `success: true` + đúng email = phiên còn, chỉ là tranh chấp profile, chạy lại lệnh; (2) chỉ khi lệnh đó cũng báo lỗi đăng nhập mới mở cửa sổ đăng nhập. Script tự mở profile (ví dụ cửa sổ đăng nhập có giao diện) phải bọc trong `with client.profile_lease(900):`, không mở thẳng `user_data_dir`.
 - **Không viết script Python tạm** (`get_task_*.py`…) để tra cứu: CLI đã đọc cache trong ~0.05 giây và không mở trình duyệt; script tạm vừa chậm (mở Chromium) vừa để lại file rác trong repo.
 
 ---
@@ -215,6 +217,8 @@ python scripts/cli.py create `
 ```powershell
 python scripts/cli.py update 8086 --status done
 # Trạng thái hợp lệ: todo | in_progress | implementing | review | done | cancel. Đổi sprint/ưu tiên/tiêu đề: --sprint, --priority, --title.
+# Thay mô tả (ghi đè toàn bộ, Markdown → HTML; ảnh dùng ![alt](url) với URL từ lệnh upload):
+python scripts/cli.py update 8086 --description-file desc.md   # nên dùng: PowerShell 5.1 làm hỏng dấu " trong --description
 ```
 
 #### ✍️ Upload ảnh / bình luận nhanh kèm ảnh:
@@ -266,5 +270,7 @@ python scripts/cli.py history --sources git,tickets
      - `### 3. Đề xuất giải pháp khắc phục:`
 2. **Định dạng xuống dòng & Trình bày (Formatting Quality):**
    - Không để lộ ký tự `\n` thô (OneTech hiển thị nguyên văn, khó đọc). Luôn ngắt dòng thực sự, có gạch đầu dòng bullet points rõ ràng.
+   - **Description của task render bằng HTML (innerHTML), KHÔNG parse Markdown.** CLI `create`/`update --description` tự chuyển Markdown đơn giản (`###`, `- `, `1. `, `**đậm**`, `` `code` ``) sang HTML qua `_markdown_to_html`; vẫn viết Markdown như bình thường, không tự ghép thẻ HTML bằng tay. Ký tự `<`, `>` trong text (ví dụ `<scan A>`) được escape an toàn.
+   - **Comment** thì ngược lại: render Markdown/text thuần, `add_comment` tự gỡ thẻ HTML (`_sanitize_markdown`). Không gửi HTML vào comment.
 3. **Không tự bịa nội dung (Zero Hallucination):** Chỉ trích xuất đúng mô tả, ảnh chụp và dữ liệu môi trường thực tế từ ticket khách gửi hoặc phản ánh của người dùng.
 4. **Phản hồi khách hàng (Comments trên Feedback Hub):** Dùng tiếng Việt lịch sự, rõ ràng, nêu bật giải pháp đã xử lý và hướng dẫn khách kiểm tra lại (UAT).

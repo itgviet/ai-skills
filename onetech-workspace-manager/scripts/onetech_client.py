@@ -1,10 +1,50 @@
 import os
 import sys
 import json
+import re
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 from playwright.sync_api import sync_playwright
+import tempfile
+import time as _time
+
+
+def _store_write(data: dict) -> None:
+    """Write tasks_store.json in one step (temp file + replace): a plain open("w") truncates first, and a reader in that
+    window (the sync below, the dashboard) saw an empty file. Retries while another process holds the file (Windows)."""
+    STORE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(prefix=STORE_FILE.name + ".", suffix=".tmp", dir=str(STORE_FILE.parent))
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+            f.flush()
+            os.fsync(f.fileno())
+        for i in range(60):
+            try:
+                os.replace(tmp, STORE_FILE)
+                return
+            except PermissionError:
+                if i == 59:
+                    raise
+                _time.sleep(0.05)
+    finally:
+        if os.path.exists(tmp):
+            os.remove(tmp)
+
+
+def _store_read() -> dict:
+    """Read tasks_store.json, retrying while a writer is replacing it. Raises when it stays unreadable: treating it as
+    empty made the sync write back only the synced project and drop every other one."""
+    err = None
+    for _ in range(6):
+        try:
+            with open(STORE_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except (json.JSONDecodeError, PermissionError, UnicodeDecodeError) as e:
+            err = e
+            _time.sleep(0.1)
+    raise RuntimeError(f"tasks_store.json unreadable, sync aborted so nothing is lost: {err}")
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -31,7 +71,36 @@ def _resolve_user_data_dir() -> Path:
 USER_DATA_DIR = _resolve_user_data_dir()
 STORE_FILE = PROJECT_ROOT / "data" / "tasks_store.json"
 EVENTS_FILE = PROJECT_ROOT / "data" / "dashboard_events.jsonl"
+
+
+def event_origin() -> Dict[str, str]:
+    """Who is acting through this CLI, for the dashboard's change log: a Claude Code session (its id is in the
+    environment) or the user at a terminal."""
+    sid = os.environ.get("CLAUDE_CODE_SESSION_ID")
+    return {"via": "cli", "actor": f"claude:{sid}" if sid else "me"}
+
+
+def log_dashboard_event(event_type: str, message: str, meta: Optional[Dict[str, Any]] = None) -> None:
+    """Append one line to data/dashboard_events.jsonl; the dashboard reads it within seconds into its change log."""
+    record = {"timestamp": datetime.now().isoformat(), "type": event_type, "message": message, "meta": {**(meta or {}), **event_origin()}}
+    try:
+        EVENTS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(EVENTS_FILE, "a", encoding="utf-8") as f:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    except OSError as err:
+        print("[Warning] Could not write dashboard event:", err)
 DEFAULT_USER_ID = "19bcfc0a-1108-40bd-810a-abbe7af46fc5"
+
+# CLI status -> (workflow status name on the project's board, bugStatus).
+# The workflow status ID is resolved per project by name: every project has its own IDs.
+STATUS_WORKFLOW = {
+    "todo": ("To Do", "new"),
+    "in_progress": ("In Progress", "assigned"),
+    "implementing": ("Implementing", "assigned"),
+    "review": ("Review", "fixed"),
+    "done": ("Done", "closed"),
+    "cancel": ("To Do", "closed"),  # OneTech native cancel: status=cancel on the To Do column
+}
 
 
 class OneTechClient:
@@ -43,8 +112,7 @@ class OneTechClient:
         try:
             if not STORE_FILE.exists():
                 return
-            with open(STORE_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
+            data = _store_read()
 
             tasks = data.get("tasks", [])
             target = None
@@ -90,8 +158,7 @@ class OneTechClient:
 
             if updated:
                 data["last_updated"] = datetime.now().isoformat()
-                with open(STORE_FILE, "w", encoding="utf-8") as f:
-                    json.dump(data, f, ensure_ascii=False, indent=2)
+                _store_write(data)
 
             # Log real-time event so Dashboard UI picks it up immediately
             msg = f"Task #{task_id} updated" + (f" -> {new_st_upper}" if new_st_upper else "")
@@ -99,7 +166,7 @@ class OneTechClient:
                 "timestamp": datetime.now().isoformat(),
                 "type": "TASK_UPDATED",
                 "message": msg,
-                "meta": {"task_id": task_id, "payload": payload}
+                "meta": {"task_id": task_id, "payload": payload, **event_origin()}
             }
             EVENTS_FILE.parent.mkdir(parents=True, exist_ok=True)
             with open(EVENTS_FILE, "a", encoding="utf-8") as f:
@@ -107,18 +174,80 @@ class OneTechClient:
         except Exception as e:
             print("[Warning] Could not sync task update to local store:", e)
 
+    # ---- one browser profile, several processes ----
+    # The dashboard engine (localhost:8988) keeps this profile open in a long-lived headless browser. Chrome locks the
+    # cookie store of a profile in use, so a second browser on it reads no login and OneTech answers 401 "Unauthorized":
+    # that is NOT an expired session. Before opening the profile, ask the engine to lend it (it closes its browser and
+    # stays off until we release it or the lease runs out). No engine running = nothing to ask.
+    ENGINE_URL = os.environ.get("ONETECH_ENGINE_URL", "http://127.0.0.1:8988")
+
+    def _engine_post(self, path: str, body: dict, timeout: float):
+        import urllib.request
+        req = urllib.request.Request(self.ENGINE_URL + path, data=json.dumps(body).encode("utf-8"),
+                                     headers={"Content-Type": "application/json"}, method="POST")
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return json.loads(r.read().decode("utf-8") or "{}")
+
+    def profile_lease(self, seconds: int = 180):
+        """Context manager: hold the browser profile for this process. Use it around any code that opens
+        self.user_data_dir itself (e.g. a visible login window): `with client.profile_lease(900): ...`."""
+        from contextlib import contextmanager
+
+        @contextmanager
+        def _lease():
+            leased = False
+            if not getattr(self, "_in_engine", False):
+                try:
+                    leased = bool(self._engine_post("/api/onetech/gateway/lease", {"seconds": seconds, "holder": f"pid {os.getpid()}"}, 3.0).get("success"))
+                except Exception:
+                    leased = False          # engine not running (or old engine): nothing to coordinate with
+            try:
+                yield leased
+            finally:
+                if leased:
+                    try:
+                        self._engine_post("/api/onetech/gateway/release", {"holder": f"pid {os.getpid()}"}, 5)
+                    except Exception:
+                        pass
+        return _lease()
+
     def _execute_browser(self, callback):
-        """Khởi chạy Chromium headless với persistent profile để gọi API/DOM an toàn."""
+        with self.profile_lease():
+            return self._execute_browser_unleased(callback)
+
+    def _execute_browser_unleased(self, callback):
+        """Khởi chạy Chromium headless với persistent profile để gọi API/DOM an toàn (tối ưu băng thông)."""
         with sync_playwright() as p:
             context = p.chromium.launch_persistent_context(
                 user_data_dir=str(self.user_data_dir),
                 headless=True
             )
             page = context.pages[0] if context.pages else context.new_page()
-            page.goto("https://workspace.onetech.vn/projects/82/sprints", wait_until="networkidle", timeout=25000)
+            # Tối ưu băng thông: chặn các tài nguyên nặng (ảnh, font, video, css) không cần cho API fetch
+            try:
+                def _filter_route(route):
+                    if route.request.resource_type in ["image", "media", "font", "stylesheet"]:
+                        route.abort()
+                    else:
+                        route.continue_()
+                page.route("**/*", _filter_route)
+            except Exception:
+                pass
+            page.goto("https://workspace.onetech.vn", wait_until="commit", timeout=35000)
+            page.wait_for_timeout(1000)
             result = callback(page)
             context.close()
             return result
+
+    @staticmethod
+    def _workflow_status_id(page, project_id: int, status: str) -> int:
+        """Look up the workflowStatusId of a CLI status in this project's own workflow."""
+        name = STATUS_WORKFLOW[status][0]
+        statuses = page.evaluate(f"() => fetch('/api/projects/{int(project_id)}/workflow-statuses').then(r => r.json())")
+        for s in statuses:
+            if str(s.get("name", "")).strip().lower() == name.lower():
+                return s["id"]
+        raise ValueError(f"Project #{project_id} has no workflow status named '{name}'")
 
     def get_current_user(self) -> Dict[str, Any]:
         """Lấy thông tin tài khoản đang đăng nhập."""
@@ -148,6 +277,10 @@ class OneTechClient:
         """Lấy danh sách tasks, có thể lọc theo sprint hoặc người phụ trách."""
         def action(page):
             tasks = page.evaluate(f"() => fetch('/api/projects/{project_id}/tasks').then(r => r.json())")
+            if not isinstance(tasks, list):
+                # e.g. {"message": "Unauthorized"} when the OneTech login in the browser profile expired.
+                msg = tasks.get("message") if isinstance(tasks, dict) else tasks
+                raise RuntimeError(f"OneTech không trả danh sách task ({msg}). Đăng nhập lại OneTech rồi chạy lại.")
             if sprint_id is not None:
                 tasks = [t for t in tasks if t.get("sprintId") == sprint_id]
             if assignee_id is not None:
@@ -157,23 +290,20 @@ class OneTechClient:
 
     def update_task(self, task_id: int, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Cập nhật thuộc tính của task (tự động map workflowStatusId khi đổi status)."""
-        # Auto-map workflowStatusId and bugStatus if status is provided
-        if "status" in payload and "workflowStatusId" not in payload:
-            wf_map = {
-                "todo": (405, "new"),
-                "in_progress": (406, "assigned"),
-                "implementing": (407, "assigned"),
-                "review": (408, "fixed"),
-                "done": (409, "closed"),
-                "cancel": (405, "closed")
-            }
-            raw_st = payload["status"].lower()
-            if raw_st in wf_map:
-                payload["workflowStatusId"] = wf_map[raw_st][0]
-                if "bugStatus" not in payload:
-                    payload["bugStatus"] = wf_map[raw_st][1]
+        if payload.get("description"):
+            payload["description"] = self._markdown_to_html(payload["description"])
+        raw_st = str(payload.get("status", "")).lower()
+        if raw_st in STATUS_WORKFLOW and "bugStatus" not in payload:
+            payload["bugStatus"] = STATUS_WORKFLOW[raw_st][1]
 
         def action(page):
+            # workflowStatusId differs per project (DTGenius #76: 333-338, insightScanX #82: 405-410),
+            # so it is looked up from the task's own project instead of a hardcoded table.
+            # Cancel is OneTech's own status on the To Do column: sending a workflowStatusId with it
+            # makes the server reset status to "todo", so cancel only sends status + bugStatus.
+            if raw_st in STATUS_WORKFLOW and raw_st != "cancel" and "workflowStatusId" not in payload:
+                project_id = page.evaluate(f"() => fetch('/api/tasks/{task_id}').then(r => r.json()).then(t => t.projectId)")
+                payload["workflowStatusId"] = self._workflow_status_id(page, project_id, raw_st)
             js_code = f"""() => fetch('/api/tasks/{task_id}', {{
                 method: 'PUT',
                 headers: {{ 'Content-Type': 'application/json' }},
@@ -186,7 +316,15 @@ class OneTechClient:
 
     def create_task(self, project_id: int, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Tạo task mới hoặc epic mới trên dự án."""
+        if payload.get("description"):
+            payload["description"] = self._markdown_to_html(payload["description"])
+        raw_st = str(payload.get("status") or "todo").lower()
+        payload["status"] = raw_st
+        if raw_st in STATUS_WORKFLOW and "bugStatus" not in payload:
+            payload["bugStatus"] = STATUS_WORKFLOW[raw_st][1]
         def action(page):
+            if raw_st in STATUS_WORKFLOW and raw_st != "cancel" and "workflowStatusId" not in payload:
+                payload["workflowStatusId"] = self._workflow_status_id(page, project_id, raw_st)
             return page.evaluate("""async ([pid, data]) => {
                 const res = await fetch(`/api/projects/${pid}/tasks`, {
                     method: 'POST',
@@ -234,6 +372,72 @@ class OneTechClient:
             }}"""
             return page.evaluate(js_code)
         return self._execute_browser(action)
+
+    @staticmethod
+    def _markdown_to_html(text: str) -> str:
+        """Chuyển Markdown đơn giản sang HTML cho field description.
+
+        OneTech render description bằng innerHTML (khối prose), KHÔNG parse markdown,
+        nên ### / - / ** gửi thẳng sẽ hiện nguyên văn và dấu < > bị nuốt như thẻ HTML.
+        Nếu text đã là HTML (bắt đầu bằng thẻ khối) thì giữ nguyên.
+        """
+        if not text:
+            return ""
+        import html as _html
+        t = text.replace("\r\n", "\n").strip()
+        if re.match(r"^\s*<(!--|h[1-6]|p|ul|ol|div|table|blockquote)\b", t, flags=re.I):
+            return t
+
+        def inline(s: str) -> str:
+            s = _html.escape(s, quote=False)
+            s = re.sub(r"`([^`]+)`", r"<code>\1</code>", s)
+            s = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", s)
+            s = re.sub(r"(?<!\w)_(.+?)_(?!\w)", r"<em>\1</em>", s)
+            s = re.sub(r"!\[([^\]]*)\]\(([^)\s]+)\)", r'<img src="\2" alt="\1">', s)
+            s = re.sub(r"\[([^\]]+)\]\(([^)\s]+)\)", r'<a href="\2">\1</a>', s)
+            return s
+
+        out, para, list_tag = [], [], None
+
+        def flush_para():
+            if para:
+                out.append("<p>" + "<br>".join(para) + "</p>")
+                para.clear()
+
+        def close_list():
+            nonlocal list_tag
+            if list_tag:
+                out.append(f"</{list_tag}>")
+                list_tag = None
+
+        for raw in t.split("\n"):
+            line = raw.rstrip()
+            if not line.strip():
+                flush_para(); close_list(); continue
+            m = re.match(r"^(#{1,6})\s+(.*)$", line)
+            if m:
+                flush_para(); close_list()
+                lvl = min(len(m.group(1)) + 1, 6)  # ### -> h4 cho vừa cỡ chữ của prose-sm
+                out.append(f"<h{lvl}>{inline(m.group(2).strip())}</h{lvl}>")
+                continue
+            m = re.match(r"^\s*[-*•]\s+(.*)$", line)
+            if m:
+                flush_para()
+                if list_tag != "ul":
+                    close_list(); out.append("<ul>"); list_tag = "ul"
+                out.append(f"<li>{inline(m.group(1).strip())}</li>")
+                continue
+            m = re.match(r"^\s*\d+[.)]\s+(.*)$", line)
+            if m:
+                flush_para()
+                if list_tag != "ol":
+                    close_list(); out.append("<ol>"); list_tag = "ol"
+                out.append(f"<li>{inline(m.group(1).strip())}</li>")
+                continue
+            close_list()
+            para.append(inline(line.strip()))
+        flush_para(); close_list()
+        return "\n".join(out)
 
     @staticmethod
     def _sanitize_markdown(text: str) -> str:
@@ -302,7 +506,15 @@ class OneTechClient:
         def action(page):
             tasks = page.evaluate(f"() => fetch('/api/projects/{project_id}/tasks').then(r => r.json())")
             sprints_raw = page.evaluate(f"() => fetch('/api/projects/{project_id}/sprints').then(r => r.json())")
-            sprints = {s["id"]: s["name"] for s in sprints_raw}
+            if isinstance(tasks, dict) and (tasks.get("message") == "Unauthorized" or tasks.get("statusCode") == 401):
+                raise RuntimeError("Phiên đăng nhập OneTech đã hết hạn (Unauthorized), vui lòng bấm Đăng nhập lại.")
+            if isinstance(sprints_raw, dict) and (sprints_raw.get("message") == "Unauthorized" or sprints_raw.get("statusCode") == 401):
+                raise RuntimeError("Phiên đăng nhập OneTech đã hết hạn (Unauthorized), vui lòng bấm Đăng nhập lại.")
+            if not isinstance(tasks, list):
+                tasks = []
+            if not isinstance(sprints_raw, list):
+                sprints_raw = []
+            sprints = {s["id"]: s["name"] for s in sprints_raw if isinstance(s, dict) and "id" in s}
 
             members_raw = page.evaluate(f"() => fetch('/api/projects/{project_id}/members').then(r => r.json()).catch(() => [])")
             members_map = {}
@@ -322,20 +534,16 @@ class OneTechClient:
                 }
 
             priority_map = {"critical": "P0-CRITICAL", "high": "P1-HIGH", "medium": "P2-MEDIUM", "low": "P3-LOW"}
-            status_map = {"todo": "TODO", "in_progress": "IN_PROGRESS", "review": "REVIEW", "done": "DONE", "cancel": "CANCELLED"}
+            status_map = {"todo": "TODO", "in_progress": "IN_PROGRESS", "review": "REVIEW", "done": "DONE", "cancel": "CANCELLED", "pending": "PENDING"}
 
             # Load existing store
             existing_data = {}
             existing_tasks_map = {}
             if STORE_FILE.exists():
-                try:
-                    with open(STORE_FILE, "r", encoding="utf-8") as f:
-                        existing_data = json.load(f)
-                    for t in existing_data.get("tasks", []):
-                        if t.get("onetech_task_id"):
-                            existing_tasks_map[t["onetech_task_id"]] = t
-                except Exception:
-                    pass
+                existing_data = _store_read()   # raises rather than wiping the other projects
+                for t in existing_data.get("tasks", []):
+                    if t.get("onetech_task_id"):
+                        existing_tasks_map[t["onetech_task_id"]] = t
 
             # Filter out current project tasks from existing list to replace with fresh sync
             other_project_tasks = [t for t in existing_data.get("tasks", []) if t.get("project_id", 82) != project_id]
@@ -357,6 +565,17 @@ class OneTechClient:
 
             formatted = []
             idx = len(other_project_tasks) + 1
+            # Local ids must stay unique across the whole store: keep a task's previous id only if nobody else uses it,
+            # otherwise (and for new tasks) take the next number above every id already in use.
+            def _id_num(v):
+                try:
+                    return int(str(v).replace("TASK-", ""))
+                except Exception:
+                    return 0
+            other_ids = {str(x.get("task_id")) for x in other_project_tasks if x.get("task_id")}
+            all_known = other_ids | {str(p.get("task_id")) for p in existing_tasks_map.values() if p.get("task_id")}
+            next_num = max([_id_num(v) for v in all_known] + [len(other_project_tasks) + len(tasks)]) + 1
+            assigned_ids = set()
             for t in tasks:
                 aid = t.get("assigneeId")
                 assignees = t.get("assignees") or []
@@ -375,8 +594,14 @@ class OneTechClient:
                 tasks_lookup = {item["id"]: (item.get("title") or item.get("name")) for item in tasks}
                 parent_title = tasks_lookup.get(parent_id) if parent_id else None
 
+                local_id = prev.get("task_id")
+                if not local_id or local_id in assigned_ids or local_id in other_ids:
+                    local_id = f"TASK-{next_num:03d}"
+                    next_num += 1
+                assigned_ids.add(local_id)
+
                 task_obj = {
-                    "task_id": prev.get("task_id", f"TASK-{idx:03d}"),
+                    "task_id": local_id,
                     "onetech_task_id": t_id,
                     "project_id": project_id,
                     "project": p_name,
@@ -387,10 +612,10 @@ class OneTechClient:
                     "sprint_id": t.get("sprintId"),
                     "category": "APP" if "[APP" in (t.get("title") or "") else ("CMS" if "[CMS" in (t.get("title") or "") else "DEV"),
                     "priority": priority_map.get(raw_priority, "P2-MEDIUM"),
-                    "status": status_map.get(raw_status, "TODO"),
+                    "status": status_map.get(raw_status, raw_status.upper() or "TODO"),  # unknown statuses kept, never silently TODO
                     "type": t.get("type", "task"),
                     "bugStatus": t.get("bugStatus") or ("new" if t.get("type") == "bug" else None),
-                    "workflowStatusId": t.get("workflowStatusId") or 405,
+                    "workflowStatusId": t.get("workflowStatusId"),
                     "assignee_id": aid,
                     "assignee_name": assignee_name,
                     "assignee_alias": assignee_alias,
@@ -410,16 +635,16 @@ class OneTechClient:
 
             all_tasks = other_project_tasks + formatted
             STORE_FILE.parent.mkdir(parents=True, exist_ok=True)
-            with open(STORE_FILE, "w", encoding="utf-8") as f:
-                json.dump({
-                    "version": "2.0",
-                    "system": "Antigravity Multi-Project Task Store",
-                    "last_updated": datetime.now().isoformat(),
-                    "next_task_index": len(all_tasks) + 1,
-                    "user": {"name": "Viet Nguyen Tung", "email": "vietnt@onetech.vn", "role": "Team Lead / Developer"},
-                    "current_project_id": project_id,
-                    "tasks": all_tasks
-                }, f, ensure_ascii=False, indent=2)
+            _store_write({
+                "version": "2.0",
+                "system": "Antigravity Multi-Project Task Store",
+                "last_updated": datetime.now().isoformat(),
+                "next_task_index": len(all_tasks) + 1,
+                "user": {"name": "Viet Nguyen Tung", "email": "vietnt@onetech.vn", "role": "Team Lead / Developer"},
+                # syncing another project in the background must not switch the project you work in
+                "current_project_id": existing_data.get("current_project_id") or project_id,
+                "tasks": all_tasks
+            })
 
             return len(formatted)
 
@@ -440,9 +665,14 @@ class OneTechClient:
 
     def get_user_timesheet(self, start_date: str, end_date: str) -> List[Dict[str, Any]]:
         """Lấy bảng thống kê timesheet của user theo khoảng thời gian."""
-        return self._execute_browser(
+        res = self._execute_browser(
             lambda page: page.evaluate(f"() => fetch('/api/users/me/timesheet?start={start_date}&end={end_date}', {{ credentials: 'include' }}).then(r => r.json())")
         )
+        if isinstance(res, dict) and (res.get("message") == "Unauthorized" or res.get("statusCode") == 401):
+            raise RuntimeError("Phiên đăng nhập OneTech đã hết hạn (Unauthorized), vui lòng bấm Đăng nhập lại.")
+        if not isinstance(res, list):
+            return []
+        return res
 
     def fetch_history_raw(self, ts_start: str, ts_end: str, user_id: str = DEFAULT_USER_ID) -> Dict[str, Any]:
         """Đọc (chỉ GET) toàn bộ dữ liệu thô cho lịch sử công việc trong một phiên trình duyệt:
