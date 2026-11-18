@@ -33,7 +33,7 @@ SERVICES = {
     "efs": ("res", "elastic_file_system", "storage", False), "rds": ("res", "rds", "database", False),
     "dynamodb": ("res", "dynamodb", "database", True), "elasticache": ("res", "elasticache", "database", False),
     "sqs": ("res", "sqs", "integration", True), "sns": ("res", "sns", "integration", True),
-    "eventbridge": ("res", "eventbridge", "integration", True), "step_functions": ("res", "step_functions", "integration", False),
+    "eventbridge": ("res", "eventbridge", "integration", True), "step_functions": ("res", "step_functions", "integration", True),
     "api_gateway": ("res", "api_gateway", "networking", True), "cloudfront": ("res", "cloudfront", "networking", True),
     "route_53": ("res", "route_53", "networking", True), "nat": ("shape", "nat_gateway", "networking", True),
     "vpc_endpoint": ("shape", "endpoints", "networking", True), "igw": ("shape", "internet_gateway", "networking", True), "waf": ("res", "waf", "security", True),

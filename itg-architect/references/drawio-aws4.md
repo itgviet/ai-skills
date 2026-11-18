@@ -27,7 +27,7 @@ Compute `#ED7100` · Storage `#7AA116` · Database `#C925D1` · Networking `#8C4
 
 ## Bảng service đã dùng
 
-✅ = đã render kiểm trên viewer.diagrams.net (17–18/11/2026). ◻ = tên theo thư viện aws4, **chưa render kiểm**: phải nhìn ảnh ở bước 7 trước khi tin.
+✅ = đã render kiểm trên viewer.diagrams.net (17–18/11/2026; step_functions ở #8916). ◻ = tên theo thư viện aws4, **chưa render kiểm**: phải nhìn ảnh ở bước 7 trước khi tin.
 
 | `service` | Kiểu | Tên | Màu | |
 |---|---|---|---|---|
@@ -46,7 +46,7 @@ Compute `#ED7100` · Storage `#7AA116` · Database `#C925D1` · Networking `#8C4
 | sqs | resIcon | `sqs` | integration | ✅ (không phải `simple_queue_service`) |
 | sns | resIcon | `sns` | integration | ✅ |
 | eventbridge | resIcon | `eventbridge` | integration | ✅ |
-| step_functions | resIcon | `step_functions` | integration | ◻ |
+| step_functions | resIcon | `step_functions` | integration | ✅ |
 | api_gateway | resIcon | `api_gateway` | networking | ✅ |
 | cloudfront | resIcon | `cloudfront` | networking | ✅ |
 | route_53 | resIcon | `route_53` | networking | ✅ |

@@ -3,16 +3,16 @@ name: itg-architect
 description: "Dùng khi cần vẽ hoặc cập nhật sơ đồ kiến trúc hệ thống đúng với thực tế đang chạy và đúng chuẩn AWS (icon, tên service, khung Cloud / Region / VPC / Subnet): khảo sát Terraform + compose + tài khoản AWS ở chế độ chỉ đọc, đối chiếu code với thực tế, dựng mô hình sơ đồ, xuất draw.io có icon AWS chính thức, kiểm tra hiển thị và viết tài liệu ARCHITECTURE.md; tuỳ chọn gắn chủ chi phí và số $ lên từng khối để đối chiếu cách tính chi phí. Dùng cả khi người dùng chỉ nói \"vẽ sơ đồ hạ tầng\", \"architecture diagram\", \"tài liệu infra\", \"sơ đồ AWS chuẩn icon\", \"hệ thống đang chạy những gì trên AWS\". Không dùng cho sơ đồ luồng / sequence / ERD giải thích code → archify hoặc tech-doc-generator; không dùng để thiết kế hạ tầng mới hay sửa Terraform."
 compatibility: "Python 3.11+, boto3 (chỉ cho bước khảo sát AWS), AWS CLI v2 có profile chỉ đọc. Bước render không cần mạng; bước xem trước dùng viewer.diagrams.net."
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   author: "itgviet"
-  last_updated: "2026-11-17"
+  last_updated: "2026-11-18"
 ---
 
 # [SKILL-LEAD-006] ITG Architect: sơ đồ kiến trúc đúng thực tế, chuẩn AWS
 
 Biến "hệ thống đang chạy thật" thành một sơ đồ draw.io dùng icon AWS chính thức, kèm tài liệu `ARCHITECTURE.md`. Mỗi khối trên sơ đồ đều truy được về một tài nguyên thật (ARN / tên / tag) và một nguồn khai báo (Terraform root, hoặc ghi rõ "tạo tay").
 
-Nguồn: phiên #8882 (InsightScanX, 17/11/2026): dựng sơ đồ theo chủ chi phí cho 1 tài khoản / 3 môi trường, đối chiếu với spec quản lý chi phí.
+Nguồn: phiên #8882 (InsightScanX, 17/11/2026): dựng sơ đồ theo chủ chi phí cho 1 tài khoản / 3 môi trường, đối chiếu với spec quản lý chi phí. Phiên #8916 (18/11/2026): mở rộng ra 6 sơ đồ toàn hệ thống, đạt 0 nhãn đè nhau và 0 cạnh cắt nhãn nhờ cách dựng và kiểm ở [references/layout.md](references/layout.md).
 
 ## Gotchas
 
@@ -25,7 +25,10 @@ Nguồn: phiên #8882 (InsightScanX, 17/11/2026): dựng sơ đồ theo chủ ch
 - **Git Bash đôi khi làm hỏng heredoc Python** (`unexpected EOF`). Viết script ra file rồi chạy.
 - **Số $ trên sơ đồ:** dùng **AmortizedCost** (phí Savings Plan đã được chia vào máy). Không cộng thêm phí cam kết Savings Plan vào khối "cố định", vì như vậy là đếm hai lần (lỗi đã gặp ở #8882). Đọc [references/cost-overlay.md](references/cost-overlay.md) trước khi ghi $ lên sơ đồ.
 - **Chỉ đọc.** Khảo sát chỉ dùng `describe` / `list` / `get`; không tạo, sửa hay xoá tài nguyên. Cost Explorer tốn 0,01 USD/request: báo số request trước khi chạy.
-- **Xem trên viewer.diagrams.net:** khung trình duyệt hẹp thì sơ đồ hiện rất nhỏ. Đặt viewport khoảng 1700×1100, **reload** trang rồi mới chụp; xong thì trả viewport về mặc định. Không có draw.io desktop thì không xuất được PNG; ghi rõ trong tài liệu để người dùng tự xuất.
+- **"Không dùng" phải đo, không đoán.** Ở #8882 bản đầu xếp nhầm SQS `mpe-*`, Lambda `scan-processor-*`, `handle-s3-upload` vào "rác"; đo 30 ngày ở #8916 cho thấy chúng đang chạy cho dev / stage / production (Lambda production còn nằm ngoài Terraform, dựng bằng SAM). Trước khi ghi "rác" / "cần dọn": CloudWatch `AWS/SQS NumberOfMessagesSent`, `AWS/Lambda Invocations` 30 ngày, IAM access key last used.
+- **Đè chữ, rối mũi tên** (người dùng đã chê ở #8882): đừng viết toạ độ tương đối bằng tay và đừng kiểm bằng mắt trên ảnh thu nhỏ. Dựng bằng `scripts/model_builder.py` (toạ độ tuyệt đối), kiểm bằng `scripts/preview_page.py` + `__check()`; quy tắc ở [references/layout.md](references/layout.md). Đổi nhãn (dịch EN, thêm $) là phải kiểm lại.
+- **Browser pane không chụp / chạy script được trang `file://`**, còn viewer.diagrams.net lightbox thì thu nhỏ sơ đồ (đo nhãn sai, ảnh chụp không đọc được chữ). Phục vụ trang preview qua http (preview server `python -m http.server`), viewport ≈ 1100×572, cuộn từng vùng bằng `__go(x, y)`. Xong thì dừng server, gỡ cấu hình tạm, trả viewport. Không có draw.io desktop thì không xuất được PNG; ghi rõ trong tài liệu để người dùng tự xuất.
+- **SCP của tổ chức có thể chặn vùng khác** (`ec2:DescribeAddresses` ở us-east-1 / ap-southeast-2 bị explicit deny ở #8916). Ghi rõ "chỉ khảo sát vùng X, Y" khi kết luận "IP / tài nguyên không thuộc tài khoản".
 - **Khi sửa SKILL.md này:** không viết ký tự đô-la liền với chữ số. Trình nạp skill coi chuỗi đó là tham số và thay bằng nội dung tham số (đã gặp: "0,01 đô" thành "Production,01"). Viết "0,01 USD".
 - **Sơ đồ chia sẻ ra ngoài** (khách, đối tác): che account ID và ARN đầy đủ, không ghi IP / hostname nội bộ.
 
@@ -47,12 +50,14 @@ Progress:
   - Lập bảng tài nguyên theo [assets/ARCHITECTURE.template.md](assets/ARCHITECTURE.template.md) §4. Mỗi dòng gồm: tài nguyên, loại, vùng, tag `Name` / `Environment`, **chủ** (môi trường / dùng chung / ngoài phạm vi), $/tháng, nguồn (Terraform root hoặc "tạo tay").
   - Liệt kê **khác biệt**: tài nguyên tạo tay, thiếu tag, tag sai, máy dùng chung nhiều môi trường. Đây là phần giá trị nhất của tài liệu.
 - [ ] 5. **Dựng mô hình sơ đồ** (`model.json`, theo [assets/model.example.json](assets/model.example.json)): nhóm (aws_cloud → region → vpc → subnet / box), node (`service` lấy từ bảng icon), cạnh (nhãn luồng; `kind: cost` cho luồng có tính phí như truyền liên vùng). Mỗi node có `ref` trỏ về dòng trong bảng tài nguyên. Không vẽ tài nguyên không có trong bảng.
+  - Viết một script build cho mỗi sơ đồ bằng `scripts/model_builder.py` (toạ độ tuyệt đối, `M.p()` cho điểm neo, `exit` / `entry` / `points` cho mọi cạnh có gấp khúc). Đọc [references/layout.md](references/layout.md) trước: bố cục theo luồng, hành lang giữa khung, không ra / vào ở đáy node, nhãn khung ngắn.
 - [ ] 6. **Render:**
   - Mặc định: `python scripts/drawio_render.py model.json --out <tên>.drawio --url-file viewer_url.txt`.
   - Nếu skill **`deploy-on-aws:aws-architecture-diagram`** đã được cài (plugin AWS chính thức, xem mục Tham khảo) và người dùng muốn bố cục tự động, đưa bảng tài nguyên + `model.json` làm đầu vào cho skill đó. Không chép nội dung skill đó vào đây.
-- [ ] 7. **Kiểm tra hiển thị (vòng lặp):**
-  - Mở URL trong `viewer_url.txt` bằng trình duyệt, chụp ảnh và zom từng khung.
-  - Kiểm: không có icon nào thành ô trơn; nhãn không đè nhau; mọi node có trong bảng tài nguyên; mọi cạnh có nhãn; tổng $ các khung L1 = tổng tài khoản (± 0,01).
+- [ ] 7. **Kiểm tra hiển thị (vòng lặp)** theo [references/layout.md](references/layout.md) mục Kiểm:
+  - `python scripts/preview_page.py <dir>/p-<tên>.html <tên>.drawio`, phục vụ `<dir>` qua http, mở trang.
+  - `__check()`: `ll` (nhãn đè nhãn) phải rỗng; mỗi dòng `el` phải là nhãn của chính cạnh đó.
+  - Chụp từng vùng (`__go(x, y)` + screenshot) và tự xem: không có icon nào thành ô trơn, chữ đọc được; mọi node có trong bảng tài nguyên; tổng $ các khung L1 = tổng tài khoản (± 0,01).
   - Sai → sửa `model.json` → render lại → kiểm lại tới khi đạt.
 - [ ] 8. **Viết `docs/ARCHITECTURE.md`** trong repo hạ tầng theo template, nhúng ảnh PNG / SVG xuất từ draw.io, link file `.drawio` nguồn. Ghi ngày khảo sát và profile / vùng đã dùng. Báo cáo cho người dùng: các file đã tạo, danh sách khác biệt, phần chưa kiểm được. Không commit thay người dùng.
 
@@ -66,8 +71,11 @@ Progress:
 (inventory.json để ngoài repo nếu có account ID / ARN; chỉ đưa vào repo bản đã che)
 ```
 
+Dự án đã có bộ tài liệu hệ thống tập trung (vd. InsightScanX `docs/system-map/`: một `index.html`, một `tools/build.py` build archify + draw.io + Markdown) thì đặt `model.json` vào `src/` của bộ đó với `engine: drawio`, ghi chú vào `notes/`, thay vì tạo thư mục riêng trong repo hạ tầng.
+
 ## Tham khảo
 
+- Đọc [references/layout.md](references/layout.md) trước khi dựng `model.json` và trước bước kiểm hình.
 - Đọc [references/drawio-aws4.md](references/drawio-aws4.md) khi thêm service mới vào mô hình, hoặc khi icon hiển thị sai.
 - Đọc [references/cost-overlay.md](references/cost-overlay.md) khi sơ đồ cần ghi chủ chi phí / số $.
 - Skill bên thứ 3, **chỉ liên kết, không sao chép**:
