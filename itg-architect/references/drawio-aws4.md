@@ -44,7 +44,7 @@ Compute `#ED7100` · Storage `#7AA116` · Database `#C925D1` · Networking `#8C4
 | dynamodb | resIcon | `dynamodb` | database | ✅ |
 | elasticache | resIcon | `elasticache` | database | ◻ |
 | sqs | resIcon | `sqs` | integration | ✅ (không phải `simple_queue_service`) |
-| sns | resIcon | `sns` | integration | ◻ |
+| sns | resIcon | `sns` | integration | ✅ |
 | eventbridge | resIcon | `eventbridge` | integration | ✅ |
 | step_functions | resIcon | `step_functions` | integration | ◻ |
 | api_gateway | resIcon | `api_gateway` | networking | ✅ |
@@ -52,19 +52,22 @@ Compute `#ED7100` · Storage `#7AA116` · Database `#C925D1` · Networking `#8C4
 | route_53 | resIcon | `route_53` | networking | ✅ |
 | nat | shape | `nat_gateway` | networking | ✅ |
 | vpc_endpoint | shape | `endpoints` | networking | ✅ |
+| igw | shape | `internet_gateway` | networking | ✅ |
 | waf | resIcon | `waf` | security | ✅ |
 | guardduty | resIcon | `guardduty` | security | ✅ |
 | kms | resIcon | `key_management_service` | security | ✅ |
-| secrets_manager | resIcon | `secrets_manager` | security | ◻ |
-| iam | resIcon | `identity_and_access_management` | security | ◻ |
+| secrets_manager | resIcon | `secrets_manager` | security | ✅ |
+| iam | resIcon | `identity_and_access_management` | security | ✅ |
 | cognito | resIcon | `cognito` | security | ✅ |
 | config | resIcon | `config` | management | ✅ |
 | cloudwatch | resIcon | `cloudwatch_2` | management | ✅ |
-| systems_manager | resIcon | `systems_manager` | management | ◻ |
+| systems_manager | resIcon | `systems_manager` | management | ✅ |
 | cost_explorer | resIcon | `cost_explorer` | storage (xanh lá) | ✅ |
 | bedrock | resIcon | `bedrock` | ml | ✅ |
 | codebuild | resIcon | `codebuild` | devtools | ✅ |
 | users | shape | `users` | `#232F3E` | ✅ |
+| ses | resIcon | `simple_email_service` | security (đỏ) | ✅ |
+| backup | resIcon | `backup` | storage | ✅ |
 
 Thêm service mới: thêm vào bảng này **và** vào `SERVICES` trong `scripts/drawio_render.py`, render thử, rồi mới đổi ◻ thành ✅.
 

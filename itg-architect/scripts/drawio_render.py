@@ -9,6 +9,8 @@ Usage:
   python scripts/drawio_render.py model.json --check        # validate only, print JSON report
 
 Model format: see assets/model.example.json. Coordinates of groups/nodes are relative to their parent group.
+Edges may set "exit"/"entry" ([x, y] fractions of the node box, e.g. [1, 0.5] = right middle) and "points"
+([[x, y], ...] absolute page coordinates) to route around other shapes instead of crossing them.
 Exit codes: 0 ok, 2 bad arguments / unreadable model, 3 model validation errors (unknown service, missing ref, bad parent).
 """
 import argparse
@@ -30,17 +32,18 @@ SERVICES = {
     "ebs": ("res", "elastic_block_store", "storage", True), "s3": ("res", "s3", "storage", True),
     "efs": ("res", "elastic_file_system", "storage", False), "rds": ("res", "rds", "database", False),
     "dynamodb": ("res", "dynamodb", "database", True), "elasticache": ("res", "elasticache", "database", False),
-    "sqs": ("res", "sqs", "integration", True), "sns": ("res", "sns", "integration", False),
+    "sqs": ("res", "sqs", "integration", True), "sns": ("res", "sns", "integration", True),
     "eventbridge": ("res", "eventbridge", "integration", True), "step_functions": ("res", "step_functions", "integration", False),
     "api_gateway": ("res", "api_gateway", "networking", True), "cloudfront": ("res", "cloudfront", "networking", True),
     "route_53": ("res", "route_53", "networking", True), "nat": ("shape", "nat_gateway", "networking", True),
-    "vpc_endpoint": ("shape", "endpoints", "networking", True), "waf": ("res", "waf", "security", True),
+    "vpc_endpoint": ("shape", "endpoints", "networking", True), "igw": ("shape", "internet_gateway", "networking", True), "waf": ("res", "waf", "security", True),
     "guardduty": ("res", "guardduty", "security", True), "kms": ("res", "key_management_service", "security", True),
-    "secrets_manager": ("res", "secrets_manager", "security", False), "iam": ("res", "identity_and_access_management", "security", False),
+    "secrets_manager": ("res", "secrets_manager", "security", True), "iam": ("res", "identity_and_access_management", "security", True),
     "cognito": ("res", "cognito", "security", True), "config": ("res", "config", "management", True),
-    "cloudwatch": ("res", "cloudwatch_2", "management", True), "systems_manager": ("res", "systems_manager", "management", False),
+    "cloudwatch": ("res", "cloudwatch_2", "management", True), "systems_manager": ("res", "systems_manager", "management", True),
     "cost_explorer": ("res", "cost_explorer", "storage", True), "bedrock": ("res", "bedrock", "ml", True),
     "codebuild": ("res", "codebuild", "devtools", True), "users": ("shape", "users", "general", True),
+    "ses": ("res", "simple_email_service", "security", True), "backup": ("res", "backup", "storage", True),
 }
 GROUPS = {
     "aws_cloud": ("group_aws_cloud_alt", "#232F3E", "none", "#232F3E", 0),
@@ -131,8 +134,15 @@ def render(model):
         color, dashed = EDGE_KIND[e.get("kind", "normal")]
         style = (f"edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor={color};strokeWidth=1.5;"
                  f"dashed={dashed};fontSize=10;fontColor={color};labelBackgroundColor=#ffffff;")
+        if e.get("exit"):
+            style += f"exitX={e['exit'][0]};exitY={e['exit'][1]};exitDx=0;exitDy=0;"
+        if e.get("entry"):
+            style += f"entryX={e['entry'][0]};entryY={e['entry'][1]};entryDx=0;entryDy=0;"
+        pts = "".join(f'<mxPoint x="{x}" y="{y}"/>' for x, y in e.get("points", []))
+        geo = (f'<mxGeometry relative="1" as="geometry"><Array as="points">{pts}</Array></mxGeometry>' if pts
+               else '<mxGeometry relative="1" as="geometry"/>')
         cells.append(f'<mxCell id="e{i}" value="{html_label(e.get("label", ""))}" style="{style}" edge="1" parent="1" '
-                     f'source="{cid(e["from"])}" target="{cid(e["to"])}"><mxGeometry relative="1" as="geometry"/></mxCell>')
+                     f'source="{cid(e["from"])}" target="{cid(e["to"])}">{geo}</mxCell>')
     w, h = model.get("page", {}).get("w", 1600), model.get("page", {}).get("h", 1000)
     return (f'<mxfile host="app.diagrams.net"><diagram name="{html_label(model.get("name", "architecture"))}" id="d1">'
             f'<mxGraphModel grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" '
