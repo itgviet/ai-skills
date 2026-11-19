@@ -1,0 +1,39 @@
+{
+  "skill_name": "user-guide-builder",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Ảnh 'Gộp bản quét' trong D:/Projects/NCISSX/user-guide/proto/khung-vi.html: ở màn điện thoại ghim số 3 che mất chữ trên nút. Sửa giúp và cho xem lại.",
+      "expected_output": "Đổi vị trí ghim 3 trong data-hp (side hoặc điểm cố định), dựng lại trang, chụp hình đó ở 390 và 1280 bằng check_guide.cjs shots và tự xem ảnh; báo vị trí mới và bằng chứng.",
+      "files": [],
+      "assertions": [
+        "Chỉ sửa data-hp của đúng figure, không đổi toạ độ ô khi không cần",
+        "Chụp kiểm ở cả 390 và 1280 trước khi báo xong",
+        "Không đưa lên server review khi người dùng chưa yêu cầu"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Mình vừa thay 3 ảnh chụp màn hình trong assets/img/vi rồi publish lại artifact hướng dẫn. Kiểm tra giúp bản online đã đủ ảnh chưa.",
+      "expected_output": "Liệt kê file của artifact, chạy asset_manifest.py --published với listing đó, báo các ảnh chưa publish hoặc cũ, rồi publish lại kèm files cho đúng các đường dẫn đó.",
+      "files": [],
+      "assertions": [
+        "Chạy scripts/asset_manifest.py với --published",
+        "Publish lại có truyền files cho ảnh lệch, không chỉ HTML",
+        "Báo rõ tên từng ảnh đã lệch"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Làm trang hướng dẫn sử dụng tiếng Việt cho app quản lý kho (web + app điện thoại), có ảnh chụp màn hình đánh số các bước, có 2 luồng: thủ kho và quản lý.",
+      "expected_output": "Hỏi/khảo sát luồng, file ngôn ngữ, môi trường chụp được phép; dàn ý chương → thẻ việc theo card-template; dựng trang với guide-runtime (đổi mã luồng); chạy check_guide marks/flows/contrast/cover; giao review độc lập theo review-prompt.",
+      "files": [],
+      "assertions": [
+        "Lấy tên nút từ file ngôn ngữ của app thay vì đoán",
+        "Đổi mã luồng mep/ks trong runtime thành mã luồng của dự án",
+        "Không chụp trên môi trường production/stage khi chưa hỏi",
+        "Dùng tên demo kiểu Nhân viên A/B, không tên thật"
+      ]
+    }
+  ]
+}

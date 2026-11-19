@@ -1,0 +1,308 @@
+/* Styles for task cards, pins, boxes, crops, flows, print. Extracted from make_guide.py (EXTRA). Brand colours come from
+   --brand / --mark tokens; replace them per project. */
+
+/* task cards inside the guide */
+.card-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: -14px; font-size: var(--step--1); color: var(--muted); }
+.pill.mep { background: #e3e8fb; color: #132b88; } .pill.ks { background: var(--tip-bg); color: var(--tip-ink); }
+.chapter .note ul { padding-left: 1.2em; gap: 2px; }
+.branch { display: grid; gap: 14px; max-width: 64rem; align-items: start; }
+@media (min-width: 900px) { .branch { grid-template-columns: 1fr 1fr; } }
+.arm { border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper); padding: 14px 16px; display: grid; gap: 14px; align-content: start; }
+.arm-h { font: 600 var(--step-0) var(--f-display); color: var(--brand-ink); }
+.arm .phones { margin: 0; }
+.ends { display: grid; gap: 10px; }
+.note { align-content: start; }
+.nw { white-space: nowrap; }
+.flows .il-flange { fill: #a8236e; stroke: #fff; stroke-width: 1; }
+/* zones plan: the "> 1 m" label sits on the dashed zone border; a halo keeps it readable */
+.zones .zn-gap-t { paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
+/* IFC flow: Rebro and Revit are alternatives, so no arrow from one to the other, only the word "hoặc" */
+.ifc-flow .fd-link { border-left: 0 !important; }
+.ifc-flow .fd-link::before { display: none !important; }
+/* the zone plan keeps a readable size on phones: it scrolls sideways instead of shrinking its labels to 5 px */
+@media (max-width: 640px) {
+  .chapter .card figure.diagram.zones { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .chapter .card .zones > svg { min-width: 600px !important; width: 600px !important; height: auto !important; display: block; }
+}
+/* stacked (narrow) layout: the alternative target lines up with the first one, "hoặc" centred between them */
+@media (max-width: 640px) {
+  .ifc-flow .fd-br { margin-left: 0 !important; padding-left: 0 !important; }
+  .ifc-flow .fd-br > .fd-n { margin-left: 0 !important; width: auto !important; }
+  .ifc-flow .fd-link { display: block; text-align: center; margin: 0 !important; padding: 6px 0 !important; }
+}
+/* before a flow is picked both flows' cards show, but a sentence holds only one of its two wordings (the MEP one),
+   or "phòng bơm" and "một sàn văn phòng" would run together */
+html:not([data-flow]) main .card [data-flow="ks"][data-flow][data-flow][data-flow] { display: none !important; }
+i.fl { font-style: normal; }  /* inline flow-specific words inside a step hint (a span there would become a block) */
+/* phones: the top bar wraps to three rows, so a jump leaves room for it above the heading */
+@media (max-width: 700px) { html { scroll-padding-top: calc(var(--topbar-h, 132px) + 12px) !important; } }
+/* print: Chrome sometimes drops a zoomed crop at a page break, so paper shows the whole screenshot; the pins are
+   placed in % of the full image, so they stay on their elements */
+@media print {
+  .frame.cropped { aspect-ratio: auto !important; height: auto !important; }
+  .frame.cropped > .zoom { position: relative !important; left: 0 !important; top: 0 !important; width: 100% !important; height: auto !important; }
+  .frame.cropped > .zoom > img { position: static !important; width: 100% !important; height: auto !important; }
+}
+@media print { .card > .next { display: none !important; } details::details-content { content-visibility: visible !important; display: block !important; } .faq details > div { display: block !important; } }
+.chapter .card .zones > svg { min-width: 0; width: 100%; height: auto; }  /* the whole plan fits on a phone instead of scrolling */
+@media (min-width: 900px) { .ends { grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); max-width: 64rem; } }
+.more a, .next a { font-weight: 600; }
+.next:empty { display: none; }
+.next { padding-bottom: 10px; border-bottom: 1px dashed var(--line); }
+.frame.photo img { aspect-ratio: auto; }
+.todo.review { margin: 24px 0 0; }
+/* flow choice */
+.flow-switch { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; flex: none; }
+.flow-switch button { font: 600 var(--step--1) var(--f-body); color: var(--muted); background: transparent; border: 0; padding: 5px 10px; cursor: pointer; }
+.flow-switch button[aria-pressed="true"] { background: var(--brand); color: #fff; }
+.phones .frame .pin { width: 16px; height: 16px; font-size: 9px; border-width: 1.5px; }
+/* repeated attribute: must outrank the card layout rules that force display: grid */
+html[data-flow="mep"] [data-flow="ks"][data-flow][data-flow][data-flow][data-flow], html[data-flow="ks"] [data-flow="mep"][data-flow][data-flow][data-flow][data-flow] { display: none !important; }
+/* cover: the two flow cards are the choice */
+.cover > .flows { align-content: center; grid-template-rows: auto auto auto !important; }
+.fw-q { font: 700 var(--step-2) var(--f-display); color: var(--ink); }
+.fw.pickable { cursor: pointer; background: var(--paper); border: 2px solid var(--line); border-radius: calc(var(--radius) + 4px);
+  padding: 16px 18px 18px; transition: border-color .15s, box-shadow .15s, opacity .15s, transform .15s; }
+.fw.pickable:hover, .fw.pickable:focus-visible { border-color: var(--brand); outline: none; transform: translateY(-2px); box-shadow: var(--shadow); }
+.fw.pickable[aria-pressed="true"] { border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-soft), var(--shadow); }
+/* phones: the two cards sit side by side, each flow reads top to bottom, so both choices are on one screen */
+@media (max-width: 700px) {
+  .cover > .flows { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto auto !important; gap: 10px; }
+  .fw-q { grid-column: 1 / -1; font-size: var(--step-1); }
+  .fw.pickable { padding: 10px 10px 12px; gap: 8px; align-content: start; }
+  .fw-t { display: grid; gap: 2px; font-size: var(--step--2); }
+  .fw-t .pill { justify-self: start; }
+  .fw-steps { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .fw-steps li:not(:last-child)::after { content: "↓"; right: auto; left: 50%; top: auto; bottom: -18px; transform: translateX(-50%); width: 16px; height: 16px; font-size: 10px; }
+  .fw-img { aspect-ratio: 16 / 9; }
+  .fw-steps b { font-size: var(--step--1); margin-top: 2px; }
+  .fw-steps small { font-size: var(--step--2); }
+}
+/* phones: the choice comes right after the intro, not below a full empty screen */
+@media (max-width: 1079px) { .cover-text { min-height: 0 !important; } .cover .scroll-cue { display: none; } .cover > .flows { margin-top: 8px; } }
+@media (max-width: 640px) { .flow-switch button { padding: 4px 8px; } }
+
+
+/* steps beside a row of phone screens */
+@media (min-width: 900px) {
+  .grid-2.phone-pair { grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 12px 28px; }
+  .phone-pair > .phones { grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: 150px; margin: 0; }
+}
+.prereq.solo { grid-template-columns: minmax(0, 1fr); }
+figure.shot.mail .frame { max-width: 360px; }
+.grid-2 > .note { align-self: start; }
+/* cover: title and app box on one row, the two project types side by side under the question */
+.fw-steps li .fw-img { animation: none !important; }
+@media (min-width: 1080px) {
+  .cover { min-height: 0 !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; grid-template-rows: auto auto !important;
+    align-items: start !important; padding-block: 40px 32px !important; row-gap: 40px !important; }
+  .cover > .cover-text { grid-column: 1 / -1; grid-row: 1 !important; min-height: 0 !important; display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 48px; row-gap: 14px; align-items: center; align-content: start; }
+  .cover-text > h1, .cover-text > .lede { grid-column: 1; }
+  .cover-text > h1 { align-self: end; } .cover-text > .lede { align-self: start; }
+  .cover-text > .get-app { grid-column: 2; grid-row: 1 / span 2; }
+  .cover > .flows { grid-column: 1 / -1; grid-row: 2 !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto auto !important;
+    gap: 14px 24px; align-self: start; margin: 0; }
+  .fw-q { grid-column: 1 / -1; }
+  .cover > .scroll-cue { display: none !important; }
+}
+@media (min-width: 701px) and (max-width: 1079px) {
+  .cover > .flows { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto auto !important; gap: 12px 16px; }
+  .fw-q { grid-column: 1 / -1; }
+}
+/* one card per task, the same everywhere: white panel, title, steps, then a large picture */
+.chapter > .card { max-width: 64rem; background: var(--paper); border: 1px solid var(--line); border-radius: 14px;
+  padding: clamp(16px, 2.4vw, 30px); display: grid; gap: 18px; box-shadow: 0 1px 2px rgba(10, 21, 66, .05); min-width: 0; }
+.chapter > .card + .card { margin-top: 4px; }
+.chapter > .card > * { max-width: none !important; min-width: 0; }
+.chapter > .card > h3 { counter-increment: sub; font-size: var(--step-2); padding-top: 0; }
+.chapter > .card > h3::before { content: counter(sec) "." counter(sub); display: inline-block; min-width: 2.6em; margin-right: .4em; color: var(--muted); font-weight: 600; }
+.chapter > .card > .card-meta { margin-top: -12px; }
+.chapter > .card > .next { padding: 12px 0 0; border-top: 1px solid var(--line); border-bottom: 0; }
+.chapter > .card > .next:empty { display: none; }
+/* steps above, picture below at full card width, so screen text stays readable */
+.chapter .card .grid-2 { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 16px !important; align-items: start; }
+.chapter .card .grid-2 > figure.shot { display: grid !important; order: 0 !important; }
+.chapter .card .grid-2 > * { grid-column: auto !important; grid-row: auto !important; }
+/* the same round step numbers everywhere (the guide draws them square beside pictures) */
+.chapter .card ol.proc { gap: 12px; font-size: var(--step-0); line-height: 1.6; }
+.chapter .card ol.proc > li { grid-template-columns: 2rem minmax(0, 1fr) !important; gap: 12px !important; }
+.chapter .card ol.proc > li::before { width: 2rem !important; height: 2rem !important; border-radius: 50% !important; margin-top: 0 !important; }
+.chapter .card ol.proc > li > div { padding-top: 3px !important; }
+.chapter .card .grid-2 > figure.shot > .frame, .chapter .card .grid-2 > figure.shot > figcaption { grid-column: auto !important; grid-row: auto !important; }
+.chapter .card figure.shot { margin: 0; gap: 8px; }
+/* reference pictures with a numbered legend: picture full width, legend below in two columns */
+.chapter .card figure.shot:has(> ol.legend) { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 14px !important; }
+.chapter .card figure.shot:has(> ol.legend) > * { grid-column: auto !important; grid-row: auto !important; }
+.chapter .card figure.shot > ol.legend { grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)) !important; }
+.chapter .card figure.shot:not(.phone) { width: 100%; justify-self: stretch; }
+.chapter .card figure.shot:not(.phone) > .frame { width: 100%; }
+/* sizes by kind: full screens use the card width, dialogs and photos a calmer width, centred like the screens */
+.chapter .card figure.shot.mail > .frame { max-width: 320px; }
+.chapter .card figure.shot.scene > .frame { max-width: 640px; }
+.chapter .card figure.shot.scene.narrow > .frame { max-width: 460px; }
+.chapter .card figure.shot.dialog, .chapter .card figure.shot.mail, .chapter .card figure.shot.scene { justify-items: start; }
+/* every web screen at one zoom: a crop takes its share of the card width, like the full screen it came from */
+.chapter .card figure.shot > .frame.cropped[style*="--crop-w"] { width: var(--crop-w) !important; max-width: none !important; }
+@media (max-width: 640px) { .chapter .card figure.shot > .frame.cropped[style*="--crop-w"] { width: 100% !important; } }
+@media print { .chapter .card figure.shot > .frame.cropped[style*="--crop-w"] { width: 100% !important; } .chapter .card .grid-2 { grid-template-columns: minmax(0, 1fr) !important; } }
+/* print: phone rows wrap instead of scrolling, and no picture, row or note is split by a page break */
+@media print {
+  .chapter .card .phones, .phone-pair > .phones { display: block !important; overflow: visible !important; }
+  .chapter .card .phones > figure.phone { display: inline-block !important; vertical-align: top; margin: 0 4mm 4mm 0 !important; }
+  .chapter .card .phones figure.phone, .chapter .card .phones .frame { width: 46mm !important; max-width: 46mm !important; }
+  figure:not(.phone), .phones, .note, tr, .compare .row, ol.proc > li { break-inside: avoid; page-break-inside: avoid; }
+  .chapter .card .phones { display: flow-root !important; }
+  h3 { break-after: avoid; page-break-after: avoid; }
+  /* a grid row cannot split across pages, so on paper the two-column blocks flow as normal blocks */
+  section.chapter, .chapter .card, .chapter .card .grid-2 { display: block !important; }
+  section.chapter > * + *, .chapter .card > * + * { margin-top: 4mm !important; }
+  .chapter .card .grid-2 > * + * { margin-top: 4mm !important; }
+}
+/* boxes sit a little outside the control, the same gap all round; pins move out with them */
+.frame .box { box-sizing: content-box; padding: 5px; margin: -5px 0 0 -5px; border-radius: 7px; }
+/* a box over the app's black control bar: white line with a navy halo stays visible on dark and light parts */
+.on-dark .frame .box { border-color: #fff !important; box-shadow: 0 0 0 1.5px var(--brand) !important; }
+.frame .pin:not(.c):not(.r):not(.t):not(.b) { transform: translate(calc(-100% - 10px), -50%) !important; }
+.frame .pin.r { transform: translate(10px, -50%) !important; }
+.frame .pin.t { transform: translate(-50%, calc(-100% - 10px)) !important; }
+.frame .pin.b { transform: translate(-50%, 10px) !important; }
+.frame .pin.tl { margin: -5px 0 0 -5px; }
+/* a number placed on a corner or a set point is the same size as the others (it used the container width) */
+.frame .pin.c { width: clamp(18px, 2.2vw, 28px) !important; height: clamp(18px, 2.2vw, 28px) !important; font-size: clamp(10px, 1.2vw, 14px) !important; }
+.phones .frame .pin.c { width: 16px !important; height: 16px !important; font-size: 9px !important; }  /* phone shots keep their small numbers */
+/* narrow screens: a web screenshot is only ~340 px wide, so boxes lose their padding (the edge would cut the text
+   next to them) and phone-shot numbers get smaller than web-shot ones */
+@media (max-width: 640px) {
+  .chapter .card figure.shot:not(.phone):not(.form) .frame .box { padding: 1px !important; margin: -1px 0 0 -1px !important; }
+  .phones .frame .pin, .phones .frame .pin.c { width: 13px !important; height: 13px !important; font-size: 8px !important; border-width: 1.2px !important; }
+}
+.frame .box.tight { padding: 1px; margin: -1px 0 0 -1px; }
+/* the 3-column troubleshooting table becomes one block per problem on a phone, each cell under its column name */
+@media (max-width: 640px) {
+  .tbl.stack { overflow: visible; }
+  .tbl.stack thead { display: none; }
+  .tbl.stack table, .tbl.stack tbody, .tbl.stack tr, .tbl.stack td { display: block; width: auto; }
+  .tbl.stack tr { padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  .tbl.stack tr:last-child { border-bottom: 0; }
+  .tbl.stack td { padding: 2px 0; border: 0; }
+  .tbl.stack td:first-child { font-weight: 700; padding-bottom: 4px; }
+  .tbl.stack td:not(:first-child)::before { content: attr(data-label) ": "; color: var(--muted); font-weight: 600; }
+}
+/* contrast to WCAG AA: table heads, the OK label and the footer */
+main th, .foot span { color: hsl(220 12% 38%); }
+.compare .card.ok figcaption b { color: #1b7443; }
+/* on a phone the screen is only ~340px wide: smaller numbers and a smaller gap keep them off each other */
+@media (max-width: 640px) {
+  .frame .pin:not(.c) { width: 15px; height: 15px; font-size: 9px; border-width: 1.5px; }
+  .frame .pin.c { width: 15px !important; height: 15px !important; font-size: 9px !important; }
+  .frame .box:not(.tight) { padding: 3px; margin: -3px 0 0 -3px; }
+  .frame .pin:not(.c):not(.r):not(.t):not(.b) { transform: translate(calc(-100% - 6px), -50%) !important; }
+  .frame .pin.r { transform: translate(6px, -50%) !important; }
+  .frame .pin.t { transform: translate(-50%, calc(-100% - 6px)) !important; }
+  .frame .pin.b { transform: translate(-50%, 6px) !important; }
+  .frame .pin.tl { margin: -3px 0 0 -3px; }
+}
+/* one column everywhere: steps, then pictures, then branches one under the other */
+.chapter .card .branch { grid-template-columns: minmax(0, 1fr) !important; }
+/* notes in the app's colours: navy for what to prepare and the result, warm only for problems */
+.chapter .card .note { background: var(--bg); color: var(--ink); border-left: 3px solid var(--line); border-radius: 0 var(--radius) var(--radius) 0; }
+.chapter .card .note b.t { color: var(--brand-ink); }
+.chapter .card .note.tip { background: var(--brand-soft); border-left-color: var(--brand); color: var(--ink); }
+.chapter .card .note.tip b.t::before { content: "✓ "; }
+.chapter .card .note.warn { background: var(--warn-bg); border-left-color: #d98b2b; color: var(--ink); }
+.chapter .card .note.warn b.t { color: var(--warn-ink); }
+.pill.ks { background: var(--brand-soft); color: var(--brand-ink); }
+/* phone screens: steps on the left, phones on the right, every phone the same size */
+.chapter .card .phones { display: grid; grid-template-columns: repeat(auto-fill, 210px); gap: 16px; margin: 0; justify-content: start; }
+.chapter .card .phones figure.phone { width: 210px; }
+.chapter .card .phones .frame { max-width: 210px; width: 210px; border-radius: 18px; }
+.chapter .card .phones figcaption { max-width: 210px; }
+.chapter .card .grid-2.phone-pair > .tbl { order: 0; }
+@media (max-width: 640px) {
+  .chapter .card .phones { grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: 62%; overflow-x: auto; padding-bottom: 6px; }
+  .chapter .card .phones figure.phone, .chapter .card .phones .frame, .chapter .card .phones figcaption { width: 100%; max-width: none; }
+  .chapter .card .grid-2:has(> figure.shot ~ figure.shot) { grid-template-columns: minmax(0, 1fr) !important; }
+}
+.chapter .card .branch { max-width: none; }
+.chapter .card .arm { background: var(--bg); border-color: var(--line); }
+.chapter .card .arm .phones { grid-template-columns: repeat(auto-fill, 210px); }
+.chapter .card .prereq.solo { padding: 0; border: 0; background: none; }
+.chapter .card .ends { max-width: none; }
+/* the cover always fills exactly one screen: picture heights, gaps and type follow the window height */
+.cover { min-height: calc(100svh - var(--topbar-h)) !important; box-sizing: border-box; align-content: center !important;
+  padding-block: clamp(10px, 3vh, 40px) !important; row-gap: clamp(10px, 3.2vh, 40px) !important; }
+.cover-text { min-height: 0 !important; gap: clamp(8px, 1.6vh, 16px) !important; }
+.cover h1 { font-size: clamp(1.5rem, min(5.2vh, 4.4vw), 3.2rem) !important; }
+.cover .lede { font-size: clamp(.8rem, 1.75vh, 1.05rem); color: var(--ink-2, #3d4556); }  /* --muted on the cover tint is 4.4:1, below AA */
+.cover .get-app { padding: clamp(8px, 1.4vh, 14px) clamp(10px, 1.6vh, 18px); row-gap: clamp(6px, 1vh, 12px); }
+.cover .ga-qr { width: clamp(64px, 10vh, 112px); height: clamp(64px, 10vh, 112px); }
+.cover .flows { gap: clamp(8px, 1.6vh, 14px) clamp(12px, 1.8vw, 24px) !important; }
+.fw-q { font-size: clamp(.95rem, 2.2vh, 1.25rem) !important; }
+.fw.pickable { padding: clamp(8px, 1.6vh, 18px) clamp(10px, 1.4vw, 18px) !important; gap: clamp(6px, 1.2vh, 10px) !important; }
+.fw-steps { gap: clamp(10px, 1.8vw, 28px); }
+.fw-img { aspect-ratio: auto !important; height: clamp(54px, 17vh, 200px); }
+.fw-img svg { height: 92%; width: auto; max-width: 92%; }
+.fw-steps b { font-size: clamp(.72rem, 1.5vh, .875rem); margin-top: 2px; }
+.fw-steps small { font-size: clamp(.66rem, 1.3vh, .75rem); }
+.cover .scroll-cue { display: none !important; }
+@media (max-height: 700px) { .cover .ga-dev { display: none; } }
+@media (max-width: 700px) and (max-height: 760px) { .cover .lede { display: none; } }
+@media (max-width: 1079px) {
+  .cover { grid-template-columns: minmax(0, 1fr) !important; grid-template-rows: auto auto !important; }
+  .cover > .cover-text, .cover > .flows { grid-row: auto !important; align-self: start !important; }
+  .cover .ga-dev { display: none; }
+  .cover .ga-s { display: none; }
+}
+@media (max-width: 700px) {
+  .cover h1 { font-size: clamp(1.15rem, 3.1vh, 1.75rem) !important; }
+  .cover { row-gap: clamp(8px, 1.6vh, 16px) !important; padding-block: 8px 8px !important; }
+  .fw.pickable { padding: 8px 8px 10px !important; }
+  .fw-steps { gap: 12px !important; }
+  .cover .fw-t { padding-bottom: 4px; }
+  .cover .lede { font-size: clamp(.75rem, 1.6vh, .9rem); }
+  .fw-steps { gap: clamp(10px, 1.6vh, 16px); }
+  .cover .fw-steps .fw-img { height: clamp(30px, 6.2vh, 100px) !important; aspect-ratio: auto !important; }
+  .fw-steps small { display: none; }
+  .cover .fw-t { font-size: .68rem; }
+  .cover .get-app { grid-template-columns: 1fr; }
+  .cover .ga-qr { display: none; }
+  .fw-steps li:not(:last-child)::after { bottom: calc(-1 * clamp(10px, 1.6vh, 16px)); width: 14px; height: 14px; }
+}
+/* the subtitle beside the logo stays on one line, or steps aside when the bar is too tight */
+.topbar .brand small { white-space: nowrap; }
+@media (max-width: 760px) { .topbar .brand small { display: none; } }
+/* wide cover cards: the gap between pictures shrinks with the screen, so the arrow is centred in whatever gap there
+   is and drawn above the pictures (at 768 px the gap is narrower than the arrow) */
+@media (min-width: 701px) {
+  .cover .fw-steps { --g: clamp(18px, 2.2vw, 28px); gap: var(--g) !important; }
+  .cover .fw-steps li:not(:last-child)::after { right: calc(var(--g) / -2 - 9px); width: 18px; height: 18px; z-index: 1; }
+}
+/* data diagram on phones: the side branch (Vị trí has many Vấn đề) sits beside Vị trí, so the main down arrow goes
+   from Vị trí to Bản quét and is not read as "an issue has many scans" */
+@media (max-width: 640px) {
+  .fdg:not(.ifc-flow) .fd-col:has(> .fd-br) { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 6px; align-items: stretch; }
+  .fdg:not(.ifc-flow) .fd-col:has(> .fd-br) > .fd-br { margin: 0 !important; grid-template-rows: auto 1fr; gap: 4px; }
+  .fdg:not(.ifc-flow) .fd-col:has(> .fd-br) .fd-link { border-left: 0; margin-left: 0; padding-left: 0; height: auto; }
+  .fdg:not(.ifc-flow) .fd-col:has(> .fd-br) .fd-link::before { content: "→"; position: static; width: auto; height: auto; border: 0; margin: 0; font-size: 14px; line-height: 1; }
+}
+/* every picture in a task card starts at the left edge of its column, like the text above it (the login dialog
+   alone was centred) */
+.chapter .card figure.shot { justify-items: start !important; }
+.chapter .card figure.shot > .frame { margin-left: 0 !important; margin-right: auto !important; justify-self: start !important; }
+.chapter .card figure.shot > figcaption { justify-self: start; text-align: left; }
+/* narrow cards: each step is one row, picture left and its name right; the arrow sits under the picture's
+   centre and fills the gap down to the next picture */
+@media (max-width: 700px) {
+  .cover .fw-steps { gap: 14px !important; }
+  .cover .fw-steps li { grid-template-columns: 56px minmax(0, 1fr); column-gap: 10px; align-items: center; }
+  .cover .fw-steps .fw-img { width: 56px; height: 44px !important; grid-row: 1 / span 2; }
+  .cover .fw-steps .fw-img svg { height: 90%; max-width: 90%; }
+  /* the steps run top to bottom here: the arrow nudges downwards, the way it points, and stays centred under the picture */
+  .fw-steps li:not(:last-child)::after { animation-name: nudge-down !important; }
+  @keyframes nudge-down { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(3px); } }
+  .cover .fw-steps b { grid-column: 2; grid-row: 1 / span 2; margin: 0; line-height: 1.25; }
+  .cover .fw-t .pill { white-space: normal; }
+  .cover .fw-steps li:not(:last-child)::after { left: 28px; right: auto; top: auto; bottom: -14px; transform: translateX(-50%);
+    width: 14px; height: 14px; display: grid; place-items: center; line-height: 1; }
+}

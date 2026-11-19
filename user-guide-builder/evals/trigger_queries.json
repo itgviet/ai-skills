@@ -1,0 +1,22 @@
+[
+  {"query": "làm trang hướng dẫn sử dụng cho app quản lý kho, có ảnh chụp màn hình", "should_trigger": true},
+  {"query": "ghi chú lên ảnh chụp màn hình trong hướng dẫn, đánh số theo bước", "should_trigger": true},
+  {"query": "hướng dẫn này chưa chuyên nghiệp, sửa lại cho dễ đọc dễ hiểu", "should_trigger": true},
+  {"query": "ghim số 3 đang che chữ trên ảnh hướng dẫn ở màn điện thoại", "should_trigger": true},
+  {"query": "cập nhật bản hướng dẫn lên server review 151", "should_trigger": true},
+  {"query": "write an end-user help page for our mobile app with annotated screenshots", "should_trigger": true},
+  {"query": "user guide cho khách hàng, chia theo vai trò quản trị và nhân viên", "should_trigger": true},
+  {"query": "review lại trang hướng dẫn tới khi không còn lỗi", "should_trigger": true},
+  {"query": "khung cắt ảnh trong hướng dẫn đang cắt đôi hàng bảng", "should_trigger": true},
+  {"query": "bản hướng dẫn online thiếu ảnh dù máy mình thấy đủ", "should_trigger": true},
+  {"query": "viết tài liệu hệ thống cho repo này, có sơ đồ API và schema", "should_trigger": false},
+  {"query": "vẽ sơ đồ luồng xử lý đơn hàng dạng tương tác", "should_trigger": false},
+  {"query": "vẽ icon app và banner cho store", "should_trigger": false},
+  {"query": "dịch trang hướng dẫn sang tiếng Nhật cho tự nhiên", "should_trigger": false},
+  {"query": "làm screenshot cho Google Play listing", "should_trigger": false},
+  {"query": "viết README cho thư viện npm này", "should_trigger": false},
+  {"query": "thiết kế lại màn hình đăng nhập cho đẹp hơn", "should_trigger": false},
+  {"query": "viết release notes cho bản 4.2", "should_trigger": false},
+  {"query": "deploy bản frontend mới lên production", "should_trigger": false},
+  {"query": "onboard người mới vào codebase, giải thích kiến trúc", "should_trigger": false}
+]

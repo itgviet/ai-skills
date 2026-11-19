@@ -1,0 +1,34 @@
+<!-- One task card. Copy, fill, keep the class names: guide-runtime.js/.css depend on them.
+  data-flow="<flow-id>" on a card, chapter, figure, table row or <i class="fl"> hides it outside that flow.
+  data-hp pins, numbered by step (the pin number is the step number in the list above it):
+    "n:x,y,w,h"          box in % of the FULL image, number placed on the side that fits
+    "n:x,y,w,h:side"     side = l r t b tl lb ... (where the number sits)
+    "n:x,y,w,h:@px,py"   box, number at an exact point (crowded shots where every side covers text)
+    "n:@m[:side]"        box measured on the live app (marks.js, data-ref="shot-id")
+    "n:x,y"              number only, at a point
+  data-crop="x0,y0,x1,y1" shows only that part of the image (% of the full image); pins keep full-image coordinates.
+  Extra figure classes: .phone (phone screenshot), .dialog (dialog crop), .form (keeps box padding on phones),
+  .on-dark (white box line for dark UI). -->
+<div class="card" data-flow="<flow-id or remove>">
+  <h3 id="<task-id>"><Task title, a verb phrase></h3>
+  <p class="card-meta"><Trên web | Trên app> · Khoảng <N> phút · Dành cho <role></p>
+  <p><One or two sentences: why the reader does this and what they need first.></p>
+  <div class="grid-2">
+    <ol class="proc">
+      <li><div><b><Action first: Bấm <span class="ui">Exact button label</span>.></b><span><What happens next, or the exception.></span></div></li>
+      <li><div><b><Next action.></b></div></li>
+    </ol>
+    <figure class="shot" data-crop="0,0,100,60" data-hp="1:80,8,12,4;2:@3">
+      <div class="frame"><img src="assets/img/<lang>/<screen>.webp" alt="<what the screen is>" loading="lazy" width="1920" height="1200"></div>
+      <figcaption><Only what the picture shows; omit if the steps already say it.></figcaption>
+    </figure>
+  </div>
+  <div class="note tip"><b class="t">Kết quả</b><span><What the reader sees when it worked.></span></div>
+  <div class="note warn"><b class="t">Nếu <the common problem></b><span><Fix in one or two sentences.></span></div>
+</div><!--/card-->
+
+<!-- Phone screenshots in a row (scrolls sideways on narrow screens):
+<div class="phones">
+  <figure class="shot phone" data-hp="3:25,20.4,45.5,3.68:r"><div class="frame tall"><img src="assets/img/<lang>/app-pNN.webp" alt="..." loading="lazy" width="600" height="1302"></div><figcaption><b>Bước 3</b> <short label></figcaption></figure>
+</div>
+Inline wording that differs per flow inside a sentence: <i class="fl" data-flow="a">ví dụ A</i><i class="fl" data-flow="b">ví dụ B</i> -->

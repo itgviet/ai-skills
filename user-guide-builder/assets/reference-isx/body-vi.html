@@ -1,0 +1,862 @@
+<!-- Task-card guide, Vietnamese. Source for make_guide.py.
+  <div class="card" [data-flow="mep|ks"]> ... </div><!--/card-->  one task; the page script lifts its children into the chapter.
+  <figure class="shot" data-ref="shot-id" data-hp="1:@2;2:x,y,w,h:t;3:x,y">  pins numbered by step:
+    @m = box measured on the live page (assets/marks.js), x,y,w,h = box in % of the full image, x,y = point; :side = l r t b tl.
+  <!--FIG:name-->  a figure or block copied from src/vi.html.
+  Tone: customer service. Full sentences, address the reader as "bạn", say what happens after each step. -->
+
+<section class="chapter" id="bat-dau">
+  <div class="ch-head"><h2>Bắt đầu</h2></div>
+
+  <div class="card">
+  <h3 id="dang-ky">Đăng ký tài khoản công ty</h3>
+  <p class="card-meta">Trên web · Khoảng 5 phút · Dành cho người đăng ký đầu tiên của công ty</p>
+  <p>Nếu công ty bạn chưa có tài khoản InsightScanX, bạn có thể tự đăng ký. Người đăng ký sẽ trở thành Quản trị tổ chức của công ty. Công ty mới được dùng thử 21&nbsp;ngày; khi muốn dùng tiếp hoặc tăng hạn mức, bạn vui lòng liên hệ InsightScanX (xem <a href="#phu-luc">Phụ lục</a>).</p>
+  <div class="grid-2">
+    <ol class="proc">
+      <li><div><b>Mở trang đăng nhập và bấm <span class="ui">Tạo tài khoản</span>.</b></div></li>
+      <li><div><b>Nhập tên công ty, người liên hệ, email và mật khẩu.</b><span>Mật khẩu cần có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, chữ số và ký tự đặc biệt. Khung bên phải sẽ đánh dấu từng điều kiện khi bạn nhập đủ.</span></div></li>
+      <li><div><b>Bấm <span class="ui">Tạo tài khoản</span>, sau đó nhập mã xác minh được gửi về email của bạn.</b><span>Nếu chưa thấy thư, bạn hãy kiểm tra thư mục Spam. Khi hết thời gian đếm ngược, bạn có thể bấm <span class="ui">Gửi lại mã</span> để nhận mã mới.</span></div></li>
+    </ol>
+    <figure class="shot dialog form" data-crop="24,15,76,97" data-hp="2:27.8,28.2,23.6,40.4;3:28,72.5,23.3,4.8">
+      <div class="frame"><img src="assets/img/vi/register.webp" alt="Màn hình Tạo tài khoản" loading="lazy" width="1920" height="1200"></div>
+    </figure>
+  </div>
+  <div class="note tip"><b class="t">Kết quả</b><span>Sau khi nhập đúng mã, bạn được đưa thẳng vào bảng điều khiển của công ty vừa tạo.</span></div>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="loi-moi">Nhận lời mời và đăng nhập</h3>
+  <p class="card-meta">Trên web · Khoảng 2 phút · Dành cho người được công ty mời</p>
+  <p>Nếu công ty bạn đã dùng InsightScanX, Quản trị tổ chức sẽ gửi lời mời đến email của bạn.</p>
+  <div class="grid-2">
+    <ol class="proc">
+      <li><div><b>Mở thư mời và bấm <span class="ui">Chấp nhận lời mời</span>.</b><span>Liên kết trong thư chỉ dùng được đến thời điểm hết hạn ghi trong thư. Nếu liên kết đã hết hạn, bạn hãy nhờ người mời bấm <span class="ui">Gửi lại</span> để nhận thư mới.</span></div></li>
+      <li><div><b>Đặt mật khẩu cho tài khoản của bạn.</b></div></li>
+      <li><div><b>Từ lần sau, bạn đăng nhập bằng email (ô <span class="ui">Tên đăng nhập</span>) và mật khẩu vừa đặt.</b><span>Nếu bạn làm việc cho nhiều công ty, hãy chọn công ty sau khi đăng nhập. Bạn có thể đổi sang công ty khác bất cứ lúc nào bằng cách bấm tên công ty ở góc trên bên trái.</span></div></li>
+    </ol>
+    <figure class="shot mail"><div class="frame tall"><img src="assets/brand/real/invite-mail-vi.webp" alt="Thư mời mẫu" loading="lazy" width="1020" height="1372"></div><figcaption>Thư mời mẫu (dữ liệu minh họa).</figcaption></figure>
+  </div>
+  <figure class="shot dialog form" data-ref="login" data-crop="28,12,72,95" data-hp="3:35.39,40.3,29.22,26.9:l">
+    <div class="frame"><img src="assets/img/vi/login.webp" alt="Màn hình đăng nhập" loading="lazy" width="1920" height="1200"></div>
+    <figcaption>Nếu quên mật khẩu, bạn bấm <span class="ui">Quên mật khẩu?</span> để nhận mã đặt lại qua email.</figcaption>
+  </figure>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="moi-nguoi">Mời đồng nghiệp vào công ty</h3>
+  <p class="card-meta">Trên web · Khoảng 2 phút · Dành cho Quản trị tổ chức</p>
+  <div class="grid-2">
+    <ol class="proc">
+      <li><div><b>Vào <span class="ui">Cài đặt</span> › <span class="ui">Người dùng</span> và bấm <span class="ui">Mời người dùng</span>.</b></div></li>
+      <li><div><b>Nhập email của người được mời, chọn vai trò trong công ty, sau đó gửi lời mời.</b><span>Người được mời sẽ nhận thư và làm theo mục <a href="#loi-moi">Nhận lời mời và đăng nhập</a>. Bạn có thể xem các lời mời còn đang chờ ở thẻ <span class="ui">Lời mời</span>.</span></div></li>
+    </ol>
+    <figure class="shot" data-crop="0,0,100,64.5" data-hp="1:87.03,8.25,11.72,4">
+      <div class="frame"><img src="assets/img/vi/users.webp" alt="Quản lý người dùng" loading="lazy" width="1920" height="1200"></div>
+    </figure>
+  </div>
+  <p>Người mới vào công ty sẽ chưa thấy dự án nào cho đến khi được thêm vào dự án. Bạn xem cách thêm ở mục <a href="#thanh-vien">Thêm thành viên vào dự án</a>.</p>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="cai-app">Cài app và đăng nhập trên iPhone</h3>
+  <p class="card-meta">Trên iPhone · Khoảng 3 phút</p>
+  <div class="note"><b class="t">Bạn cần chuẩn bị</b><ul><li>iPhone hoặc iPad dòng Pro có cảm biến LiDAR, chạy iOS 17 trở lên</li><li>Tài khoản web đã kích hoạt</li></ul></div>
+  <ol class="proc">
+    <li><div><b>Tải app InsightScanX:</b> quét mã QR, bấm nút App Store ở <a href="#top">đầu trang</a> hoặc tìm “InsightScanX” trên App Store.</div></li>
+    <li><div><b>Chuyển ngôn ngữ sang Tiếng Việt</b> bằng biểu tượng lá cờ ở góc trên màn đăng nhập.<span>App mặc định hiển thị tiếng Nhật và sẽ ghi nhớ ngôn ngữ bạn chọn.</span></div></li>
+    <li><div><b>Đăng nhập bằng email và mật khẩu của tài khoản web.</b><span>Nếu bạn thuộc nhiều công ty, hãy chọn công ty ở màn <span class="ui">Chọn tổ chức</span>.</span></div></li>
+    <li><div><b>Nhờ Quản trị tổ chức duyệt máy</b> nếu app hiện <span class="ui">Chờ phê duyệt thiết bị</span> (xem <a href="#duyet-thiet-bi">Duyệt thiết bị</a>), sau đó bấm <span class="ui">Thử lại</span>.</div></li>
+  </ol>
+  <div class="phones">
+    <figure class="shot phone" data-hp="2:72,9.83,20,5.22:b;3:6.33,37.3,87.67,11.8:tl"><div class="frame tall"><img src="assets/img/vi/app-p01.webp" alt="Đăng nhập" loading="lazy" width="600" height="1302"></div><figcaption><b>Bước 2–3</b> Màn đăng nhập</figcaption></figure>
+    <figure class="shot phone"><div class="frame tall"><img src="assets/img/vi/app-p02.webp" alt="Chọn tổ chức" loading="lazy" width="600" height="1302"></div><figcaption><b>Bước 3</b> Chọn tổ chức</figcaption></figure>
+    <figure class="shot phone"><div class="frame tall"><img src="assets/img/vi/app-p03.webp" alt="Chờ phê duyệt thiết bị" loading="lazy" width="600" height="1302"></div><figcaption><b>Bước 4</b> Chờ phê duyệt thiết bị</figcaption></figure>
+  </div>
+  <div class="note tip"><b class="t">Kết quả</b><span>App mở tab <span class="ui">Quét 3D</span> với danh sách dự án của bạn. Bạn nên mở dự án một lần khi còn mạng: app sẽ lưu sẵn danh sách vị trí, nên khi xuống tầng hầm mất sóng bạn vẫn chọn được vị trí để quét.</span></div>
+  </div><!--/card-->
+</section>
+
+<section class="chapter" id="chuan-bi">
+  <div class="ch-head"><h2>Chuẩn bị</h2></div>
+
+  <div class="card">
+  <h3 id="tao-du-an">Tạo dự án</h3>
+  <p class="card-meta">Trên web · Khoảng 2 phút</p>
+  <div class="note"><b class="t">Bạn cần chuẩn bị</b><ul><li>Vai trò Quản trị tổ chức hoặc Quản lý dự án</li><li>Tên công trình và loại công trình</li></ul></div>
+  <div class="grid-2">
+    <ol class="proc">
+      <li><div><b>Vào mục <span class="ui">Dự án</span> và bấm <span class="ui">Dự án mới</span> ở góc trên bên phải.</b></div></li>
+    </ol>
+    <figure class="shot" data-ref="projects" data-crop="18.4,0,100,49" data-hp="1:@2">
+      <div class="frame"><img src="assets/img/vi/projects.webp" alt="Danh sách dự án" loading="lazy" width="1920" height="1200"></div>
+    </figure>
+  </div>
+  <div class="grid-2">
+    <ol class="proc" style="counter-reset:s 1">
+      <li><div><b>Chọn mục đích sử dụng phù hợp với kết quả bạn cần bàn giao.</b><span>Chọn <b>Thiết bị &amp; Đường ống (MEP)</b> cho phòng máy, phòng bơm, trục ống; kết quả có mô hình đường ống xuất được IFC. Chọn <b>Khảo sát mặt bằng &amp; Không gian trong nhà</b> cho văn phòng, căn hộ, cửa hàng; kết quả có mô hình BIM và mặt bằng 2D.</span></div></li>
+      <li><div><b>Nhập tên dự án và chọn loại công trình.</b><span>Địa chỉ và Tổng quan dự án có thể bỏ trống.</span></div></li>
+      <li><div><b>Bấm <span class="ui">Tiếp theo: Vị trí</span>.</b><span>Hai bước Vị trí và Thành viên có thể bỏ qua và bổ sung sau. Cuối cùng, bạn bấm <span class="ui">Tạo dự án</span>.</span></div></li>
+    </ol>
+    <figure class="shot form" data-crop="18.4,0,100,86" data-hp="2:19.1,19.6,60.6,13.25:r;3:19.1,34.2,60.6,9.6:r;4:68.28,74.5,12.66,5">
+      <div class="frame"><img src="assets/img/vi/project-new.webp" alt="Tạo dự án, bước 1 trên 3" loading="lazy" width="1920" height="1200"></div>
+    </figure>
+  </div>
+  <div class="ends"><div class="note tip"><b class="t">Kết quả</b><span>Dự án mới xuất hiện ở đầu danh sách <b>Dự án</b> với trạng thái <b>Đang hoạt động</b>.</span></div>
+  <div class="note warn"><b class="t">Nếu bạn không thấy nút Dự án mới</b><span>Tài khoản của bạn chưa có quyền tạo dự án. Bạn hãy nhờ Quản trị tổ chức tạo giúp, hoặc đề nghị cấp vai trò phù hợp.</span></div></div>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="vi-tri">Thêm vị trí</h3>
+  <p class="card-meta">Trên web · Khoảng 1 phút cho mỗi vị trí</p>
+  <p>Mỗi tầng hoặc mỗi phòng cần quét là một vị trí trong dự án. Bạn nên đặt tên theo cách đội ngoài công trường vẫn gọi, ví dụ <span data-flow="mep">“Hầm B1, phòng bơm”</span><span data-flow="ks">“Tầng 5, khu làm việc”</span>, vì app sẽ hiện đúng tên này để người quét chọn.</p>
+  <div class="grid-2">
+    <ol class="proc">
+      <li><div><b>Mở dự án, vào <span class="ui">Vị trí</span> và bấm <span class="ui">Vị trí mới</span>.</b></div></li>
+    </ol>
+    <figure class="shot" data-ref="locations" data-crop="18.4,0,100,64" data-hp="1:@2">
+      <div class="frame"><img src="assets/img/vi/locations.webp" alt="Danh sách vị trí" loading="lazy" width="1920" height="1200"></div>
+    </figure>
+  </div>
+  <div class="grid-2">
+    <ol class="proc" style="counter-reset:s 1">
+      <li><div><b>Nhập tên vị trí.</b><span>Ô <span class="ui">Loại vị trí</span><span data-flow="mep"> (Phòng máy, Trần, Hộp kỹ thuật…)</span> không bắt buộc, nhưng giúp hệ thống nhận diện <span data-flow="mep">thiết bị</span><span data-flow="ks">đồ vật</span> bằng AI chính xác hơn.</span></div></li>
+      <li><div><b>Bấm <span class="ui">Vị trí mới</span> để lưu.</b><span>Nếu cần tạo nhiều vị trí liên tiếp, bạn bấm <span class="ui">Tạo và thêm tiếp</span>.</span></div></li>
+    </ol>
+    <figure class="shot dialog" data-crop="29.85,19.4,70.15,80.5" data-hp="2:32.97,35.08,34.06,5.08;3:58.75,73.33,9.58,5:t">
+      <div class="frame"><img src="assets/img/vi/location-new.webp" alt="Hộp thoại Vị trí mới" loading="lazy" width="1920" height="1200"></div>
+    </figure>
+  </div>
+  <p>Khi có mạng, bạn cũng có thể tạo vị trí ngay trên app bằng nút <span class="ui">+</span>.</p>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="thanh-vien">Thêm thành viên vào dự án</h3>
+  <p class="card-meta">Trên web · Khoảng 1 phút</p>
+  <div class="grid-2">
+    <ol class="proc">
+      <li><div><b>Mở <span class="ui">Cài đặt</span> của dự án và chọn thẻ <span class="ui">Thành viên</span>.</b></div></li>
+      <li><div><b>Bấm <span class="ui">Thêm thành viên</span> để chọn người đã có trong công ty, hoặc <span class="ui">Mời thành viên</span> để mời người mới qua email.</b></div></li>
+      <li><div><b>Chọn vai trò của người đó trong dự án.</b><span>Bạn có thể đổi vai trò sau bằng cách bấm vào nhãn vai trò trong danh sách.</span></div></li>
+    </ol>
+    <figure class="shot" data-crop="18.4,0,100,56" data-hp="2:73.28,8,25.47,4.5:b">
+      <div class="frame"><img src="assets/img/vi/members.webp" alt="Thành viên dự án" loading="lazy" width="1920" height="1200"></div>
+    </figure>
+  </div>
+  <div class="tbl wide"><table>
+    <thead><tr><th>Vai trò trong dự án</th><th>Quyền hạn</th></tr></thead>
+    <tbody>
+      <tr><td>Quản trị viên</td><td>Thực hiện mọi việc trong dự án, kể cả cài đặt dự án.</td></tr>
+      <tr><td>Quản lý dự án</td><td>Cài đặt dự án, thêm người đã có trong công ty, quản lý bản quét và vấn đề.</td></tr>
+      <tr><td>Người kiểm tra</td><td>Quét, tải bản quét lên, tạo và cập nhật vấn đề.</td></tr>
+      <tr><td>Người xem</td><td>Chỉ xem mô hình và vấn đề.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note warn"><b class="t">Lưu ý cho người đi quét</b><span>Người đi quét cần vai trò từ Người kiểm tra trở lên. Với vai trò Người xem, app không cho tải bản quét lên.</span></div>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="in-marker">In marker</h3>
+  <p class="card-meta">Ở văn phòng · Khoảng 10 phút · In một lần, dùng lại cho mọi dự án</p>
+  <p>Marker là ô mã in trên giấy, được dán ở chỗ nối giữa hai khu vực quét để app ghép các khu vực vào đúng vị trí. Một bộ chuẩn gồm 20 marker trên 10 tờ A4, đủ dùng cho 10 chỗ nối.</p>
+  <div class="grid-2">
+    <ol class="proc">
+      <li><div><b>Mở <span class="ui">Vị trí</span> của dự án, bấm <span class="ui">Tải marker</span>, sau đó bấm <span class="ui">Tải PDF (A4)</span>.</b><span>Trên app, bạn vào tab <span class="ui">Tôi</span> › <span class="ui">Marker ghép khu vực</span> › <span class="ui">Xem</span> › <span class="ui">Chia sẻ / In marker</span>.</span></div></li>
+      <li><div><b>In đúng tỷ lệ 100%.</b><span>Bạn hãy tắt tùy chọn “Fit to page” trong hộp thoại in, rồi đo thước 50&nbsp;mm ở cuối trang. Nếu bản in bị lệch cỡ, app sẽ không nhận được marker.</span></div></li>
+      <li><div><b>Cắt marker theo khung 12 × 12&nbsp;cm</b> (phần mã bên trong là 9 × 9&nbsp;cm).<span>Nếu muốn ép plastic, bạn nên dùng màng mờ, vì màng bóng dễ gây lóa.</span></div></li>
+    </ol>
+    <figure class="shot dialog" data-ref="marker-dialog" data-crop="19.4,17,80.6,83" data-hp="1:@2:r">
+      <div class="frame"><img src="assets/img/vi/marker-dialog.webp" alt="Hộp thoại Marker ghép khu vực" loading="lazy" width="1920" height="1200"></div>
+      <figcaption>Các số 1, 2 nhỏ in sẵn trong hộp thoại là lưu ý của app, ứng với bước 2 và 3.</figcaption>
+    </figure>
+  </div>
+  <div class="note warn"><b class="t">Nếu app báo “Marker sai kích thước”</b><span>Trước tiên, bạn lại gần và hướng máy thẳng vào marker như app nhắc. Nếu vẫn báo, bản in đã bị co giãn: hãy in lại riêng tờ đó ở tỷ lệ 100% (dùng <span class="ui">In một phần</span> trong app).</span></div>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="dan-marker">Chia khu vực và dán marker</h3>
+  <p class="card-meta">Ở công trình · Khoảng 15 phút</p>
+  <div class="note"><b class="t">Bạn cần chuẩn bị</b><ul><li>Bộ marker đã in và băng dính hai mặt</li><li>Bản phác mặt bằng khu vực sẽ quét</li></ul></div>
+  <ol class="proc">
+    <li><div><b>Chia không gian thành các khu vực, mỗi khu vực khoảng 30&nbsp;m² trở xuống</b> (cỡ 5 × 6&nbsp;m).<span>Bạn nên chia theo ranh giới tự nhiên: mỗi phòng là một khu vực, phòng lớn thì chia theo trục cột. Ví dụ, <span data-flow="mep">phòng bơm</span><span data-flow="ks">một sàn văn phòng</span> 80&nbsp;m² có thể chia thành 3 khu vực.</span></div></li>
+    <li><div><b>Đánh số các chỗ nối theo thứ tự quét.</b><span>Ví dụ: chỗ nối giữa khu vực 1 và 2 dùng marker #0 và #1, giữa khu vực 2 và 3 dùng #2 và #3. Trong cùng một vị trí, mỗi số chỉ dùng một lần.</span></div></li>
+    <li><div><b>Dán 2 marker ở mỗi chỗ nối, ở độ cao 1,2–1,5&nbsp;m.</b><span>Bạn dán một marker trên tường và một marker trên mặt cột hoặc bệ máy vuông góc với tường, cách nhau hơn 1&nbsp;m. Hãy dán phẳng và chặt cả 4 góc; tránh mặt cong như ống tròn, kính, gương, inox bóng và chỗ ngược sáng.</span></div></li>
+  </ol>
+  <figure class="shot scene narrow"><div class="frame photo"><img src="assets/brand/real/marker-joint.jpg" alt="Hai marker dán ở chỗ nối" loading="lazy" width="840" height="630"></div><figcaption>Ảnh minh họa: marker dán phẳng, chặt cả 4 góc, ở độ cao khoảng 1,3&nbsp;m.</figcaption></figure>
+  <!--FIG:zones-->
+  <div class="ends"><div class="note tip"><b class="t">Kết quả</b><span>Đứng ở khu vực nào bạn cũng nhìn thấy cả hai marker của chỗ nối, và hai marker không nằm trên cùng một mặt phẳng.</span></div>
+  <div class="note warn"><b class="t">Nếu bạn không có marker</b><span>Bạn vẫn quét được: hãy chọn <span class="ui">Chưa có marker</span> khi bắt đầu quét và quét chồng lên khu vực trước ít nhất 20%. Khi đó, các khu vực được ghép theo hình dạng tường và cột, nên độ chính xác sẽ thấp hơn.</span></div></div>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="kiem-tra-truoc">Kiểm tra trước buổi quét</h3>
+  <p class="card-meta">Trước khi ra công trình · Khoảng 5 phút</p>
+  <div class="grid-2 phone-pair">
+    <!--FIG:check-->
+    <div class="phones"><figure class="shot phone"><div class="frame tall"><img src="assets/img/vi/app-p11.webp" alt="App tự kiểm tra thiết bị" loading="lazy" width="600" height="1302"></div><figcaption>Khi bắt đầu quét, app tự kiểm tra pin, bộ nhớ, mạng, độ sáng và LiDAR.</figcaption></figure></div>
+  </div>
+  </div><!--/card-->
+</section>
+
+<section class="chapter" id="quet">
+  <div class="ch-head"><h2>Quét</h2></div>
+
+  <div class="card">
+  <h3 id="bat-dau-quet">Bắt đầu một lần quét</h3>
+  <p class="card-meta">Trên iPhone · Khoảng 1 phút</p>
+  <ol class="proc">
+    <li><div><b>Chọn dự án, mở tab <span class="ui">Quét 3D</span>, chọn vị trí rồi bấm nút <span class="ui">Quét</span></b> ở giữa thanh dưới.</div></li>
+    <li><div><b>Kiểm tra lại dự án và vị trí.</b><span>Ở câu hỏi <span class="ui">Đã dán marker ở ranh giới chưa?</span>, bạn chọn <span class="ui">Đã dán</span> nếu sẽ quét nhiều khu vực nối với nhau bằng marker, sau đó bấm <span class="ui">Tiếp tục</span>.</span></div></li>
+    <li><div><b>Xem kết quả kiểm tra thiết bị và bấm <span class="ui">Tiếp tục</span>.</b><span>Các mục màu đỏ chỉ là cảnh báo. App chỉ dừng lại khi máy không có LiDAR hoặc còn trống dưới 500&nbsp;MB.</span></div></li>
+    <li><div><b>Chọn mức chi tiết và bấm <span class="ui">Bắt đầu quét</span>.</b><span>Mức <span class="ui">Tiêu chuẩn</span> (LiDAR thu điểm trong khoảng 3&nbsp;m) phù hợp với hầu hết các phòng. Mức <span class="ui">Cao</span> (khoảng 1&nbsp;m) dành cho <span data-flow="mep">cụm van và </span>chi tiết nhỏ. Mức <span class="ui">Toàn cảnh</span> (khoảng 5&nbsp;m) dành cho nhà xưởng hoặc trần cao.</span></div></li>
+  </ol>
+  <div class="phones">
+    <figure class="shot phone" data-hp="1:42.83,85.79,15.67,7.6:t"><div class="frame tall"><img src="assets/img/vi/app-p05.webp" alt="Vị trí của dự án, nút Quét" loading="lazy" width="600" height="1302"></div><figcaption><b>Bước 1</b></figcaption></figure>
+    <figure class="shot phone" data-hp="2:8.33,46.08,39.5,4.76:l"><div class="frame tall"><img src="assets/img/vi/app-p10.webp" alt="Thông tin bản quét" loading="lazy" width="600" height="1302"></div><figcaption><b>Bước 2</b></figcaption></figure>
+    <figure class="shot phone" data-hp="3:4.17,90.4,91.83,5.61:tl"><div class="frame tall"><img src="assets/img/vi/app-p11.webp" alt="Kiểm tra thiết bị" loading="lazy" width="600" height="1302"></div><figcaption><b>Bước 3</b></figcaption></figure>
+    <figure class="shot phone" data-hp="4:35.17,18.05,29.67,13.36:@64.8,17.6"><div class="frame tall"><img src="assets/img/vi/app-p12.webp" alt="Mức chi tiết và AI" loading="lazy" width="600" height="1302"></div><figcaption><b>Bước 4</b></figcaption></figure>
+  </div>
+  <p>Cũng ở bước 4, mục <span class="ui">Mô hình AI</span> có hai tùy chọn được tính vào hạn mức hằng tháng: <span class="ui">Mô tả AI</span> giúp gợi ý tiêu đề, danh mục và cách xử lý khi bạn ghi vấn đề; <span class="ui">Nhận diện AI</span> tự nhận diện <span data-flow="mep">linh kiện MEP</span><span data-flow="ks">đồ vật, thiết bị</span> và khiếm khuyết trong lúc quét.</p>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="quet-khu-vuc">Quét một khu vực</h3>
+  <p class="card-meta">Trên iPhone · Khoảng 5–10 phút cho mỗi khu vực</p>
+  <div class="note"><b class="t">Bạn cần chuẩn bị</b><ul><li>Pin còn trên 50% (app cảnh báo khi pin dưới 20%) và đèn trong phòng đã bật hết</li><li>Cụm camera và LiDAR đã được lau sạch</li></ul></div>
+  <div class="grid-2">
+    <ol class="proc">
+      <li><div><b>Bấm nút tròn màu trắng để bắt đầu quét.</b><span>Ở lần quét đầu tiên, app sẽ mở phần hướng dẫn; bạn có thể xem lại bất cứ lúc nào bằng nút <span class="ui">?</span>.</span></div></li>
+      <li><div><b>Đi chậm và đưa máy lên xuống đều tay, giống như khi phun sơn.</b><span>Bạn đi khoảng nửa bước mỗi giây và chờ điểm 3D hiện đủ rồi mới bước tiếp. <span data-flow="mep">Hãy quét đủ sàn, cụm ống ở giữa và giàn ống sát trần trước khi dịch sang ngang. Mỗi đoạn ống chỉ nên quét một lượt.</span><span data-flow="ks">Hãy đi dọc chân tường và hướng máy vào các góc phòng, khung cửa và cửa sổ để hệ thống dựng đủ tường và cửa.</span></span></div></li>
+    </ol>
+    <figure class="shot scene" data-flow="mep"><div class="frame photo"><img src="assets/brand/real/scanning-vi.jpg" alt="Quét tại phòng bơm" loading="lazy" width="1264" height="848"></div><figcaption>Ảnh minh họa: quét dọc dãy bơm và theo dõi màn hình để biết chỗ nào đã được quét.</figcaption></figure>
+    <div class="phones" data-flow="ks"><figure class="shot phone" data-hp="2:30,15.2,40,3.4:r"><div class="frame tall"><img src="assets/img/vi/app-p13.webp" alt="Đang quét RoomPlan" loading="lazy" width="600" height="1302"></div><figcaption><b>Bước 2</b> Đường viền trắng là tường và đồ vật app đã nhận ra; ô <span class="ui">Diện tích</span> là phần đã quét.</figcaption></figure></div>
+  </div>
+  <ol class="proc" style="counter-reset:s 2">
+    <li><div><b>Khi đến chỗ nối, bạn đứng cách marker 0,35–1&nbsp;m và hướng máy gần như thẳng vào marker.</b><span>Giữ yên máy cho đến khi điện thoại rung nhẹ và hiện thông báo <span class="ui">Đã nhận diện marker</span> kèm số của marker đó.</span></div></li>
+    <li><div><b>Sau khi quét hết khu vực, bấm nút đỏ.</b></div></li>
+    <li><div><b>Chọn <span class="ui">Kết thúc</span> trong hộp thoại.</b></div></li>
+  </ol>
+  <div class="phones">
+    <figure class="shot phone" data-flow="mep"><div class="frame tall"><img src="assets/img/vi/app-p21.webp" alt="Đang quét" loading="lazy" width="600" height="1302"></div><figcaption><b>Bước 2</b> Chỗ đã quét được phủ sọc</figcaption></figure>
+    <figure class="shot phone" data-hp="3:25,20.4,45.5,3.68:r"><div class="frame tall"><img src="assets/img/vi/app-p22.webp" alt="Đã nhận diện marker" loading="lazy" width="600" height="1302"></div><figcaption><b>Bước 3</b> Đã nhận diện marker. Số nhỏ trên nút Marker là số marker app đã ghi nhận.</figcaption></figure>
+    <figure class="shot phone on-dark" data-hp="4:39,82.21,21.33,11.27:t;5:52.33,54.83,34,5.6:r"><div class="frame tall"><img src="assets/img/vi/app-p26.webp" alt="Kết thúc khu vực" loading="lazy" width="600" height="1302"></div><figcaption><b>Bước 4–5</b> Nút đỏ › Kết thúc</figcaption></figure>
+  </div>
+  <div class="ends"><div class="note tip"><b class="t">Kết quả</b><span>Khu vực vừa quét được lưu lại, và app hỏi bạn quét tiếp khu vực sau hay hoàn tất.</span></div>
+  <div class="note warn"><b class="t">Nếu app hiện cảnh báo</b><span>Bạn xem cách xử lý ở mục <a href="#canh-bao">Khi app cảnh báo lúc quét</a>.</span></div></div>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="noi-khu-vuc">Nối khu vực tiếp theo</h3>
+  <p class="card-meta">Trên iPhone · Khoảng 5–10 phút cho mỗi khu vực</p>
+  <div class="grid-2 phone-pair">
+    <ol class="proc">
+      <li><div><b>Sau khi kết thúc khu vực trước, bấm <span class="ui">Thêm khu vực</span>.</b><span>Sau mỗi khu vực, app hiện 4 nút: <span class="ui">Xóa</span>, <span class="ui">Chỉnh sửa</span> (quét tiếp khu vực đó), <span class="ui">Thêm khu vực</span> và <span class="ui">Hoàn tất</span>.</span></div></li>
+    </ol>
+    <div class="phones"><figure class="shot phone" data-hp="1:52,83.18,20,9.68:t"><div class="frame tall"><img src="assets/img/vi/app-p27.webp" alt="4 nút sau mỗi khu vực" loading="lazy" width="600" height="1302"></div><figcaption><b>Bước 1</b></figcaption></figure></div>
+  </div>
+  <div class="branch">
+    <div class="arm"><p class="arm-h">Nếu bạn đã dán marker</p>
+      <ol class="proc" style="counter-reset:s 1"><li><div><b>Bắt đầu quét từ chỗ nối với khu vực trước và hướng máy vào marker.</b><span>Khi app báo <span class="ui">Đã liên kết marker #… với Khu vực …</span>, hai khu vực đã được nối với nhau. Bạn tiếp tục quét như mục <a href="#quet-khu-vuc">Quét một khu vực</a>.</span></div></li></ol>
+      <div class="phones"><figure class="shot phone" data-hp="2:16.17,20.4,62.3,3.68:b"><div class="frame tall"><img src="assets/img/vi/app-p28.webp" alt="Khu vực 2 nối qua marker" loading="lazy" width="600" height="1302"></div><figcaption><b>Bước 2</b> Đã liên kết marker</figcaption></figure></div>
+    </div>
+    <div class="arm"><p class="arm-h">Nếu bạn chưa có marker</p>
+      <ol class="proc" style="counter-reset:s 1"><li><div><b>Quét chồng lên khu vực trước khoảng 1–2&nbsp;m.</b><span>Phần chồng cần chiếm ít nhất 20% và có tường, góc phòng, cột hoặc thiết bị cố định; bạn nên tránh để phần chồng chỉ là một dãy ống giống nhau. Cách này kém chính xác hơn và có thể cần chỉnh tay trên web (xem <a href="#gop-ban-quet">Gộp nhiều bản quét</a>).</span></div></li></ol>
+    </div>
+  </div>
+  <ol class="proc" style="counter-reset:s 2">
+    <li><div><b>Khi đã quét xong khu vực cuối cùng, bấm <span class="ui">Hoàn tất</span>.</b></div></li>
+  </ol>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="canh-bao">Khi app cảnh báo lúc quét</h3>
+  <p class="card-meta">Trên iPhone</p>
+  <div class="grid-2 phone-pair">
+    <div class="tbl"><table>
+      <thead><tr><th>App báo</th><th>Cách xử lý</th></tr></thead>
+      <tbody>
+        <tr><td>Mất định vị</td><td>Bạn đi chậm lại và hướng máy về chỗ vừa quét, nơi đủ sáng và có nhiều chi tiết, rồi chờ app tìm lại vị trí.</td></tr>
+        <tr><td>Thiếu chi tiết</td><td>Tường quá trơn hoặc quá tối. Bạn hướng máy sang chỗ sáng hơn và có nhiều chi tiết hơn.</td></tr>
+        <tr><td>Di chuyển chậm lại</td><td>Bạn đi chậm hơn và giữ máy ổn định.</td></tr>
+        <tr><td>Không khớp được vị trí</td><td>Bạn bấm <span class="ui">Thử định vị lại</span>. Nếu vẫn chưa được, chọn <span class="ui">Tiếp tục quét từ đây</span> hoặc <span class="ui">Dừng &amp; Quét lại</span>.</td></tr>
+        <tr><td>Sắp đạt hoặc đã đạt giới hạn ảnh</td><td>Bạn kết thúc khu vực này, sau đó bấm <span class="ui">Thêm khu vực</span> để quét tiếp phần còn lại.</td></tr>
+        <tr data-flow="ks"><td>Đạt giới hạn diện tích</td><td>Bạn kết thúc khu vực này và quét phần còn lại ở khu vực mới.</td></tr>
+        <tr><td>Không hiện nhãn MARKER</td><td>Bạn lại gần marker hơn (0,35–1&nbsp;m) và hướng máy gần như thẳng vào marker.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="phones">
+      <figure class="shot phone"><div class="frame tall"><img src="assets/img/vi/app-p31.webp" alt="Cảnh báo khi đi quá nhanh" loading="lazy" width="600" height="1302"></div><figcaption>Di chuyển chậm lại</figcaption></figure>
+      <figure class="shot phone"><div class="frame tall"><img src="assets/img/vi/app-p32.webp" alt="Mất định vị" loading="lazy" width="600" height="1302"></div><figcaption>Mất định vị</figcaption></figure>
+    </div>
+  </div>
+  <div class="note"><b class="t">Về kính, gương, inox bóng và bề mặt đen</b><span>Đây là giới hạn của cảm biến LiDAR nên điểm ở những chỗ này thường thưa hoặc bị thủng. Bạn hãy lại gần khoảng 0,5–1,5&nbsp;m và quét từ vài hướng khác nhau để bù.</span></div>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="xem-truoc">Kiểm tra bản quét trước khi rời công trình</h3>
+  <p class="card-meta">Trên iPhone · Khoảng 2 phút</p>
+  <p>Bạn nên kiểm tra ngay trên iPhone trước khi rời công trình, vì quay lại quét bù sau này sẽ tốn công hơn nhiều.</p>
+  <div class="grid-2 phone-pair">
+    <ol class="proc">
+      <li><div><b>Ở màn <span class="ui">Xem trước</span>, xem mục <span class="ui">Khu vực đã quét</span>.</b><span>Khu vực đầu tiên là <span class="ui">Gốc</span>. Mỗi khu vực sau có trạng thái <span class="ui">Đã ghép</span>, <span class="ui">Cần kiểm tra</span> hoặc <span class="ui">Chưa ghép</span>.</span></div></li>
+      <li><div><b>Xoay mô hình để tìm chỗ bị hở và dấu hiệu máy bị trôi.</b><span>Chẳng hạn tường hiện thành hai lớp<span data-flow="mep">, hoặc ống bị gãy khúc, lơ lửng</span>.</span></div></li>
+      <li><div><b>Nếu khu vực nào Chưa ghép, lệch trên 50&nbsp;mm hoặc bị trôi, bấm <span class="ui">Chỉnh sửa bản quét</span></b> và quét lại khu vực đó ngay.</div></li>
+    </ol>
+    <div class="phones"><figure class="shot phone" data-hp="1:6.33,39.32,87.67,30.34:tl"><div class="frame tall"><img src="assets/img/vi/app-p29.webp" alt="Xem trước, tình trạng ghép" loading="lazy" width="600" height="1302"></div><figcaption><b>Bước 1</b> Khu vực đã quét</figcaption></figure></div>
+  </div>
+  <p>Các ví dụ dưới đây cho thấy dấu hiệu cần tìm; vòng đỏ đánh dấu chỗ hỏng.</p>
+  <div class="compare real">
+    <div class="row" data-flow="mep">
+      <figure class="card ok"><img src="assets/brand/real/pipes-ok-zoom.jpg" alt="Ống đỏ quét một lượt: một lớp, cạnh rõ" loading="lazy" width="900" height="640"><figcaption><b>Đạt</b>Ống quét một lượt: mỗi ống chỉ có một lớp điểm.</figcaption></figure>
+      <figure class="card bad"><img src="assets/brand/real/pipes-bad-zoom.jpg" alt="Ống đỏ bị quét đè: hai lớp nhòe" loading="lazy" width="900" height="640"><figcaption><b>Lỗi</b>Quét đè khi máy đã trôi: ống trong vòng đỏ dày lên thành hai lớp nhòe, AI sẽ đo sai cỡ ống.</figcaption></figure>
+    </div>
+    <div class="row">
+      <figure class="card ok"><img src="assets/brand/real/join-ok-zoom.jpg" alt="Hai khu vực ghép khớp" loading="lazy" width="900" height="640"><figcaption><b>Đạt</b>Hai khu vực ghép khớp qua marker chung: sàn và thiết bị liền mạch ở chỗ nối.</figcaption></figure>
+      <figure class="card bad"><img src="assets/brand/real/join-bad-zoom.jpg" alt="Hai khu vực ghép lệch, hở khe" loading="lazy" width="900" height="640"><figcaption><b>Lỗi</b>Khu vực ghép không có marker chung bị lệch: trong vòng đỏ có khe đen chạy chéo và thiết bị bị lặp hình.</figcaption></figure>
+    </div>
+  </div>
+  <div class="note tip"><b class="t">Kết quả</b><span>Ngoài khu vực Gốc, mọi khu vực đều ở trạng thái <b>Đã ghép</b>. Độ lệch đến 10&nbsp;mm được đánh giá là <span class="nw"><span class="pill">Khớp tốt</span>,</span> <span class="nw">đến 50&nbsp;mm là</span> <span class="nw"><span class="pill">Khớp tạm</span>.</span></span></div>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="tai-len-app">Tải bản quét lên từ app</h3>
+  <p class="card-meta">Trên iPhone · Tùy dung lượng bản quét và tốc độ mạng</p>
+  <div class="grid-2 phone-pair">
+    <ol class="proc">
+      <li><div><b>Ở màn <span class="ui">Xem trước</span>, kiểm tra tên bản quét và bấm <span class="ui">Tải lên</span>.</b><span>Bạn có thể dùng Wi-Fi hoặc 4G/5G; lưu ý 4G/5G sẽ tốn dung lượng di động.</span></div></li>
+      <li><div><b>Nếu chưa có mạng, bạn bấm <span class="ui">Lưu</span>.</b><span>Bản quét được giữ an toàn trên máy, kể cả khi bạn đăng xuất. Khi có mạng, bạn mở tab <span class="ui">Đồng bộ</span> để tải lên.</span></div></li>
+      <li><div><b>Giữ app mở cho đến khi tải xong.</b><span>Trong lúc tải, bạn không chuyển sang app khác và không khóa màn hình.</span></div></li>
+    </ol>
+    <div class="phones">
+      <figure class="shot phone" data-hp="1:52.5,89.17,41.5,5.91:@93,87.6;2:6,89.17,41.5,5.91:tl"><div class="frame tall"><img src="assets/img/vi/app-p30.webp" alt="Lưu hoặc Tải lên" loading="lazy" width="600" height="1302"></div><figcaption><b>Bước 1–2</b></figcaption></figure>
+      <figure class="shot phone" data-hp="2:62,86.64,19,8.99:t"><div class="frame tall"><img src="assets/img/vi/app-p40.webp" alt="Tab Đồng bộ" loading="lazy" width="600" height="1302"></div><figcaption><b>Bước 2</b> Tab Đồng bộ</figcaption></figure>
+      <figure class="shot phone"><div class="frame tall"><img src="assets/img/vi/app-p42.webp" alt="Bản quét Chưa hoàn tất" loading="lazy" width="600" height="1302"></div><figcaption><b>Nếu app bị tắt</b> Chưa hoàn tất</figcaption></figure>
+    </div>
+  </div>
+  <div class="ends"><div class="note tip"><b class="t">Kết quả</b><span>Bản quét không còn trong tab <span class="ui">Đồng bộ</span> và xuất hiện trên web ở vị trí đã chọn, với trạng thái <b>Đang xử lý</b>.</span></div>
+  <div class="note warn"><b class="t">Nếu app bị tắt giữa chừng</b><span>Bạn mở tab <span class="ui">Đồng bộ</span>, chọn bản quét ở trạng thái <span class="ui">Chưa hoàn tất</span> và bấm <span class="ui">Tải lên</span> để tải tiếp.</span></div></div>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="tai-len-may-tinh">Tải bản quét lên từ máy tính</h3>
+  <p class="card-meta">Trên web · Tùy dung lượng file</p>
+  <p>Cách này dùng cho gói <code>.zip</code> xuất từ app, hoặc đám mây điểm <code>.e57</code>, <code>.las</code>, <code>.ply</code> từ máy quét laser. Mỗi lần, bạn tải được tối đa 6 file; mỗi file đến 1&nbsp;GB và 50 triệu điểm.</p>
+  <div class="grid-2">
+    <ol class="proc">
+      <li><div><b>Mở vị trí và bấm <span class="ui">Bản quét mới</span>.</b><span>Nếu muốn bổ sung vào bản quét đang xem (ví dụ một góc bị sót), bạn bấm <span class="ui">Thêm vào bản quét</span>.</span></div></li>
+      <li><div><b>Đặt tên cho bản quét.</b></div></li>
+      <li><div><b>Kéo file vào khung, hoặc bấm vào khung để chọn file.</b></div></li>
+      <li><div><b>Bấm <span class="ui">Tải lên</span> và giữ nguyên tab trình duyệt cho đến khi xong.</b><span data-flow="mep">Ở dự án MEP, bạn có thể đánh dấu <span class="ui">Tự động trích xuất MEP sau khi tải lên</span> để không phải chạy trích xuất sau.</span></div></li>
+    </ol>
+    <figure class="shot dialog" data-crop="30.5,19.5,69.5,80.5" data-hp="2:34.38,35,31.25,4.5;3:34.38,45.5,31.25,19.67;4:59.32,73.67,6.2,4:t">
+      <div class="frame"><img src="assets/img/vi/upload-dialog.webp" alt="Hộp thoại Tải lên bản quét" loading="lazy" width="1920" height="1200"></div>
+    </figure>
+  </div>
+  <div class="note warn"><b class="t">Nếu bạn lỡ đóng tab hoặc bị mất mạng</b><span>Bản quét sẽ chuyển sang trạng thái <b>Bị gián đoạn</b>. Bạn mở lại bản quét, bấm <span class="ui">Tải lên tiếp</span> và chọn đúng file đã chọn trước đó.</span></div>
+  </div><!--/card-->
+
+</section>
+
+<section class="chapter" id="xu-ly">
+  <div class="ch-head"><h2>Xử lý</h2></div>
+
+  <div class="card">
+  <h3 id="theo-doi-xu-ly">Theo dõi xử lý bản quét</h3>
+  <p class="card-meta">Trên web · Từ vài phút đến vài giờ, tùy dung lượng</p>
+  <p>Sau khi tải lên, máy chủ sẽ tự dựng mô hình 3D. Bạn không cần thao tác gì thêm, chỉ cần theo dõi trạng thái.</p>
+  <ol class="proc">
+    <li><div><b>Mở vị trí để xem trạng thái của bản quét.</b></div></li>
+    <li><div><b>Chờ thông báo ở biểu tượng chuông hoặc qua email.</b></div></li>
+  </ol>
+  <!--FIG:status-->
+  <div class="ends"><div class="note tip"><b class="t">Kết quả</b><span>Bản quét chuyển sang trạng thái <b>Hoạt động</b>, và bạn có thể bấm vào vị trí để mở trình xem 3D. <span data-flow="ks">Nút <b>BIM</b> và <b>Mặt bằng 2D</b> sẽ hiện trên thanh chế độ xem khi đã có dữ liệu.</span></span></div>
+  <div class="note warn"><b class="t">Nếu bản quét báo Thất bại</b><span>Bạn bấm <span class="ui">Xử lý lại</span>. Nếu hệ thống vẫn báo không đọc được file, bạn hãy tải lên một file khác.</span></div></div>
+  </div><!--/card-->
+
+  <div class="card" data-flow="mep">
+  <h3 id="trich-xuat-mep">Trích xuất đường ống MEP</h3>
+  <p class="card-meta">Trên web · Vài phút</p>
+  <p>Nếu lúc tải lên bạn đã đánh dấu <span class="ui">Tự động trích xuất MEP sau khi tải lên</span>, bạn có thể bỏ qua mục này.</p>
+  <div class="grid-2">
+    <ol class="proc">
+      <li><div><b>Mở vị trí và chọn chế độ <span class="ui">MEP</span> trên thanh chế độ xem.</b><span>Nếu nút còn mờ và báo <span class="ui">Chưa có dữ liệu MEP</span>, bản quét chưa được trích xuất.</span></div></li>
+      <li><div><b>Bấm mũi tên ▾ cạnh nút MEP và chọn <span class="ui">Xuất mô hình MEP</span>.</b><span>Lệnh này chạy trích xuất trên máy chủ, chưa tải file về máy của bạn.</span></div></li>
+      <li><div><b>Chờ thông báo <span class="ui">Trích xuất MEP hoàn tất</span>.</b><span>Nếu muốn chạy lại từ đầu, bạn chọn <span class="ui">Trích xuất lại</span> trong cùng bảng đó.</span></div></li>
+    </ol>
+    <figure class="shot" data-hp="1:25.4,15.8,4.3,3.4:b;2:30.45,15.8,1.5,3.4:r">
+      <div class="frame"><img src="assets/img/vi/viewer-merge.webp" alt="Nút MEP khi chưa trích xuất" loading="lazy" width="1920" height="1200"></div>
+    </figure>
+  </div>
+  <div class="note tip"><b class="t">Kết quả</b><span>Nút MEP sáng lên, và mô hình hiện các ống, phụ kiện đã được nhận diện.</span></div>
+  </div><!--/card-->
+</section>
+
+<section class="chapter" id="xem">
+  <div class="ch-head"><h2>Xem kết quả</h2></div>
+
+  <div class="card">
+  <h3 id="xem-3d">Xem mô hình 3D</h3>
+  <p class="card-meta">Trên web, máy tính</p>
+  <ol class="proc">
+    <li><div><b>Mở dự án, vào <span class="ui">Vị trí</span> và bấm vào thẻ vị trí bạn muốn xem.</b><span>Tất cả bản quét của vị trí đó được hiển thị chung trong một không gian.</span></div></li>
+    <li><div><b>Dùng chuột để xoay, dời và phóng to mô hình</b> (xem bảng bên dưới).</div></li>
+    <li><div><b>Chọn chế độ xem</b> trên thanh phía trên mô hình.</div></li>
+    <li><div><b>Bật hoặc tắt từng khu vực, từng loại dữ liệu</b> ở <span class="ui">Lớp dữ liệu</span> bên phải bằng biểu tượng con mắt.</div></li>
+  </ol>
+  <figure class="shot" data-flow="mep" data-ref="viewer" data-hp="3:@3;4:@5">
+    <div class="frame"><img src="assets/img/vi/viewer.webp" alt="Trình xem 3D của dự án MEP" loading="lazy" width="1920" height="1200"></div>
+  </figure>
+  <figure class="shot" data-flow="ks" data-hp="3:7.29,15.17,67.3,4.67:b;4:75.9,15.17,21.8,81.17:b">
+    <div class="frame"><img src="assets/img/vi/viewer-bim.webp" alt="Trình xem 3D của dự án khảo sát" loading="lazy" width="1920" height="1200"></div>
+  </figure>
+  <div class="tbl wide"><table>
+    <thead><tr><th>Thao tác</th><th>Tác dụng</th></tr></thead>
+    <tbody>
+      <tr><td>Kéo chuột trái</td><td>Xoay quanh mô hình</td></tr>
+      <tr><td>Kéo chuột phải</td><td>Dời khung nhìn</td></tr>
+      <tr><td>Lăn chuột</td><td>Phóng to, thu nhỏ</td></tr>
+      <tr><td><kbd>Alt</kbd> + bấm chuột trái vào một điểm (Mac: <kbd>Option</kbd>)</td><td>Mở các ảnh chụp tại điểm đó lúc quét, ảnh rõ nhất hiện trước</td></tr>
+      <tr><td>Chế độ Đi xuyên</td><td><kbd>Space</kbd> để phát hoặc dừng, <kbd>←</kbd> <kbd>→</kbd> để chuyển khung hình, <kbd>Esc</kbd> để thoát</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><b class="t">Kiểm tra chất lượng bản quét</b><span>Bạn bấm biểu tượng <b>i</b> trên thanh chế độ xem để xem các chỉ số: độ tin cậy LiDAR, mật độ điểm, tỷ lệ mất định vị, ánh sáng và nhiệt độ máy. Nếu có chỉ số <span class="pill">Kém</span>, bạn nên quét lại khu vực đó.</span></div>
+  </div><!--/card-->
+
+  <div class="card" data-flow="mep">
+  <h3 id="xem-mep">Xem đường ống MEP</h3>
+  <p class="card-meta">Trên web</p>
+  <ol class="proc">
+    <li><div><b>Bật chế độ <span class="ui">MEP</span>.</b><span>Các ống và phụ kiện đã nhận diện sẽ hiện trên nền đám mây điểm.</span></div></li>
+    <li><div><b>Tắt bớt các lớp không cần ở <span class="ui">Lớp dữ liệu</span></b> để nhìn rõ tuyến ống bạn đang kiểm tra.</div></li>
+  </ol>
+  <figure class="shot" data-hp="1:26.46,15.08,6.2,4.75:b"><div class="frame"><img src="assets/img/vi/viewer-mep.webp" alt="Đường ống MEP trong trình xem" loading="lazy" width="1920" height="1200"></div></figure>
+  <p>Đường ống được trích xuất tự động là bản nháp: thường đúng phần lớn, nhưng bạn nên rà soát lại trước khi bàn giao (xem <a href="#chinh-sua">Chỉnh sửa đường ống</a>).</p>
+  </div><!--/card-->
+
+  <div class="card" data-flow="ks">
+  <h3 id="xem-bim">Xem mô hình BIM và mặt bằng 2D</h3>
+  <p class="card-meta">Trên web</p>
+  <ol class="proc">
+    <li><div><b>Chọn chế độ <span class="ui">BIM</span></b> để xem tường, sàn, cửa và đồ vật dạng khối. Chế độ này phù hợp để đối chiếu thiết kế và tính diện tích.</div></li>
+    <li><div><b>Chọn <span class="ui">Mặt bằng 2D</span></b> để xem bản vẽ có trục, cao độ và tên phòng.</div></li>
+  </ol>
+  <div class="grid-2">
+    <figure class="shot" data-hp="1:22,15.8,3.5,3.4:b"><div class="frame"><img src="assets/img/vi/viewer-bim.webp" alt="Chế độ BIM" loading="lazy" width="1920" height="1200"></div><figcaption><b>Bước 1</b> Chế độ BIM</figcaption></figure>
+    <figure class="shot" data-hp="2:26.2,15.8,8.2,3.4:b"><div class="frame"><img src="assets/img/vi/viewer-plan.webp" alt="Chế độ Mặt bằng 2D" loading="lazy" width="1920" height="1200"></div><figcaption><b>Bước 2</b> Chế độ Mặt bằng 2D</figcaption></figure>
+  </div>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="do-chu-thich">Đo và chú thích trên mô hình</h3>
+  <p class="card-meta">Trên web · Khoảng 1 phút</p>
+  <div class="grid-2">
+    <ol class="proc">
+      <li><div><b>Chọn công cụ đo</b> ở thanh bên trái, rồi bấm vào hai điểm trên mô hình để đo khoảng cách.</div></li>
+      <li><div><b>Chọn công cụ chú thích</b>, bấm vào đối tượng và nhập tên, ví dụ <i class="fl" data-flow="mep">“Bơm P-01”</i><i class="fl" data-flow="ks">“Phòng họp 1”</i>.</div></li>
+    </ol>
+    <figure class="shot" data-ref="viewer-tools" data-crop="0,13,60,90" data-hp="1:@1:r;2:@3:r">
+      <div class="frame"><img src="assets/img/vi/viewer-tools.webp" alt="Thanh công cụ của trình xem" loading="lazy" width="1920" height="1200"></div>
+    </figure>
+  </div>
+  <p>Các công cụ khác như thống kê đối tượng, cắt vùng, làm sạch điểm nhiễu và xuất file được giới thiệu ở <a href="#tc-cong-cu">Tra cứu › Thanh công cụ trình xem</a>.</p>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="gop-ban-quet">Gộp nhiều bản quét</h3>
+  <p class="card-meta">Trên web · Khoảng 5 phút, chưa kể thời gian xử lý</p>
+  <p>Bạn dùng chức năng này khi cùng một khu vực đã được quét thành nhiều bản riêng, ví dụ quét trong nhiều buổi, quét lại một góc bị sót, hoặc có cả bản từ máy quét laser lẫn bản từ iPhone.</p>
+  <div class="grid-2">
+    <ol class="proc">
+      <li><div><b>Mở danh sách bản quét</b> ở trang vị trí, hoặc bấm nút số bản quét (ví dụ “2 bản quét”) ở góc trên bên trái trình xem.</div></li>
+      <li><div><b>Đánh dấu ô chọn ở 2 đến 6 bản quét.</b><span>Bạn chỉ chọn được các bản quét đã xử lý xong.</span></div></li>
+      <li><div><b>Bấm <span class="ui">Gộp bản quét</span>.</b></div></li>
+    </ol>
+    <figure class="shot" data-ref="merge-select" data-crop="4.27,0,100,49" data-hp="2:8,30.5,2.2,11.5:b;3:@2:@89.5,28">
+      <div class="frame"><img src="assets/img/vi/merge-select.webp" alt="Chọn bản quét để gộp" loading="lazy" width="1920" height="1200"></div>
+    </figure>
+  </div>
+  <div class="grid-2">
+    <ol class="proc" style="counter-reset:s 3">
+      <li><div><b>Sửa tên bản gộp nếu cần.</b></div></li>
+      <li><div><b>Chọn một bản làm <span class="ui">Gốc tọa độ</span></b>, nên là bản rộng nhất hoặc chính xác nhất. Các bản còn lại sẽ được xoay và dời cho khớp với bản này.</div></li>
+      <li><div><b>Bấm <span class="ui">Gộp</span>.</b><span>Hệ thống tạo một bản quét mới; các bản gốc được chuyển sang lưu trữ chứ không bị xóa.</span></div></li>
+    </ol>
+    <figure class="shot dialog" data-ref="merge-dialog" data-crop="30.5,20.5,69.5,79" data-hp="4:34.45,39.9,31.09,4.3;5:@2;6:@4:r">
+      <div class="frame"><img src="assets/img/vi/merge-dialog.webp" alt="Hộp thoại Gộp bản quét" loading="lazy" width="1920" height="1200"></div>
+    </figure>
+  </div>
+  <div class="ends"><div class="note tip"><b class="t">Kết quả</b><span>Trình xem mở bản quét mới, trong đó mỗi bản gốc là một lớp màu riêng ở <span class="ui">Lớp dữ liệu</span>.</span></div>
+  <div class="note warn"><b class="t">Nếu một phần báo Cần xem lại hoặc Chưa ghép được</b><span>Bạn bấm <span class="ui">Đặt vị trí</span>, dời và xoay phần đó vào đúng chỗ, chọn <span class="ui">Giữ vị trí này</span> hoặc <span class="ui">Tinh chỉnh tự động</span>, sau đó bấm <span class="ui">Ghép lại</span>.</span></div></div>
+  <p>Mỗi lần gộp sẽ trừ một lượt trong hạn mức của công ty. Bạn chỉ gộp được các bản quét trong cùng một dự án.</p>
+  </div><!--/card-->
+</section>
+
+<section class="chapter" id="chinh-sua" data-flow="mep">
+  <div class="ch-head"><h2>Chỉnh sửa đường ống</h2></div>
+
+  <div class="card" data-flow="mep">
+  <h3 id="ra-soat">Rà soát danh sách Xem lại</h3>
+  <p class="card-meta">Trên web · Khoảng 10–30 phút</p>
+  <div class="grid-2">
+    <ol class="proc">
+      <li><div><b>Ở chế độ MEP, bấm <span class="ui">Chỉnh sửa nâng cao</span></b>, nút màu xanh ở cuối thanh chế độ xem.</div></li>
+    </ol>
+    <figure class="shot" data-crop="6.6,4,100,46.8" data-hp="1:61.81,15.08,12.45,5.75:b"><div class="frame"><img src="assets/img/vi/viewer-mep.webp" alt="Nút Chỉnh sửa nâng cao" loading="lazy" width="1920" height="1200"></div></figure>
+  </div>
+  <ol class="proc" style="counter-reset:s 1">
+    <li><div><b>Mở tab <span class="ui">Xem lại</span>.</b><span>Số màu đỏ là các phần tử chưa khớp với chi tiết nào trong danh mục; chúng được tô nổi bật trong khung 3D. Số màu cam là các phần tử còn thiếu thuộc tính bắt buộc.</span></div></li>
+    <li><div><b>Xử lý lần lượt từng mục:</b> bấm <span class="ui">Xác nhận</span> nếu đúng, <span class="ui">Đổi cỡ…</span> nếu sai cỡ, hoặc <span class="ui">Xoá</span> nếu hệ thống nhận nhầm.</div></li>
+  </ol>
+  <figure class="shot" data-ref="mep-editor" data-hp="2:@4:@95,25">
+    <div class="frame"><img src="assets/img/vi/mep-editor.webp" alt="Trình chỉnh sửa nâng cao" loading="lazy" width="1920" height="1200"></div>
+  </figure>
+  <div class="note tip"><b class="t">Kết quả</b><span>Tab Xem lại không còn số màu đỏ hoặc màu cam.</span></div>
+  </div><!--/card-->
+
+  <div class="card" data-flow="mep">
+  <h3 id="sua-ong">Sửa ống và thêm chi tiết</h3>
+  <p class="card-meta">Trên web · Tùy khối lượng</p>
+  <ol class="proc">
+    <li><div><b>Bấm chọn một ống</b> (giữ <kbd>Shift</kbd> và bấm để chọn thêm), sau đó dùng các lệnh trong bảng bên dưới.</div></li>
+    <li><div><b>Gõ tên hoặc cỡ chi tiết còn thiếu</b> (ví dụ 100A, tức DN100) vào ô tìm kiếm của danh mục chi tiết bên trái, rồi bấm vào cỡ cần dùng hoặc kéo thả vào khung 3D.</div></li>
+  </ol>
+  <figure class="shot" data-ref="mep-editor" data-hp="2:@1:r">
+    <div class="frame"><img src="assets/img/vi/mep-editor.webp" alt="Danh mục chi tiết" loading="lazy" width="1920" height="1200"></div>
+  </figure>
+  <div class="tbl wide"><table>
+    <thead><tr><th>Đang chọn</th><th>Lệnh có thể dùng</th></tr></thead>
+    <tbody>
+      <tr><td>Một ống hoặc phụ kiện</td><td><span class="ui">Đổi cỡ (theo dữ liệu chi tiết)</span>, <span class="ui">Di chuyển</span>, <span class="ui">Xoay</span>, <span class="ui">Xoay quanh ống</span>, <span class="ui">Đảo chiều</span>, <span class="ui">Nhân bản</span>, <span class="ui">Kéo dài</span>, <span class="ui">Xoá</span></td></tr>
+      <tr><td>Hai ống</td><td>Nối bằng <span class="ui">Co 90°</span>, <span class="ui">Co 45°</span>, <span class="ui">Tê</span> hoặc <span class="ui">Côn thu</span>; <span class="ui">Gộp</span> hai ống gần thẳng hàng thành một; <span class="ui">Căn tâm</span> hai ống thẳng trục</td></tr>
+    </tbody>
+  </table></div>
+  <p>Phím tắt: <kbd>Ctrl</kbd>+<kbd>Z</kbd> để hoàn tác, <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> để làm lại, <kbd>Del</kbd> để xóa đối tượng đang chọn. Các mục ghi <span class="ui">Chưa có IFC</span> trong danh mục là chi tiết chưa có mô hình 3D, nên tạm thời chưa thêm được.</p>
+  </div><!--/card-->
+
+  <div class="card" data-flow="mep">
+  <h3 id="kiem-tra-luu">Kiểm tra và lưu phiên bản</h3>
+  <p class="card-meta">Trên web · Khoảng 5 phút</p>
+  <ol class="proc">
+    <li><div><b>Vào menu <span class="ui">Đường ống &amp; Kiểm tra</span> › <span class="ui">Kiểm tra hệ thống</span></b> để tìm mối nối hở, chỗ lệch cỡ, khe hở và phụ kiện còn đầu hở.</div></li>
+    <li><div><b>Chạy <span class="ui">Kiểm tra va chạm</span></b> (cũng trong menu <span class="ui">Đường ống &amp; Kiểm tra</span>) để tìm chỗ ống và phụ kiện đâm vào nhau. Bạn sửa từng lỗi rồi chạy lại cho đến khi không còn lỗi.</div></li>
+    <li><div><b>Chọn <span class="ui">Tệp</span> › <span class="ui">Cảnh</span> › <span class="ui">Lưu cảnh</span></b> để lưu thành một phiên bản mới.</div></li>
+    <li><div><b>Bấm <span class="ui">Quay lại màn hình xem</span> để thoát trình chỉnh sửa.</b></div></li>
+  </ol>
+  <figure class="shot" data-ref="mep-editor" data-hp="1:42.1,6.75,11.6,3.5:b;3:30.95,6.75,3.0,3.5:b;4:@5">
+    <div class="frame"><img src="assets/img/vi/mep-editor.webp" alt="Menu và phiên bản trong trình sửa" loading="lazy" width="1920" height="1200"></div>
+  </figure>
+  <div class="note warn"><b class="t">Nếu bạn muốn bỏ hết các chỉnh sửa</b><span>Bạn mở danh sách phiên bản và quay về một bản cũ, hoặc chọn <span class="ui">Nhập lại từ IFC của scan</span> để bắt đầu lại từ kết quả trích xuất ban đầu.</span></div>
+  </div><!--/card-->
+</section>
+
+<section class="chapter" id="ban-giao">
+  <div class="ch-head"><h2>Bàn giao</h2></div>
+
+  <div class="card" data-flow="mep">
+  <h3 id="xuat-ifc-mep">Xuất IFC đường ống và mở trong Rebro hoặc Revit</h3>
+  <p class="card-meta">Trên web · Khoảng 5 phút</p>
+  <ol class="proc">
+    <li><div><b>Trong Chỉnh sửa nâng cao, chọn <span class="ui">Tệp</span> › <span class="ui">Xuất</span> › <span class="ui">Xuất IFC</span>.</b><span>File này gồm cả phần bạn đã chỉnh sửa và thông tin chi tiết theo Rebro (tên trong Rebro, vật liệu, phân loại). Riêng file <span class="ui">.IFC (MEP Model)</span> ở nút <span class="ui">Xuất</span> là kết quả tự động, chưa qua rà soát.</span></div></li>
+    <li><div><b>Mở file trong Rebro</b> bằng chức năng đọc IFC. Ống, cút và van sẽ hiện thành đối tượng Rebro với cỡ và thuộc tính đã điền sẵn.</div></li>
+    <li><div><b>Hoặc mở trong Revit:</b> dùng <b>Insert › Link IFC</b> nếu chỉ cần đối chiếu với mô hình thiết kế, hoặc <b>File › Open › IFC</b> nếu muốn chuyển thành đối tượng Revit để chỉnh sửa tiếp.</div></li>
+  </ol>
+  <!--FIG:ifc-flow-->
+  </div><!--/card-->
+
+  <div class="card" data-flow="ks">
+  <h3 id="xuat-bim">Xuất IFC mô hình BIM và DXF mặt bằng</h3>
+  <p class="card-meta">Trên web · Khoảng 2 phút</p>
+  <ol class="proc">
+    <li><div><b>Bấm nút xuất trên thanh công cụ bên trái và chọn <span class="ui">.IFC (3D Layout Model)</span> để xuất IFC.</b><span>Bạn xem trước mô hình, sau đó bấm <span class="ui">Tải IFC</span>.</span></div></li>
+    <li><div><b>Chọn chế độ <span class="ui">Mặt bằng 2D</span> để xuất DXF.</b></div></li>
+    <li><div><b>Bấm nút xuất trên thanh công cụ bên trái (<span class="ui">Xuất DXF</span>).</b><span>Bạn có thể mở file bằng AutoCAD hoặc phần mềm CAD khác.</span></div></li>
+  </ol>
+  <div class="grid-2">
+    <figure class="shot" data-hp="1:7.24,63.83,3.96,3.33:r"><div class="frame"><img src="assets/img/vi/viewer-bim.webp" alt="Nút xuất trên thanh công cụ ở chế độ BIM" loading="lazy" width="1920" height="1200"></div><figcaption><b>Bước 1</b> Nút xuất</figcaption></figure>
+    <figure class="shot" data-hp="2:26.2,15.8,8.2,3.4:b;3:7.9,54.3,2.5,2.8:r"><div class="frame"><img src="assets/img/vi/viewer-plan.webp" alt="Chế độ Mặt bằng 2D" loading="lazy" width="1920" height="1200"></div><figcaption><b>Bước 2–3</b> Chế độ Mặt bằng 2D và nút Xuất DXF</figcaption></figure>
+  </div>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="xuat-dam-may">Xuất đám mây điểm</h3>
+  <p class="card-meta">Trên web · Khoảng 1 phút, file lớn cần lâu hơn</p>
+  <div class="grid-2">
+    <ol class="proc">
+      <li><div><b>Bấm <span class="ui">Xuất</span> ở góc trên bên phải trình xem.</b></div></li>
+      <li><div><b>Chọn định dạng <span class="ui">.PLY</span> hoặc <span class="ui">.E57</span>.</b><span>Với file lớn, máy chủ cần thời gian chuẩn bị. Nếu thấy thông báo “Bản xuất đang được chuẩn bị”, bạn vui lòng đợi vài phút rồi bấm lại.</span></div></li>
+    </ol>
+    <figure class="shot" data-crop="45,4,100,46" data-hp="1:89.32,8.25,6.3,4:@92.5,6.2;2:78.4,17.6,16.6,7.2:l">
+      <div class="frame"><img src="assets/img/vi/viewer-export.webp" alt="Menu Xuất" loading="lazy" width="1920" height="1200"></div>
+    </figure>
+  </div>
+  <p>Để file nhẹ hơn, đám mây điểm xuất ra được giảm còn khoảng 1 điểm mỗi 15&nbsp;mm. Nếu cần mật độ gốc, bạn hãy dùng file gốc đã tải lên.</p>
+  </div><!--/card-->
+</section>
+
+<section class="chapter" id="van-de">
+  <div class="ch-head"><h2>Vấn đề</h2></div>
+
+  <div class="card">
+  <h3 id="ghi-van-de">Ghi một vấn đề lên mô hình</h3>
+  <p class="card-meta">Trên web · Khoảng 1 phút</p>
+  <div class="grid-2">
+    <ol class="proc">
+      <li><div><b>Chọn công cụ <span class="ui">Thêm vấn đề</span></b> ở thanh bên trái trình xem.</div></li>
+      <li><div><b>Bấm vào đúng chỗ có lỗi trên mô hình.</b><span>Vị trí và bản quét sẽ được điền sẵn.</span></div></li>
+    </ol>
+    <figure class="shot" data-ref="viewer-tools" data-hp="1:@2:r;2:48,52">
+      <div class="frame"><img src="assets/img/vi/viewer-tools.webp" alt="Công cụ Thêm vấn đề" loading="lazy" width="1920" height="1200"></div>
+    </figure>
+  </div>
+  <div class="grid-2">
+    <ol class="proc" style="counter-reset:s 2">
+      <li><div><b>Nhập tên vấn đề (bắt buộc) và mô tả; chọn trạng thái, mức ưu tiên, danh mục; thêm ảnh nếu có.</b></div></li>
+      <li><div><b>Bấm <span class="ui">Vấn đề mới</span> để lưu.</b></div></li>
+    </ol>
+    <figure class="shot dialog" data-crop="31.2,9.6,68.8,90.3" data-hp="3:34.2,19.5,31.3,60.2:l;4:58.07,82.5,7.45,4:r">
+      <div class="frame"><img src="assets/img/vi/issue-create.webp" alt="Hộp thoại Vấn đề mới" loading="lazy" width="1920" height="1200"></div>
+    </figure>
+  </div>
+  <div class="ends"><div class="note tip"><b class="t">Kết quả</b><span>Biểu tượng vấn đề hiện đúng chỗ trên mô hình và có trong danh sách <b>Vấn đề</b> của dự án.</span></div>
+  <div class="note warn"><b class="t">Nếu bấm vào mô hình mà hộp thoại không mở</b><span>Công cụ <span class="ui">Thêm vấn đề</span> chưa được bật. Bạn bấm lại vào công cụ cho nút sáng lên, rồi bấm vào mô hình.</span></div></div>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="ghi-van-de-app">Ghi vấn đề ngay khi đang quét</h3>
+  <p class="card-meta">Trên iPhone · Khoảng 1 phút</p>
+  <div class="grid-2 phone-pair">
+    <ol class="proc">
+      <li><div><b>Trên màn hình quét, bấm <span class="ui">Thêm vấn đề</span></b> ở thanh dưới.</div></li>
+      <li><div><b>Chụp ảnh, chọn danh mục, nhập tiêu đề, chọn người phụ trách và mức ưu tiên, sau đó bấm <span class="ui">Lưu</span>.</b><span>Vấn đề được lưu cùng bản quét, kể cả khi mất mạng, rồi tải lên cùng bản quét.</span></div></li>
+    </ol>
+    <div class="phones"><figure class="shot phone" data-hp="2:52.5,87.1,38.5,5.15:tl"><div class="frame tall"><img src="assets/img/vi/app-p24.webp" alt="Thêm vấn đề khi đang quét" loading="lazy" width="600" height="1302"></div><figcaption><b>Bước 2</b></figcaption></figure></div>
+  </div>
+  <p>Ngoài lúc quét, bạn cũng có thể tạo vấn đề ở tab <span class="ui">Vấn đề</span> của app (cần có mạng) hoặc ở trang <span class="ui">Vấn đề</span> của dự án trên web.</p>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="giao-van-de">Giao vấn đề và theo dõi tiến độ</h3>
+  <p class="card-meta">Trên web · Khoảng 1 phút</p>
+  <div class="grid-2">
+    <ol class="proc">
+      <li><div><b>Mở vấn đề, rồi chọn <span class="ui">Người phụ trách</span> ở cột <span class="ui">Chi tiết</span></b> (mặc định là <span class="ui">Chưa phân công</span>).<span>Người phụ trách cần là thành viên của dự án, vì vậy bạn hãy thêm thầu phụ vào dự án trước.</span></div></li>
+      <li><div><b>Đặt <span class="ui">Hạn chót</span> cho vấn đề.</b></div></li>
+      <li><div><b>Trao đổi với người phụ trách trong phần <span class="ui">Bình luận</span></b>, và đính kèm ảnh hoặc PDF khi cần.</div></li>
+    </ol>
+    <figure class="shot" data-hp="1:73.9,66.2,23.6,2.6;2:73.9,93.8,23.3,2.4;3:18.6,35.2,51.6,14:@16.4,42">
+      <div class="frame"><img src="assets/img/vi/issue-detail.webp" alt="Chi tiết vấn đề" loading="lazy" width="1920" height="1200"></div>
+    </figure>
+  </div>
+  <!--FIG:issue-status-->
+  <figure class="shot" data-crop="17.6,0,100,72"><div class="frame"><img src="assets/img/vi/issues-board.webp" alt="Bảng Kanban vấn đề" loading="lazy" width="1920" height="1200"></div><figcaption>Ở chế độ <span class="ui">Bảng Kanban</span>, bạn kéo thẻ sang cột khác để đổi trạng thái của vấn đề.</figcaption></figure>
+  <p>Người được giao sẽ nhận thông báo mỗi khi vấn đề có thay đổi. Việc giao không tự đổi trạng thái; người xử lý sẽ tự cập nhật trạng thái khi hoàn thành. Người có vai trò Người xem không đổi được trạng thái.</p>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="xuat-van-de">Xuất danh sách vấn đề</h3>
+  <p class="card-meta">Trên web · Khoảng 1 phút</p>
+  <ol class="proc">
+    <li><div><b>Mở trang <span class="ui">Vấn đề</span> của dự án và lọc danh sách</b> theo trạng thái, mức ưu tiên, người phụ trách, vị trí hoặc bản quét.</div></li>
+    <li><div><b>Bấm <span class="ui">Xuất</span> và chọn Excel hoặc PDF.</b><span>Bạn có thể xuất toàn bộ danh sách hoặc chỉ các vấn đề theo bộ lọc đang chọn.</span></div></li>
+  </ol>
+  <figure class="shot" data-crop="0,0,100,84.3" data-hp="1:18.4,23.9,32.7,10.8:@16.4,29;2:82.8,8.2,6.1,4.3:b"><div class="frame"><img src="assets/img/vi/issues.webp" alt="Danh sách vấn đề" loading="lazy" width="1920" height="1200"></div><figcaption>Ngoài dạng bảng, bạn có thể xem theo <span class="ui">Bảng Kanban</span>, <span class="ui">Thư viện</span>, <span class="ui">Biểu đồ Gantt</span> hoặc <span class="ui">Lịch</span>; bộ lọc áp dụng cho mọi kiểu xem.</figcaption></figure>
+  </div><!--/card-->
+</section>
+
+<section class="chapter" id="quan-tri">
+  <div class="ch-head"><h2>Quản trị</h2></div>
+
+  <div class="card">
+  <h3 id="duyet-thiet-bi">Duyệt thiết bị và giới hạn truy cập</h3>
+  <p class="card-meta">Trên web · Dành cho Quản trị tổ chức</p>
+  <ol class="proc">
+    <li><div><b>Mở <span class="ui">Kiểm soát truy cập</span></b> trong nhóm <span class="ui">Quản lý tổ chức</span> trên thanh bên.</div></li>
+    <li><div><b>Ở mục Đăng ký thiết bị, bấm <span class="ui">Duyệt</span> cho iPhone đang <span class="ui">Chờ duyệt</span>.</b><span>Bấm <span class="ui">Từ chối</span> nếu thiết bị không đúng người, hoặc <span class="ui">Thu hồi</span> ngay khi có máy bị mất.</span></div></li>
+    <li><div><b>Giới hạn IP nếu cần</b>, ví dụ chỉ cho phép truy cập từ mạng văn phòng hoặc VPN của công ty.</div></li>
+  </ol>
+  <figure class="shot" data-crop="0,0,100,88" data-hp="1:0.9,30.95,16.29,3.05:@15.2,32.5;2:19.69,69.5,78.96,9;3:18.49,18.75,80.16,8.08"><div class="frame"><img src="assets/img/vi/access-control-pending.webp" alt="Kiểm soát truy cập" loading="lazy" width="1920" height="1200"></div><figcaption>Nút <span class="ui">Duyệt</span> và <span class="ui">Từ chối</span> nằm ở cột cuối của dòng; nếu bảng bị che, bạn kéo bảng sang phải.</figcaption></figure>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="vai-tro-han-muc">Vai trò, quyền và hạn mức</h3>
+  <p class="card-meta">Trên web · Dành cho Quản trị tổ chức</p>
+  <div class="grid-2">
+    <ol class="proc">
+      <li><div><b>Tạo vai trò riêng ở <span class="ui">Cài đặt</span> › <span class="ui">Vai trò &amp; Quyền</span>.</b><span>Bạn đặt tên vai trò và đánh dấu từng quyền như mô tả ở bảng bên dưới.</span></div></li>
+    </ol>
+    <figure class="shot" data-crop="0,0,100,64.5" data-hp="1:1.2,43.9,13.4,2.5:r"><div class="frame"><img src="assets/img/vi/users.webp" alt="Mục Vai trò &amp; Quyền trong Cài đặt" loading="lazy" width="1920" height="1200"></div></figure>
+  </div>
+  <div class="grid-2">
+    <ol class="proc" style="counter-reset:s 1">
+      <li><div><b>Mở <span class="ui">Hạn mức</span> trong nhóm <span class="ui">Quản lý tổ chức</span> để quản lý hạn mức.</b><span>Trang Hạn mức cho xem mức đã dùng và gán hạn mức riêng cho từng thành viên.</span></div></li>
+    </ol>
+    <figure class="shot" data-crop="0,0,100,60" data-hp="2:1,35.5,15.5,2.9:b"><div class="frame"><img src="assets/img/vi/access-control.webp" alt="Mục Hạn mức trên thanh bên" loading="lazy" width="1920" height="1200"></div></figure>
+  </div>
+  <div class="tbl wide"><table>
+    <tbody>
+      <tr><td>Vai trò &amp; Quyền</td><td>Bạn có thể tạo vai trò riêng, ví dụ “Giám sát viên”, rồi đánh dấu các quyền Xem, Thêm, Sửa, Xóa, Xuất báo cáo cho từng mục: Dự án, Vấn đề, Bản quét, Cơ sở, Người dùng. Nhóm quyền Cơ sở áp dụng cho các vị trí.</td></tr>
+      <tr><td>Hạn mức</td><td>Bạn xem được gói đang dùng, ngày đặt lại hạn mức và mức đã dùng của <span class="ui">Quỹ chung tổ chức</span>. Bạn có thể gán hạn mức riêng cho từng thành viên (lượt AI và lượt gộp bản quét); những ai không được gán sẽ dùng chung quỹ của công ty. Thanh mức dùng chuyển sang màu vàng ở 70% và màu đỏ ở 90%.</td></tr>
+    </tbody>
+  </table></div>
+  </div><!--/card-->
+
+  <div class="card">
+  <h3 id="bao-mat-tai-khoan">Bật xác thực 2 yếu tố</h3>
+  <p class="card-meta">Trên web · Khoảng 1 phút · Dành cho mọi người dùng</p>
+  <p>Để bảo vệ tài khoản tốt hơn, chúng tôi khuyên bạn bật xác thực 2 yếu tố.</p>
+  <div class="grid-2">
+    <ol class="proc">
+      <li><div><b>Bấm vào tên của bạn ở góc trên bên phải và chọn <span class="ui">Hồ sơ</span>.</b></div></li>
+      <li><div><b>Bật <span class="ui">Xác thực 2 yếu tố</span>.</b><span>Từ đó, mỗi lần đăng nhập bạn sẽ nhập thêm mã 6 số được gửi qua email; mã có hiệu lực trong 15 phút. Trên máy đã được đánh dấu tin cậy, bạn không cần nhập mã trong 30&nbsp;ngày.</span></div></li>
+    </ol>
+    <figure class="shot" data-crop="18.4,0,100,72" data-hp="1:89.6,0.9,8.9,4.6:b;2:73.12,55.75,25.52,14.3:l">
+      <div class="frame"><img src="assets/img/vi/profile.webp" alt="Hồ sơ tài khoản" loading="lazy" width="1920" height="1200"></div>
+    </figure>
+  </div>
+  <p>Trong Hồ sơ, bạn cũng có thể đổi ảnh đại diện, họ tên, ngôn ngữ, múi giờ, mật khẩu và xem các thiết bị đang đăng nhập.</p>
+  </div><!--/card-->
+</section>
+
+<section class="chapter" id="tra-cuu">
+  <div class="ch-head"><h2>Tra cứu</h2></div>
+  <div class="card ref">
+  <h3 id="tc-thiet-bi">Yêu cầu thiết bị</h3>
+  <!--FIG:devices-->
+  </div><!--/card-->
+
+  <div class="card ref">
+  <h3 id="tc-giao-dien">Giao diện web</h3>
+  <!--FIG:dashboard-->
+  </div><!--/card-->
+
+  <div class="card ref">
+  <h3 id="tc-du-lieu">Cách dữ liệu được sắp xếp</h3>
+  <!--FIG:data-org-->
+  </div><!--/card-->
+
+  <div class="card ref">
+  <h3 id="tc-trinh-xem">Màn hình trình xem</h3>
+  <!--FIG:viewer-->
+  </div><!--/card-->
+
+  <div class="card ref">
+  <h3 id="tc-che-do">Chế độ xem</h3>
+  <!--FIG:modes-table-->
+  </div><!--/card-->
+
+  <div class="card ref">
+  <h3 id="tc-cong-cu">Thanh công cụ trình xem</h3>
+  <!--FIG:viewer-tools-->
+  </div><!--/card-->
+
+  <div class="card ref">
+  <h3 id="tc-ghep">Ghép khu vực hoạt động thế nào</h3>
+  <p>Mỗi lần quét nên gói gọn trong khoảng 30&nbsp;m². Với không gian lớn hơn, bạn chia thành nhiều khu vực và quét lần lượt, sau đó app sẽ ghép các khu vực lại với nhau. App ghép dựa vào <b>marker chung</b>: khu vực mới được đặt đúng chỗ khi nó nhìn thấy lại ít nhất một marker mà khu vực trước đã thấy. Vì vậy, cả hai khu vực đều phải quét được marker ở chỗ nối. Ngoài ra, mỗi khu vực nên quét lấn sang khu vực bên cạnh <b>ít nhất 20%</b> (thường khoảng 1–2&nbsp;m qua chỗ nối); phần chồng này giúp hệ thống kiểm tra và chỉnh lại khi một khu vực bị báo Cần kiểm tra.</p>
+  <div class="tbl wide"><table>
+    <thead><tr><th>Marker chung</th><th>Kết quả</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>Không ghép được. App báo “Không có marker chung để ghép với khu vực khác” và khu vực hiện trạng thái <span class="ui">Chưa ghép</span>.</td></tr>
+      <tr><td>1</td><td>Ghép được nhưng dễ lệch góc: chỉ cần một marker 9&nbsp;cm sai 2–4° là đầu phòng cách đó 5&nbsp;m có thể lệch 15–30&nbsp;cm.</td></tr>
+      <tr><td>2 (khuyến nghị)</td><td>Ghép được và app tự kiểm tra: nếu hai marker lệch nhau, app bỏ marker sai và báo <span class="ui">Cần kiểm tra</span>. Hai marker nên nằm trên hai mặt vuông góc với nhau (tường và cột) và cách nhau hơn 1&nbsp;m.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Sau khi ghép, mỗi khu vực được đánh giá theo độ lệch: <span class="pill">Khớp tốt</span> khi lệch đến 10&nbsp;mm, <span class="pill">Khớp tạm</span> khi lệch đến 50&nbsp;mm, và <span class="pill">Cần kiểm tra</span> khi lệch trên 50&nbsp;mm.</p>
+  </div><!--/card-->
+
+  <div class="card ref">
+  <h3 id="tc-file">Định dạng file</h3>
+  <div class="tbl wide"><table>
+    <thead><tr><th>Dữ liệu</th><th>Định dạng</th><th>Cách xuất</th></tr></thead>
+    <tbody>
+      <tr><td>Đám mây điểm</td><td><code>.PLY</code> <code>.E57</code></td><td>Nút <span class="ui">Xuất</span> ở góc trên bên phải trình xem</td></tr>
+      <tr data-flow="mep"><td>Đường ống MEP</td><td><code>.IFC</code></td><td>Nút <span class="ui">Xuất</span> › .IFC (MEP Model). Bản đã chỉnh sửa: <span class="ui">Xuất IFC</span> trong Chỉnh sửa nâng cao</td></tr>
+      <tr data-flow="ks"><td>Mô hình BIM</td><td><code>.IFC</code></td><td>Nút xuất trên thanh công cụ › .IFC (3D Layout Model), xem trước rồi bấm <span class="ui">Tải IFC</span></td></tr>
+      <tr><td>Mesh</td><td><code>.OBJ</code> hoặc <code>.GLB</code></td><td>Nút xuất trên thanh công cụ › <span class="ui">Lưới 3D</span></td></tr>
+      <tr data-flow="ks"><td>Mặt bằng 2D</td><td><code>.DXF</code></td><td><span class="ui">Xuất DXF</span> ở chế độ Mặt bằng 2D</td></tr>
+      <tr><td>Danh sách vấn đề</td><td>Excel, PDF</td><td>Trang <span class="ui">Vấn đề</span> › <span class="ui">Xuất</span></td></tr>
+    </tbody>
+  </table></div>
+  <p>File IFC theo chuẩn IFC4 và đã ghi sẵn đơn vị đo: mét với bản quét từ app<span data-flow="mep"> và bản xuất từ Chỉnh sửa nâng cao</span>, milimét với đám mây điểm tải lên từ máy quét laser. <span data-flow="mep">Rebro, </span>Revit và các phần mềm BIM sẽ tự quy đổi khi mở file. File .PLY và .E57 là bản đã giảm còn khoảng 1 điểm mỗi 15&nbsp;mm; nếu cần mật độ gốc, bạn hãy dùng file gốc đã tải lên.<span data-flow="ks"> File DXF mở được bằng AutoCAD hoặc phần mềm CAD khác.</span></p>
+  </div><!--/card-->
+
+  <div class="card ref">
+  <h3 id="tc-tu-ngu">Từ ngữ hay gặp</h3>
+  <!--FIG:glossary-->
+  </div><!--/card-->
+
+  <div class="card ref">
+  <h3 id="tc-bao-mat">Bảo mật dữ liệu</h3>
+  <!--FIG:security-->
+  </div><!--/card-->
+</section>
+
+<section class="chapter" id="hoi-dap">
+  <div class="ch-head"><h2>Hỏi đáp và xử lý sự cố</h2></div>
+  <div class="card ref">
+  <h3 id="hd-su-co">Xử lý sự cố</h3>
+  <div class="tbl wide stack"><table>
+    <thead><tr><th>Bạn gặp</th><th>Nguyên nhân thường gặp</th><th>Cách xử lý</th></tr></thead>
+    <tbody>
+      <tr><td>App hiển thị tiếng Nhật</td><td>Đây là ngôn ngữ mặc định của app.</td><td>Ở màn đăng nhập, bạn chọn Tiếng Việt bằng biểu tượng lá cờ.</td></tr>
+      <tr><td>App báo Chờ phê duyệt thiết bị</td><td>Công ty bạn yêu cầu duyệt từng thiết bị.</td><td>Bạn nhờ Quản trị tổ chức bấm Duyệt trong Kiểm soát truy cập, sau đó bấm Thử lại.</td></tr>
+      <tr><td>Không nhận được email xác minh</td><td>Thư bị chuyển vào Spam, hoặc email nhập chưa đúng.</td><td>Bạn kiểm tra thư mục Spam. Khi hết thời gian đếm ngược, bạn bấm Gửi lại mã.</td></tr>
+      <tr><td>Liên kết mời báo đã hết hạn</td><td>Mỗi lời mời chỉ có hiệu lực trong một thời gian.</td><td>Bạn nhờ người mời bấm Gửi lại để nhận thư mới.</td></tr>
+      <tr><td>Tài khoản bị khóa khi đăng nhập</td><td>Mật khẩu bị nhập sai 5 lần liên tiếp.</td><td>Bạn đợi 30 phút rồi thử lại, hoặc bấm <span class="ui">Quên mật khẩu?</span> để đặt lại.</td></tr>
+      <tr><td>Không đăng nhập được trên web dù mật khẩu đúng</td><td>Công ty giới hạn truy cập theo dải IP.</td><td>Bạn nhờ Quản trị tổ chức kiểm tra mục Kiểm soát truy cập.</td></tr>
+      <tr><td>Không thấy dự án</td><td>Bạn đang ở công ty khác, hoặc chưa được thêm vào dự án.</td><td>Bạn đổi công ty ở góc trên bên trái, hoặc nhờ Quản lý dự án thêm bạn vào dự án.</td></tr>
+      <tr><td>App không nhận được marker</td><td>Marker in sai tỷ lệ, giấy bị cong hoặc bị lóa.</td><td>Bạn in lại ở tỷ lệ 100% và đo vạch 50&nbsp;mm, dán phẳng, tránh mặt kính. Khi quét, đứng cách marker 0,35–1&nbsp;m và hướng máy gần như thẳng vào marker.</td></tr>
+      <tr><td>Khu vực Chưa ghép hoặc ghép lệch</td><td>Camera chưa quét qua marker chung, hoặc marker dán sai số.</td><td>Bạn quét lại khu vực đó, đi chậm qua cả hai marker ở chỗ nối.</td></tr>
+      <tr><td>Tải lên từ app bị dừng</td><td>Bạn đã chuyển sang app khác, khóa màn hình, hoặc app bị tắt.</td><td>Bạn mở lại app. Nếu việc tải không tự chạy tiếp, vào tab Đồng bộ, chọn bản quét và bấm Tải lên.</td></tr>
+      <tr><td>Tải lên trên web bị gián đoạn</td><td>Mất mạng hoặc tab trình duyệt bị đóng.</td><td>Bạn mở lại bản quét, bấm Tải lên tiếp và chọn đúng file đã chọn trước đó.</td></tr>
+      <tr><td>Bản quét xử lý thất bại</td><td>File bị hỏng hoặc sai định dạng.</td><td>Bạn bấm Xử lý lại. Nếu vẫn báo không đọc được file, bạn tải lên một file khác.</td></tr>
+      <tr data-flow="ks"><td>Không thấy nút MEP</td><td>Dự án thuộc loại khảo sát mặt bằng.</td><td>Chức năng MEP chỉ có ở dự án chọn mục đích Thiết bị &amp; Đường ống (MEP).</td></tr>
+      <tr><td>Trình xem 3D chạy chậm</td><td>Máy tính cấu hình thấp hoặc trình duyệt đã cũ.</td><td>Bạn dùng Chrome hoặc Edge bản mới và tắt bớt các lớp dữ liệu không cần.</td></tr>
+    </tbody>
+  </table></div>
+  </div><!--/card-->
+
+  <div class="card ref">
+  <h3 id="hd-cau-hoi">Câu hỏi thường gặp</h3>
+  <div class="faq">
+    <p class="grp">Quét 3D</p>
+    <details><summary>Vì sao nên chia phòng lớn thành nhiều khu vực thay vì quét một lần?</summary><div><p>Khi quét càng lâu, sai số vị trí của máy càng cộng dồn và máy cũng nóng lên; mỗi khu vực chỉ chứa được khoảng 1.000 ảnh. Khi bạn chia thành các khu vực khoảng 30&nbsp;m² và nối bằng cặp marker, mỗi lần quét ngắn hơn nên sai số không kịp cộng dồn.</p></div></details>
+    <details data-flow="mep"><summary>Vì sao không nên quét đi quét lại cùng một đoạn ống?</summary><div><p>Mỗi lượt quét lệch nhau vài milimét. Nếu quét đè nhiều lượt, ống sẽ dày lên hoặc hiện thành hai lớp, khiến AI đo sai cỡ ống. Bạn nên đi dọc dãy ống một lượt, chậm và đều tay.</p></div></details>
+    <details><summary>Tôi nên chọn mức chi tiết nào?</summary><div><p>Mức <span class="ui">Tiêu chuẩn</span> (LiDAR thu điểm trong khoảng 3&nbsp;m) phù hợp với hầu hết các phòng. Mức <span class="ui">Cao</span> (khoảng 1&nbsp;m) dùng khi cần thấy rõ chi tiết nhỏ<span data-flow="mep"> như van, mặt bích</span>. Mức <span class="ui">Toàn cảnh</span> (khoảng 5&nbsp;m) dùng cho nhà xưởng hoặc <span data-flow="mep">giàn ống sát </span>trần cao.</p></div></details>
+    <details><summary>Tầng hầm không có mạng thì có quét được không?</summary><div><p>Bạn vẫn quét được. Hãy mở dự án một lần khi còn mạng để app lưu sẵn danh sách vị trí. Quét xong, bạn bấm <span class="ui">Lưu</span>; khi lên chỗ có mạng, bạn tải lên ở tab <span class="ui">Đồng bộ</span>.</p></div></details>
+
+    <p class="grp">Marker</p>
+    <details><summary>Vì sao hai marker ở chỗ nối không nên dán trên cùng một bức tường?</summary><div><p>Khi hai marker nằm trên cùng một mặt phẳng, nhất là khi dán sát nhau, chỉ cần lệch một chút là khu vực sau bị xoay sai. Nếu bạn dán một marker trên tường và một marker trên mặt cột hoặc bệ máy vuông góc, cách nhau hơn 1&nbsp;m, app sẽ xác định hướng của khu vực chính xác hơn.</p></div></details>
+    <details><summary>Tôi có thể in marker to hơn để quét từ xa không?</summary><div><p>Không nên. App tính vị trí theo đúng kích thước mã 9 × 9&nbsp;cm; nếu in sai cỡ, app sẽ báo “Marker sai kích thước” và bỏ qua marker đó. Bạn hãy luôn in ở tỷ lệ 100% và đo lại vạch 50&nbsp;mm. App chỉ ghi nhận marker khi bạn đứng cách 0,35–1&nbsp;m.</p></div></details>
+    <details><summary>Ghép bằng marker chính xác đến mức nào?</summary><div><p>Sau khi ghép, mỗi khu vực được đánh giá theo độ lệch: <span class="pill">Khớp tốt</span> khi lệch đến 10&nbsp;mm, <span class="pill">Khớp tạm</span> khi lệch đến 50&nbsp;mm, và <span class="pill">Cần kiểm tra</span> khi lệch trên 50&nbsp;mm. Với khu vực Cần kiểm tra, bạn nên quét lại chỗ nối trước khi rời công trình.</p></div></details>
+
+    <p class="grp">Ghép không dùng marker</p>
+    <details><summary>Nếu quên mang marker, tôi có quét và ghép được không?</summary><div><p>Bạn vẫn làm được: chọn <span class="ui">Chưa có marker</span> khi bắt đầu quét. Bạn giữ phần chồng giữa hai khu vực ít nhất 20% ở chỗ có góc phòng, cột, <span data-flow="mep">tủ điện hoặc cụm van, và tránh chỗ chỉ có dãy ống giống nhau</span><span data-flow="ks">cửa hoặc đồ đạc, và tránh đoạn hành lang hay bức tường trơn giống nhau</span>. Hệ thống sẽ ghép theo hình dạng tường rồi tinh chỉnh. Nếu kết quả chưa đạt, bạn có thể đặt bản quét vào đúng chỗ bằng tay (xem <a href="#gop-ban-quet">Gộp nhiều bản quét</a>).</p></div></details>
+
+    <p class="grp">Giới hạn của LiDAR</p>
+    <details><summary>Vì sao bề mặt bóng (inox, kim loại bóng) hay đồ vật sơn đen bị thưa điểm hoặc thủng?</summary><div><p>Bề mặt bóng làm tia LiDAR phản xạ đi hướng khác, còn bề mặt đen hấp thụ tia. Đây là giới hạn của cảm biến. Bạn hãy lại gần khoảng 0,5–1,5&nbsp;m, quét từ vài hướng xiên, tránh góc phản chiếu đèn, <span data-flow="mep"> và quét rõ mặt bích, van ở hai đầu để hệ thống nối được tuyến ống</span>.</p></div></details>
+    <details><summary>Còn kính và gương thì sao?</summary><div><p>LiDAR gần như không thu được kính trong suốt và gương; gương còn tạo ra một “phòng ảo” phía sau. Nếu có thể, bạn nên che các tấm gương lớn trước khi quét.</p></div></details>
+
+    <p class="grp" data-flow="mep">MEP và IFC</p>
+    <details data-flow="mep"><summary>Làm sao để đưa file IFC vào Rebro hoặc Revit mà vẫn giữ thuộc tính ống?</summary><div><p>Bạn xuất file từ Chỉnh sửa nâng cao, rồi mở trong Rebro hoặc Revit theo hướng dẫn ở mục <a href="#xuat-ifc-mep">Xuất IFC đường ống và mở trong Rebro hoặc Revit</a>.</p></div></details>
+  </div>
+  </div><!--/card-->
+</section>
+
+<section class="chapter" id="phu-luc">
+  <div class="ch-head"><h2>Phụ lục</h2></div>
+  <div class="card ref">
+  <h3 id="pl-yeu-cau">Yêu cầu hệ thống</h3>
+  <div class="tbl wide"><table>
+    <tbody>
+      <tr><td>Quét</td><td>iPhone hoặc iPad dòng Pro có cảm biến LiDAR, chạy iOS 17 trở lên. Thiết bị khuyến nghị: iPhone 17 Pro trở lên, iPad Pro chip M4 trở lên. Thiết bị đã kiểm chứng: iPhone 15 Pro, iPad Pro chip M3 trở lên. Trước khi quét, máy nên còn trên 20% pin và trên 2&nbsp;GB bộ nhớ trống (xem <a href="#kiem-tra-truoc">Kiểm tra trước buổi quét</a>).</td></tr>
+      <tr><td>Xem trên web</td><td>Máy tính dùng Chrome, Edge hoặc Safari bản mới. Máy có card đồ họa sẽ hiển thị 3D mượt hơn.</td></tr>
+      <tr><td>Ngôn ngữ</td><td>Tiếng Việt, English, 日本語 (cả web và app)</td></tr>
+    </tbody>
+  </table></div>
+  </div><!--/card-->
+
+  <div class="card ref">
+  <h3 id="pl-lien-he">Liên hệ hỗ trợ</h3>
+  <p>Nếu cần hỗ trợ, bạn vui lòng liên hệ:<br>河本 直己 (Naoki Kawamoto)<br>Email: <a href="mailto:kawamoto@onetech.jp">kawamoto@onetech.jp</a></p>
+  </div><!--/card-->
+</section>
