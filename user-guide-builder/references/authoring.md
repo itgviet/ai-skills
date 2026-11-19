@@ -29,6 +29,12 @@ Nhiều mục cách nhau `;`. Toạ độ luôn theo **ảnh gốc**, kể cả 
 
 ## Lớp của figure
 
+- **Chọn chỗ đặt ảnh web:** ảnh hẹp hoặc đã crop ≤ 50% bề ngang → trong `.grid-2` cạnh danh sách bước; ảnh rộng (các vùng cần chỉ
+  trải khắp màn hình) → ngay **dưới** `</div>` của `.grid-2` hoặc bỏ `.grid-2`, để ảnh rộng hết thẻ (~950 px ở 1280).
+- `.annotated` ảnh nguồn đã có số vẽ sẵn (không có `data-hp`). Số vẽ sẵn phải trùng số bước; nếu lệch thì sửa câu bước theo ảnh, hoặc
+  lấy ảnh gốc chưa vẽ. Ảnh vẽ dày số khắp màn hình thường cần đặt rộng (xem trên).
+- `figure.photo` (trong `<div class="photos">`) ảnh minh họa thật: rộng 240 px, cắt khung 4:3, xếp hàng ngang; chú thích bắt đầu
+  "Ảnh minh họa:". Không dùng `figure.shot` + `style` cho ảnh này.
 - `.shot` ảnh chụp; `.phone` ảnh điện thoại (trong `.phones` để xếp hàng, cuộn ngang trên màn hẹp); `.dialog` crop hộp thoại (rộng tối đa 420 px).
 - `.form` giữ khoảng đệm của ô trên điện thoại (ô form sát nhãn sẽ chạm chữ nếu bỏ).
 - `.on-dark` viền ô trắng + quầng màu chính, cho ô nằm **bên trong** vùng tối (nút trên thanh điều khiển đen). Ô **bao quanh**

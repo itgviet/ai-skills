@@ -11,6 +11,9 @@ Mỗi dòng là một lỗi đã gặp thật ở hướng dẫn InsightScanX.
 - [ ] Viền focus xanh của chính app không bị nhầm thành ô của hướng dẫn (nếu dễ nhầm, chụp lại khi không focus).
 
 ## Khung cắt và ảnh
+- [ ] Ảnh giao diện đọc được ở 1280 (`check_guide pictures` không báo dưới 45%); ảnh rộng đặt dưới các bước.
+- [ ] Ảnh nguồn có số vẽ sẵn: từng số khớp bước; màn hình không có số vẽ sẵn thì có `data-hp`.
+- [ ] Ảnh minh họa dùng `figure.photo`, nhỏ, xếp hàng; không `style` nội tuyến; chú thích không lặp `alt`.
 - [ ] Không cắt đôi hàng, nút, icon (kể cả nửa icon thanh bên ở góc).
 - [ ] Hộp thoại không lộ chữ của trang phía sau.
 - [ ] Ảnh minh họa/ghép đúng quy tắc nghiệp vụ, ghi "Ảnh minh họa".

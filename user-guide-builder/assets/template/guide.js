@@ -29,8 +29,7 @@
       layer = document.createElement('div'); layer.className = 'zoom';
       layer.style.cssText = 'left:' + (-c[0] / cw * 100) + '%;top:' + (-c[1] / ch * 100) + '%;width:' + (100 / cw * 100) + '%;height:' + (100 / ch * 100) + '%';
       frame.classList.add('cropped'); frame.style.aspectRatio = (cw * iw) + ' / ' + (ch * ih);
-      // a cropped web screen is shown at the same zoom as a full one: its width is its share of the full image
-      if (!fig.classList.contains('phone') && !fig.classList.contains('dialog')) frame.style.setProperty('--crop-w', cw + '%');
+      // a crop fills its frame, i.e. it zooms in: that is what makes screen text readable beside the steps
       layer.appendChild(img); frame.appendChild(layer);
     }
     var marks = M[fig.getAttribute('data-ref')] || [];

@@ -72,8 +72,63 @@ def step_numbers(card: str) -> set[int]:
     return nums
 
 
-def check(body: str, root: Path, flows: list[str]):
+def image_size(path: Path):
+    """(width, height) from the file header for png / jpeg / gif / webp, without Pillow; None if unknown."""
+    b = path.read_bytes()[:256 * 1024]
+    if b[:8] == b'\x89PNG\r\n\x1a\n':
+        return int.from_bytes(b[16:20], 'big'), int.from_bytes(b[20:24], 'big')
+    if b[:6] in (b'GIF87a', b'GIF89a'):
+        return int.from_bytes(b[6:8], 'little'), int.from_bytes(b[8:10], 'little')
+    if b[:4] == b'RIFF' and b[8:12] == b'WEBP':
+        k = b[12:16]
+        if k == b'VP8 ':
+            return int.from_bytes(b[26:28], 'little') & 0x3fff, int.from_bytes(b[28:30], 'little') & 0x3fff
+        if k == b'VP8L':
+            v = int.from_bytes(b[21:25], 'little')
+            return (v & 0x3fff) + 1, ((v >> 14) & 0x3fff) + 1
+        if k == b'VP8X':
+            return int.from_bytes(b[24:27], 'little') + 1, int.from_bytes(b[27:30], 'little') + 1
+    if b[:2] == b'\xff\xd8':
+        i = 2
+        while i + 9 < len(b):
+            if b[i] != 0xFF:
+                i += 1
+                continue
+            marker = b[i + 1]
+            if marker in (0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7, 0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF):
+                return int.from_bytes(b[i + 7:i + 9], 'big'), int.from_bytes(b[i + 5:i + 7], 'big')
+            i += 2 + int.from_bytes(b[i + 2:i + 4], 'big')
+    return None
+
+
+def fix_sizes(body: str, root: Path):
+    """width/height on every <img> set from the real file: crops, phone frames and the layout all depend on them."""
+    notes = []
+
+    def one(m):
+        tag = m.group(0)
+        src = re.search(r'src="([^"]+)"', tag).group(1)
+        f = root / src
+        if re.match(r'^(?:[a-z]+:|//|data:)', src) or not f.is_file():
+            return tag
+        size = image_size(f)
+        if not size:
+            return tag
+        w, h = re.search(r'\swidth="(\d+)"', tag), re.search(r'\sheight="(\d+)"', tag)
+        if w and h and (int(w.group(1)), int(h.group(1))) == size:
+            return tag
+        notes.append(f'{src}: width/height set to the real {size[0]}x{size[1]}' + (f' (was {w.group(1)}x{h.group(1)})' if w and h else ''))
+        tag = re.sub(r'\s(?:width|height)="\d*"', '', tag)
+        return tag.replace('<img', f'<img width="{size[0]}" height="{size[1]}"', 1)
+    return re.sub(r'<img\b[^>]*>', one, body), notes
+
+
+def check(body: str, root: Path, flows: list[str], lang: str = 'vi'):
     errors, warnings = [], []
+    # layout comes from the template's classes; inline styles were how a past guide hid a missing pattern
+    for m in re.finditer(r'<(\w+)[^>]*\sstyle="([^"]*)"', body):
+        if not re.fullmatch(r'\s*counter-reset:\s*s\s+\d+;?\s*', m.group(2)):
+            errors.append(f'inline style on <{m.group(1)} style="{m.group(2)[:40]}">: use a template class (figure.photo, .phones, .dialog...) instead')
     ids = re.findall(r'\sid="([^"]+)"', body)
     for i in sorted({x for x in ids if ids.count(x) > 1}):
         errors.append(f'duplicate id "{i}"')
@@ -87,10 +142,39 @@ def check(body: str, root: Path, flows: list[str]):
         if not hid:
             errors.append('a card has no <h3 id="...">')
         steps = step_numbers(card)
-        for fig in re.finditer(r'<figure\b[^>]*>', card):
-            tag = fig.group(0)
+        for fig in re.finditer(r'<figure\b([^>]*)>(.*?)</figure>', card, re.S):
+            tag, inner = fig.group(0)[:fig.group(0).index('>') + 1], fig.group(2)
+            m_cls = re.search(r'class="([^"]*)"', tag)
+            cls = m_cls.group(1).split() if m_cls else []
             hp = re.search(r'data-hp="([^"]*)"', tag)
             crop = re.search(r'data-crop="([^"]*)"', tag)
+            img = re.search(r'<img\b[^>]*>', inner)
+            img_tag = img.group(0) if img else ''
+            m_alt, m_src = re.search(r'alt="([^"]*)"', img_tag), re.search(r'src="([^"]*)"', img_tag)
+            alt, src = (m_alt.group(1) if m_alt else ''), (m_src.group(1) if m_src else '')
+            m_cap = re.search(r'<figcaption>(.*?)</figcaption>', inner, re.S)
+            cap = re.sub(r'<[^>]+>', '', m_cap.group(1)) if m_cap else ''
+            kind = 'photo' if 'photo' in cls else 'diagram' if 'diagram' in cls else 'shot'
+            # a screenshot beside numbered steps must show where each step happens
+            if kind == 'shot' and img and len(steps) >= 2 and not hp and 'annotated' not in cls:
+                errors.append(f'#{name}: screenshot {src} has no pins for steps {min(steps)}–{max(steps)}: add data-hp, or class "annotated" '
+                              f'if the image already carries numbers that match the steps, or "photo" for an illustration')
+            if 'annotated' in cls:
+                warnings.append(f'#{name}: annotated image: check every number drawn in it equals the step it marks, and that its marks look like the '
+                                f'guide\'s pins; a clean source image + data-hp is better')
+            if kind == 'photo' and lang == 'vi' and not cap.strip().startswith('Ảnh minh họa'):
+                warnings.append(f'#{name}: illustration photo without a caption starting "Ảnh minh họa"')
+            if alt and cap and re.sub(r'\W+', '', alt.lower()) == re.sub(r'\W+', '', cap.lower()):
+                warnings.append(f'#{name}: caption repeats the alt text "{cap[:40]}": say what the reader should see, or drop the caption')
+            # only beside the steps (inside .grid-2) is a full screen squeezed; under them it gets the card's full width
+            seg = card[:fig.start()]
+            g = seg.rfind('<div class="grid-2">')
+            beside = g >= 0 and seg[g:].count('<div') > seg[g:].count('</div>')
+            if kind == 'shot' and img and beside and not crop and not ({'phone', 'dialog'} & set(cls)):
+                w = re.search(r'\swidth="(\d+)"', img.group(0))
+                if w and int(w.group(1)) >= 1200:
+                    warnings.append(f'#{name}: full {w.group(1)} px screen without data-crop: beside the steps it shows at ~1/3 size and its text cannot be read; '
+                                    f'crop to the area the steps use')
             if crop:
                 v = crop.group(1).split(',')
                 if len(v) != 4 or not all(re.fullmatch(r'-?\d+(\.\d+)?', x.strip()) for x in v) or float(v[0]) >= float(v[2]) or float(v[1]) >= float(v[3]):
@@ -126,8 +210,9 @@ def build(cfg_path: Path, only_check: bool):
     src = (root / cfg['content']).read_text('utf8')
     src = re.sub(r'^\s*<!--.*?-->', '', src, count=1, flags=re.S)  # the authoring note at the top quotes markup
     body = src[src.index('<section'):] if '<section' in src else src
-    errors, warnings = check(body, root, flow_ids)
-    report = {'errors': errors, 'warnings': warnings}
+    body, size_notes = fix_sizes(body, root)
+    errors, warnings = check(body, root, flow_ids, lang)
+    report = {'errors': errors, 'warnings': warnings, 'fixed': size_notes}
     if errors or only_check:
         print(json.dumps(report, ensure_ascii=False, indent=1))
         return 1 if errors else 0

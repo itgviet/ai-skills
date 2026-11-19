@@ -46,6 +46,18 @@
         "Thêm {match, why} vào guide.accept.json",
         "Chạy lại check_guide.cjs all --accept và báo PASS"
       ]
+    },
+    {
+      "id": 5,
+      "prompt": "Làm hướng dẫn tiếng Việt cho app kiểm định nhà; ảnh chụp lấy từ bộ tài liệu tiếng Nhật cũ, đã có sẵn số khoanh màu cam trên ảnh, ảnh PC 1600 px, kèm vài ảnh hiện trường.",
+      "expected_output": "Hỏi xin ảnh gốc chưa vẽ số; nếu không có thì gắn lớp annotated và đối chiếu từng số với bước; ảnh PC rộng đặt dưới các bước hoặc crop ≤ 50%; ảnh hiện trường dùng figure.photo trong .photos; không style nội tuyến; build không lỗi và check_guide all (gồm pictures) PASS.",
+      "files": [],
+      "assertions": [
+        "Không để ảnh giao diện cạnh 2+ bước mà không có data-hp hoặc annotated",
+        "Ảnh PC rộng không đặt trong .grid-2 khi chưa crop",
+        "Ảnh minh họa dùng figure.photo, không style=",
+        "check_guide pictures không báo ảnh dưới 45%"
+      ]
     }
   ]
 }
