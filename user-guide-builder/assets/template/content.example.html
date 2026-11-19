@@ -1,0 +1,46 @@
+<!-- Content for build_guide.py. One <section class="chapter"> per chapter, one <div class="card"> per task.
+  Every card ends with  </div><!--/card-->  (the builder finds cards by it). Card markup: assets/card-template.html.
+  data-flow on a chapter, card, figure, table row or <i class="fl"> shows it only in that flow.
+  Pins: data-hp="n:x,y,w,h[:side]" in % of the full image; n is the step number. Rules: references/authoring.md. -->
+
+<section class="chapter" id="bat-dau">
+  <div class="ch-head"><h2>Bắt đầu</h2></div>
+
+  <div class="card">
+  <h3 id="dang-nhap">Đăng nhập lần đầu</h3>
+  <p class="card-meta">Trên web · Khoảng 2 phút · Dành cho mọi người</p>
+  <p>Bạn nhận email mời từ quản trị của công ty, trong đó có đường dẫn đăng nhập.</p>
+  <div class="grid-2">
+    <ol class="proc">
+      <li><div><b>Mở đường dẫn trong email mời.</b><span>Trang đăng nhập hiện ra với email của bạn đã điền sẵn.</span></div></li>
+      <li><div><b>Đặt mật khẩu và bấm <span class="ui">Đăng nhập</span>.</b></div></li>
+    </ol>
+    <figure class="shot" data-crop="0,0,100,70" data-hp="1:34,30,32,8;2:34,52,32,8:b">
+      <div class="frame"><img src="img/example-screen.png" alt="Màn hình đăng nhập" loading="lazy" width="1600" height="1000"></div>
+    </figure>
+  </div>
+  <div class="note tip"><b class="t">Kết quả</b><span>Bạn vào trang chủ của công ty.</span></div>
+  </div><!--/card-->
+</section>
+
+<section class="chapter" id="hang-ngay">
+  <div class="ch-head"><h2>Việc hằng ngày</h2></div>
+
+  <div class="card" data-flow="nhan-vien">
+  <h3 id="ghi-nhan">Ghi nhận công việc trên app</h3>
+  <p class="card-meta">Trên app · Khoảng 1 phút</p>
+  <ol class="proc">
+    <li><div><b>Bấm <span class="ui">Thêm</span> ở góc dưới.</b></div></li>
+    <li><div><b>Nhập nội dung, ví dụ <i class="fl" data-flow="nhan-vien">“Kiểm kho khu A”</i><i class="fl" data-flow="quan-ly">“Duyệt phiếu 12”</i>, rồi bấm <span class="ui">Lưu</span>.</b></div></li>
+  </ol>
+  </div><!--/card-->
+
+  <div class="card" data-flow="quan-ly">
+  <h3 id="duyet">Duyệt việc trên web</h3>
+  <p class="card-meta">Trên web · Khoảng 2 phút</p>
+  <ol class="proc">
+    <li><div><b>Mở <span class="ui">Chờ duyệt</span> trên thanh bên.</b></div></li>
+    <li><div><b>Bấm <span class="ui">Duyệt</span> ở dòng cần duyệt.</b><span>Người gửi nhận thông báo ngay.</span></div></li>
+  </ol>
+  </div><!--/card-->
+</section>

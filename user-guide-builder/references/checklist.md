@@ -19,6 +19,7 @@ Mỗi dòng là một lỗi đã gặp thật ở hướng dẫn InsightScanX.
 - [ ] Dữ liệu demo không tên thật, danh mục/ví dụ hợp ngữ cảnh luồng.
 
 ## Chữ
+- [ ] Bước không có ảnh (không có ảnh chụp thật cho bước đó): ghi đủ tên nút/ô bằng `.ui`, không vẽ màn hình giả, không ghim.
 - [ ] Bước mở đầu bằng hành động; điều kiện để sau.
 - [ ] Tên nút đúng chữ trên app, thống nhất cả trang; chỉ tô kiểu `.ui` cho đúng tên nút.
 - [ ] Không câu tự nói về trang, không ghi chú review lẫn vào bài.

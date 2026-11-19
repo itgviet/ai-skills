@@ -26,13 +26,25 @@
     {
       "id": 3,
       "prompt": "Làm trang hướng dẫn sử dụng tiếng Việt cho app quản lý kho (web + app điện thoại), có ảnh chụp màn hình đánh số các bước, có 2 luồng: thủ kho và quản lý.",
-      "expected_output": "Hỏi/khảo sát luồng, file ngôn ngữ, môi trường chụp được phép; dàn ý chương → thẻ việc theo card-template; dựng trang với guide-runtime (đổi mã luồng); chạy check_guide marks/flows/contrast/cover; giao review độc lập theo review-prompt.",
+      "expected_output": "Hỏi/khảo sát luồng, file ngôn ngữ, môi trường chụp; chạy build_guide.py --init; điền guide.config.json (2 luồng thu-kho, quan-ly, màu thương hiệu); viết thẻ theo card-template; build không lỗi; check_guide.cjs all PASS; tự chụp shots ở 390 và 1280; giao review theo review-prompt.",
       "files": [],
       "assertions": [
+        "Dùng scripts/build_guide.py --init rồi --config, không chép generator của ISX",
+        "Khai báo đúng 2 luồng trong guide.config.json",
         "Lấy tên nút từ file ngôn ngữ của app thay vì đoán",
-        "Đổi mã luồng mep/ks trong runtime thành mã luồng của dự án",
-        "Không chụp trên môi trường production/stage khi chưa hỏi",
-        "Dùng tên demo kiểu Nhân viên A/B, không tên thật"
+        "Chạy check_guide.cjs all và shots ở 390 + 1280 trước khi báo xong",
+        "Không chụp trên production/stage khi chưa hỏi; tên demo kiểu Nhân viên A/B"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "check_guide all báo FAIL vì \"boxes overlap #tim-kiem\" ở 390, nhưng ô tìm kiếm và nút lọc trong app vốn đứng sát nhau. Xử lý giúp.",
+      "expected_output": "Chụp hình đó ở 390 để xác nhận hai ô chỉ chạm vì đứng liền nhau trong app; nếu đúng thì thêm mục vào guide.accept.json kèm why thay vì đổi toạ độ bừa; chạy lại all ra PASS.",
+      "files": [],
+      "assertions": [
+        "Xem ảnh trước khi quyết định",
+        "Thêm {match, why} vào guide.accept.json",
+        "Chạy lại check_guide.cjs all --accept và báo PASS"
       ]
     }
   ]

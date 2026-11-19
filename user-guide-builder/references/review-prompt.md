@@ -18,7 +18,7 @@ crops don't cut UI elements in half; captions match the picture; diagrams readab
 <language>, no contradictions with pictures, consistent names for the same control, steps start with the action, no
 redundant or meta sentences, consecutive numbering, nothing clipped or overflowing.
 
-Already accepted, do not report: <list from earlier rounds>.
+Already accepted, do not report: <paste each "match" + "why" from guide.accept.json, plus judgement calls from earlier rounds>.
 
 Do not edit files. Report under 400 words: first say which cards/widths/flows you actually opened; then findings with
 severity (major/minor), card id, width, flow, problem, concrete fix (coordinates or exact wording). If nothing a careful
@@ -26,6 +26,8 @@ professional editor would fix remains, say "CLEAN" explicitly.
 ```
 
 ## Xử lý kết quả
+
+- Trước khi giao: `check_guide.cjs all` phải PASS, để reviewer không mất thời gian vào lỗi máy bắt được.
 
 - Reviewer có thể sai (ví dụ nhầm viền focus của app là ô). Xác minh từng mục bằng ảnh chụp/mã nguồn trước khi sửa;
   mục không phải lỗi → giải thích ngắn và thêm vào "đã chấp nhận".

@@ -1,0 +1,16 @@
+{
+  "lang": "vi",
+  "product": "Tên sản phẩm",
+  "title": "Hướng dẫn sử dụng Tên sản phẩm",
+  "lede": "Một câu nói người đọc làm được gì với sản phẩm, ví dụ: Nhập kho bằng điện thoại, duyệt phiếu trên web.",
+  "content": "content.html",
+  "output": "dist/index.html",
+  "brand": { "primary": "#132b88", "soft": "#eef1ff" },
+  "flows": [
+    { "id": "nhan-vien", "label": "Nhân viên", "desc": "Làm việc hằng ngày trên app", "icon": "N" },
+    { "id": "quan-ly", "label": "Quản lý", "desc": "Duyệt, theo dõi và báo cáo trên web", "icon": "Q" }
+  ],
+  "marks": null,
+  "footer": "Tên sản phẩm · Hướng dẫn sử dụng · Tiếng Việt",
+  "labels": {}
+}

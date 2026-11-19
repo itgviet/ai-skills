@@ -1,17 +1,18 @@
-<!-- One task card. Copy, fill, keep the class names: guide-runtime.js/.css depend on them.
+<!-- One task card for content.html. Copy, fill, keep the class names: assets/template/guide.css/.js depend on them.
+  End every card with  </div><!--/card-->  : build_guide.py finds cards by it.
   data-flow="<flow-id>" on a card, chapter, figure, table row or <i class="fl"> hides it outside that flow.
   data-hp pins, numbered by step (the pin number is the step number in the list above it):
     "n:x,y,w,h"          box in % of the FULL image, number placed on the side that fits
     "n:x,y,w,h:side"     side = l r t b tl lb ... (where the number sits)
     "n:x,y,w,h:@px,py"   box, number at an exact point (crowded shots where every side covers text)
-    "n:@m[:side]"        box measured on the live app (marks.js, data-ref="shot-id")
+    "n:@m[:side]"        box measured on the live app (config "marks", data-ref="shot-id")
     "n:x,y"              number only, at a point
   data-crop="x0,y0,x1,y1" shows only that part of the image (% of the full image); pins keep full-image coordinates.
   Extra figure classes: .phone (phone screenshot), .dialog (dialog crop), .form (keeps box padding on phones),
   .on-dark (white box line for dark UI). -->
 <div class="card" data-flow="<flow-id or remove>">
   <h3 id="<task-id>"><Task title, a verb phrase></h3>
-  <p class="card-meta"><Trên web | Trên app> · Khoảng <N> phút · Dành cho <role></p>
+  <p class="card-meta"><Trên web | Trên app> · Khoảng <N> phút[ · Dành cho <role>, only on cards WITHOUT data-flow: a flow card already gets its flow badge]</p>
   <p><One or two sentences: why the reader does this and what they need first.></p>
   <div class="grid-2">
     <ol class="proc">

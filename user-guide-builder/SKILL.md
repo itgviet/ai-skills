@@ -3,76 +3,79 @@ name: user-guide-builder
 description: "Dùng khi cần làm hoặc chỉnh trang hướng dẫn sử dụng cho người dùng cuối của một app/web (user guide, help page, tài liệu hướng dẫn khách hàng): một trang HTML gồm các thẻ việc có bước đánh số, ảnh chụp màn hình có ghim số và ô khoanh, chọn theo luồng/vai trò, in ra PDF được, rồi kiểm tra tự động và review theo vòng tới khi sạch. Dùng cả khi người dùng chỉ nói \"làm trang hướng dẫn cho app X\", \"ghi chú lên ảnh chụp màn hình\", \"hướng dẫn này chưa chuyên nghiệp\", \"đánh số bước cho rõ\", \"cập nhật bản hướng dẫn lên server review\". Không dùng cho tài liệu kỹ thuật cho dev (kiến trúc, API, schema) → tech-doc-generator; sơ đồ đơn lẻ → archify; ảnh minh họa/asset vẽ mới → visual-artist; dịch sang ngôn ngữ khác → cultural-localization-strategist."
 compatibility: "Cần Python 3.10+, Node 18+ và Playwright (msedge hoặc chrome). Deploy review cần ssh + docker trên máy đích."
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   author: "itgviet"
   last_updated: "2026-11-19"
 ---
 
 # [SKILL-DEV-006] User Guide Builder
 
-Làm trang hướng dẫn sử dụng một trang (HTML) cho người dùng cuối: thẻ việc có bước đánh số, ảnh chụp thật có ghim/ô
-chính xác, lọc theo luồng, rồi kiểm tra tự động + review độc lập theo vòng. Đầu ra là một trang HTML kèm `assets/`,
-xuất bản dạng Artifact và (khi người dùng yêu cầu) lên server review. Rút từ hướng dẫn InsightScanX (61 bản, 23 vòng review).
+Làm trang hướng dẫn sử dụng một trang (HTML) cho người dùng cuối của bất kỳ app nào: thẻ việc có bước đánh số, ảnh chụp
+thật có ghim/ô chính xác, lọc theo luồng (vai trò hoặc loại công việc), in được. Đầu ra là `dist/index.html` + ảnh,
+dựng bằng `scripts/build_guide.py` từ `guide.config.json` + `content.html` của dự án, rồi qua vòng kiểm tra → sửa → review
+tới khi đạt. Rút từ hướng dẫn InsightScanX (62 bản, 23 vòng review); đã chạy thử trên một app không liên quan.
 
 ## Gotchas
 
 - **Xuất bản Artifact chỉ gửi HTML.** Ảnh mới hoặc đã sửa phải truyền trong `files`, nếu không bản online thiếu ảnh hoặc giữ
   ảnh cũ trong khi ảnh chụp kiểm tra (đọc từ đĩa) vẫn đẹp. Trước khi báo xong: `python scripts/asset_manifest.py <page> --published <listing>`.
-- **Tên nút lấy từ file ngôn ngữ của app** (vi.json, Localizable.strings), không đoán theo ảnh. Mỗi nút một tên trong cả trang
-  ("nút xuất" ở bước 1 thì bước 3 cũng "nút xuất"). Câu khẳng định điều ảnh không cho thấy (màu tô, đơn vị mm…) → kiểm tra mã nguồn,
-  không xác minh được thì viết trung tính.
-- **Không bịa màn hình.** Ảnh thiếu → ghép từ giao diện thật và mã nguồn, ghi "Ảnh minh họa" trong chú thích. Ảnh vẽ phải đúng
-  quy tắc nghiệp vụ (ví dụ hai marker trên hai mặt vuông góc, không phải hai mặt song song).
-- **Dữ liệu demo:** chụp trên môi trường dev/local với dữ liệu mẫu. Upload lên stage/prod tốn tiền: hỏi trước. Tên người là
-  "Nhân viên A/B/C", tên dự án chung chung, không địa chỉ thật.
-- **Không có câu tự nói về trang** ("ảnh dưới cho thấy…", "trang này…"). Ghi chú review đặt trong hộp nội bộ, không lẫn vào bài.
-- **Bước bắt đầu bằng hành động** ("Bấm…", "Chọn…"), không "Để…, bạn…" hay "Nếu…". Điều kiện đặt sau: "Nhờ Quản trị duyệt máy nếu app hiện…".
-- **Ghim/ô ở khổ điện thoại (390 px):** ảnh web chỉ còn ~340 px nên ô sát nhau sẽ chạm, ghim che chữ. Luôn chụp kiểm ở 390 lẫn 1280.
-  Ô trên nền tối dùng `.on-dark`; ảnh form dùng `.form` để giữ khoảng đệm; chỗ chật dùng điểm ghim cố định `n:box:@x,y`.
-- **`data-crop` cắt theo ranh giới hàng/cột**, đo trên ảnh gốc (vẽ thước % lên ảnh), không cắt đôi nút hay hàng. Hộp thoại: đo mép
-  hộp thoại thật (pixel sáng) rồi chừa ~0,5%. Ảnh gốc tự bị cắt ở mép phải thì chấp nhận, đừng cắt thêm.
-- **Sơ đồ SVG trên điện thoại** co lại tới chữ 5–6 px: cho cuộn ngang với `min-width` thay vì co.
-- **Python in tiếng Việt trên Windows:** `python -X utf8`. Patch file bằng script Python (raw string) thay vì heredoc bash
-  (bash ăn mất `\`). Thay chuỗi luôn `assert s.count(a) == 1` để không thay nhầm.
-- **Trang dạng fragment lên nginx** phải thêm `<!doctype html><meta charset="utf-8">` (script deploy đã làm), nếu không lỗi font.
-- **Chỉ đồng bộ server review khi người dùng bảo.** Review lặp dễ không dừng: dừng khi 2 vòng liền không còn lỗi lớn hoặc khi người dùng chốt.
+- **Tên nút lấy từ file ngôn ngữ của app** (vi.json, Localizable.strings…), không đoán theo ảnh. Mỗi nút một tên trong cả trang.
+  Câu khẳng định điều ảnh không cho thấy (màu tô, đơn vị…) → kiểm tra mã nguồn; không xác minh được thì viết trung tính.
+- **Không bịa màn hình.** Ảnh thiếu → ghép từ giao diện thật và mã nguồn, ghi "Ảnh minh họa". Ảnh vẽ phải đúng quy tắc nghiệp vụ của app.
+- **Dữ liệu demo:** chụp trên môi trường dev/local với dữ liệu mẫu; upload lên stage/prod tốn tiền nên hỏi trước. Tên người
+  "Nhân viên A/B/C", tên dự án/công ty chung chung, không địa chỉ thật.
+- **Không có câu tự nói về trang** ("ảnh dưới cho thấy…", "trang này…"). Ghi chú review không lẫn vào bài.
+- **Bước bắt đầu bằng hành động** ("Bấm…", "Chọn…"), điều kiện để sau. `build_guide.py` cảnh báo bước mở đầu bằng "Để", "Nếu".
+- **Kiểm tra DOM xanh không chứng minh ghim không che chữ.** Luôn chụp từng hình ở 390 và 1280 (`check_guide.cjs shots`) và tự mở ảnh.
+  Ở 390 ảnh web chỉ còn ~340 px: ô sát nhau sẽ chạm, ghim cạnh ô dễ đè chữ → dùng điểm ghim cố định `n:box:@x,y` vào khoảng trống.
+- **`data-crop` cắt theo ranh giới hàng/cột** đo trên ảnh gốc, không cắt đôi nút/hàng; hộp thoại: đo mép thật rồi chừa ~0,5%.
+- **Python in tiếng Việt trên Windows:** `python -X utf8`. Sửa file bằng Write/Edit hoặc script Python, không bằng heredoc bash
+  (bash ăn mất `\` trong regex/`\n`). Thay chuỗi trong script luôn `assert s.count(a) == 1`.
+- **Reviewer cũng sai và hay chỉ phủ một phần trang.** Xác minh từng phát hiện bằng ảnh/mã nguồn; báo cáo không ghi rõ đã mở
+  những thẻ nào ở khổ/luồng nào thì giao tiếp phần còn thiếu.
+- **Chỉ đồng bộ server review khi người dùng bảo.** Không đặt mục tiêu "review đến khi hoàn hảo" không có điểm dừng: dừng khi
+  `check_guide.cjs all` PASS và 2 vòng review liền không còn lỗi lớn, hoặc khi người dùng chốt.
 
 ## Quy trình
 
 Progress:
-- [ ] 1. Khảo sát: luồng người dùng (ví dụ MEP / Khảo sát), vai trò, file ngôn ngữ của app, ảnh chụp có sẵn, môi trường chụp được phép.
+- [ ] 1. Khảo sát: luồng người dùng (vai trò / loại việc), file ngôn ngữ của app, ảnh có sẵn, môi trường chụp được phép, nơi xuất bản.
       Hỏi người dùng nếu chưa rõ luồng hoặc nơi xuất bản.
-- [ ] 2. Dàn ý: chương → thẻ việc. Mỗi thẻ: tiêu đề động từ, `card-meta` (web/app · thời gian · vai trò), các bước, Kết quả,
-      Nếu có sự cố, "Tiếp theo". Mẫu: [assets/card-template.html](assets/card-template.html).
-- [ ] 3. Chụp ảnh (dev/local, dữ liệu demo). Ảnh web 1920×1200, ảnh điện thoại 600×1302, lưu dạng webp trong thư mục ảnh của dự án (cạnh trang: `img/<lang>/` bên trong thư mục assets của dự án).
-- [ ] 4. Viết thẻ + ghi chú ghim/ô (`data-hp`, `data-crop`). Dựng trang: copy [assets/reference-isx/make_guide.py](assets/reference-isx/make_guide.py)
-      làm khung, hoặc nhúng [assets/guide-runtime.css](assets/guide-runtime.css) + [assets/guide-runtime.js](assets/guide-runtime.js) vào trang có sẵn.
-      Đọc [references/authoring.md](references/authoring.md) trước khi đặt ghim lần đầu hoặc khi đổi mã luồng.
-- [ ] 5. Kiểm tra tự động, sửa tới khi sạch (trừ mục đã chấp nhận):
-      `node scripts/check_guide.cjs marks|flows|contrast|cover --page <page.html>`.
-- [ ] 6. Tự chụp từng hình ở 390 và 1280 (`node scripts/check_guide.cjs shots --page <p> --width 390 --flow <f> --dpr 3 --out <dir/x> <selector…>`)
-      và tự mở ảnh ra xem; test DOM xanh không chứng minh ghim không che chữ.
-- [ ] 7. Review độc lập theo vòng: giao agent mới prompt trong [references/review-prompt.md](references/review-prompt.md) kèm danh sách
-      "đã chấp nhận". Xác minh từng phát hiện bằng ảnh/mã nguồn trước khi sửa (reviewer có thể sai). Sửa → bước 5.
-- [ ] 8. Xuất bản: Artifact (kèm `files` cho ảnh đổi) → `asset_manifest.py --published` sạch. Server review khi người dùng yêu cầu:
-      `bash scripts/deploy_review.sh --page <p> --host <user@host> --dir <folder> --port <n>`.
+- [ ] 2. Khởi tạo: `python scripts/build_guide.py --init <thư mục hướng dẫn của dự án>` → `guide.config.json`, `content.html`, `img/`.
+      Điền config (tên sản phẩm, màu thương hiệu, luồng). Dự án đã có trang riêng (như ISX) thì giữ trang đó, chỉ dùng bước 5–8.
+- [ ] 3. Chụp ảnh (dev/local, dữ liệu demo): web 1920×1200, điện thoại 600×1302, webp/png trong `img/`. Ghi toạ độ % của
+      các nút cần chỉ (vẽ thước % lên ảnh, hoặc lấy bounding box từ DOM của app).
+- [ ] 4. Viết thẻ trong `content.html` theo [assets/card-template.html](assets/card-template.html): tiêu đề động từ, `card-meta`,
+      bước, ảnh có `data-hp`/`data-crop`, Kết quả, Nếu có sự cố. Cú pháp: [references/authoring.md](references/authoring.md).
+- [ ] 5. Build + kiểm cấu trúc: `python scripts/build_guide.py --config <cfg>`. Lỗi (id trùng, luồng lạ, ảnh thiếu, ghim không khớp
+      bước) dừng build → sửa → build lại. Đọc cả cảnh báo.
+- [ ] 6. Cổng tự động: `node scripts/check_guide.cjs all --page dist/index.html --accept guide.accept.json` → sửa tới khi `PASS`.
+      Mục đúng là lựa chọn có chủ đích (hai nút liền nhau trong app…) → thêm vào `guide.accept.json` kèm `why`, không sửa bừa.
+- [ ] 7. Tự xem: `node scripts/check_guide.cjs shots --page <p> --width 390 --flow <id> --out shots/390-<id> --sheet shots/390-<id>.png`
+      (không truyền selector = mọi hình của luồng đó), rồi 1280; mở các tấm `--sheet` ra xem, phóng to chỗ nghi ngờ bằng `--dpr 3`
+      + selector `.card:has(#<id>) figure`. Ghim che chữ, ô cắt chữ, crop cắt đôi → sửa → bước 5.
+- [ ] 8. Review độc lập: giao agent mới prompt trong [references/review-prompt.md](references/review-prompt.md) kèm nội dung
+      `guide.accept.json`. Xác minh từng phát hiện, sửa → bước 5. Dừng theo điểm dừng ở Gotchas.
+- [ ] 9. Xuất bản: Artifact (kèm `files` cho ảnh) → `asset_manifest.py --published` sạch. Server review khi người dùng yêu cầu:
+      `bash scripts/deploy_review.sh --page dist/index.html --host <user@host> --dir <folder> --port <n>`.
 
-Checklist chất lượng đầy đủ: [references/checklist.md](references/checklist.md) (đọc ở bước 5–7).
+Checklist chất lượng: [references/checklist.md](references/checklist.md) (đọc ở bước 6–8).
 
 ## Đầu ra
 
 ```markdown
 Bản <N> đã lên <artifact URL> [và <server>:<port>].
 Đã sửa: <từng mục, bằng chữ của người đọc hướng dẫn>.
-Kiểm tra: marks/flows/contrast/cover <kết quả>; đã chụp kiểm <các hình> ở 390 và 1280.
+Kiểm tra: build <errors/warnings>; check_guide all <PASS/FAIL, n mục đã chấp nhận>; đã tự xem <các hình> ở 390 và 1280.
 Không sửa: <mục> — <lý do>.
 Chưa làm / chưa kiểm: <…>.
 ```
 
 ## Tham khảo
 
-- Đọc [references/authoring.md](references/authoring.md) khi viết ghim/ô/crop, thêm luồng mới, hoặc chuyển runtime sang dự án khác.
-- Đọc [references/checklist.md](references/checklist.md) trước khi tự review hoặc trả lời reviewer.
-- Đọc [references/review-prompt.md](references/review-prompt.md) khi giao review cho agent độc lập.
-- [assets/reference-isx/](assets/reference-isx/) là bản InsightScanX hoàn chỉnh (generator + nội dung), dùng làm ví dụ, không chạy trực tiếp
-  được vì phụ thuộc khung trang `src/` của dự án đó.
+- [references/authoring.md](references/authoring.md): cú pháp ghim/ô/crop, luồng, đo toạ độ, config. Đọc trước khi viết thẻ đầu tiên.
+- [references/checklist.md](references/checklist.md): checklist chất lượng, đọc trước khi tự review hoặc trả lời reviewer.
+- [references/review-prompt.md](references/review-prompt.md): prompt giao review độc lập.
+- [assets/template/](assets/template/): khung trang (`guide.css`, `guide.js`) và mẫu config/content mà `--init` chép ra.
+- [assets/reference-isx/](assets/reference-isx/): bản InsightScanX hoàn chỉnh (generator riêng của dự án đó, nội dung 49 thẻ) để
+  tham khảo cách viết; không chạy được ngoài dự án ISX.
