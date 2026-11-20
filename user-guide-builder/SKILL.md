@@ -18,6 +18,11 @@ cũ vẫn cho qua: các luật về ảnh trong Gotchas và `check_guide picture
 
 ## Gotchas
 
+- **Số trên ảnh phải khớp bước cùng hàng.** Bước nằm cạnh ảnh mà không có số trên ảnh, hay số trên ảnh mà bước ở hàng khác,
+  người đọc coi là sai (sếp góp ý 20/11). Bước không hiện trên ảnh: gộp vào bước khác, đổi thành câu dẫn / Kết quả, hoặc thêm
+  ảnh thật của bước đó. Ghi chú có sẵn của app (số xám 1, 2 trong hộp thoại) dễ bị nhầm với số bước. `check_guide.cjs steps` bắt lỗi này.
+- **Trang ráp từ DOM phải có `<meta charset="utf-8">`.** Thiếu nó, server trả text/html bị đọc thành Latin-1, script gặp regex
+  có dấu tiếng Việt thì dừng: mất bố cục bước và số trên ảnh, nhưng `check_guide` mở file:// vẫn PASS. Kiểm tra lại qua http.
 - **Xuất bản Artifact chỉ gửi HTML.** Ảnh mới hoặc đã sửa phải truyền trong `files`, nếu không bản online thiếu ảnh hoặc giữ
   ảnh cũ trong khi ảnh chụp kiểm tra (đọc từ đĩa) vẫn đẹp. Trước khi báo xong: `python scripts/asset_manifest.py <page> --published <listing>`.
 - **Tên nút lấy từ file ngôn ngữ của app** (vi.json, Localizable.strings…), không đoán theo ảnh. Mỗi nút một tên trong cả trang.

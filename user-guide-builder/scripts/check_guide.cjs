@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 // Automated checks for a one-page user guide built with this skill.
 // Usage: node scripts/check_guide.cjs <command> --page <guide.html> [--accept guide.accept.json] [options]
-//   all      marks + flows + contrast + pictures + cover, then one PASS/FAIL summary (the gate of the fix loop)
+//   all      marks + flows + contrast + pictures + steps + cover, then one PASS/FAIL summary (the gate of the fix loop)
 //   marks    boxes overlapping, pins outside the frame, pins sitting on a box        (widths 1440, 390)
 //   flows    elements of another flow still visible after picking a flow             (widths 1280, 390)
 //   contrast text below WCAG AA (4.5:1, 3:1 for large text)                          (1440, every flow)
 //   pictures screenshots shown below 45% of real size (unreadable) or without numbers beside 2+ steps (1280)
+//   steps    in each text + picture row, numbers on the pictures = the steps beside them (no stray, no missing) (1280)
 //   cover    cover block fits the first screen and nothing scrolls sideways at 12 sizes (PNGs with --out)
 //   shots    screenshot each picture: --width 390 --flow <id> --dpr 2 --out dir/prefix [--sheet sheet.png] [css selectors...]
 //            (no selector = every visible figure; --sheet joins them into one labelled image to look at)
@@ -162,6 +163,40 @@ const checks = {
     }
     return out;
   },
+  async steps(b, flows) {
+    // in each text + picture row (.step-body, else .grid-2) the numbers on the pictures and the steps beside them match:
+    // a number with no step in its row, or a pictured row where some steps have no number, reads as a mistake (20/11)
+    const out = [];
+    for (const flow of flows.length ? flows : [null]) {
+      const p = await open(b, 1280, 900, flow);
+      const r = await p.evaluate(() => {
+        const vis = (e) => e.offsetParent !== null, f = [];
+        document.querySelectorAll('main .card').forEach((card) => {
+          if (!vis(card) || card.querySelector('ol.legend')) return;
+          const id = card.querySelector('h3')?.id || '?';
+          const rows = card.querySelectorAll('.step-body').length ? card.querySelectorAll('.step-body') : card.querySelectorAll('.grid-2');
+          rows.forEach((row) => {
+            if (!vis(row)) return;
+            const steps = [];
+            row.querySelectorAll('ol.proc').forEach((ol) => {
+              if (!vis(ol) || ol.closest('figure')) return;
+              const m = /counter-reset:\s*s\s+(\d+)/.exec(ol.getAttribute('style') || ''); let n = m ? +m[1] : 0;
+              [...ol.children].forEach((li) => { n++; if (vis(li)) steps.push(n); });
+            });
+            const figs = [...row.querySelectorAll('figure.shot:not(.scene):not(.photo)')].filter(vis);
+            const pins = [...new Set(figs.flatMap((x) => [...x.querySelectorAll('.pin')].filter(vis).map((pn) => +pn.textContent)))];
+            if (!pins.length) return;
+            const orphan = pins.filter((n) => !steps.includes(n)), bare = steps.filter((n) => !pins.includes(n));
+            if (orphan.length) f.push(`number ${orphan.join(',')} on a picture but no such step beside it #${id}`);
+            if (bare.length) f.push(`step ${bare.join(',')} beside a numbered picture has no number on it #${id}`);
+          });
+        });
+        return f;
+      });
+      r.forEach((x) => out.push(`steps 1280 ${flow || '-'}: ${x}`)); await p.close();
+    }
+    return out;
+  },
   async cover(b) {
     const out = [];
     const sizes = [[2560, 1440], [1920, 1080], [1536, 864], [1440, 900], [1366, 768], [1280, 720], [1024, 768], [768, 1024], [414, 896], [390, 844], [375, 667], [360, 640]];
@@ -221,11 +256,11 @@ const checks = {
 };
 
 (async () => {
-  const names = cmd === 'all' ? ['marks', 'flows', 'contrast', 'pictures', 'cover'] : [cmd];
-  if (!names.every((n) => checks[n])) { console.error(`unknown command "${cmd}"; use all | marks | flows | contrast | pictures | cover | shots`); process.exit(2); }
+  const names = cmd === 'all' ? ['marks', 'flows', 'contrast', 'pictures', 'steps', 'cover'] : [cmd];
+  if (!names.every((n) => checks[n])) { console.error(`unknown command "${cmd}"; use all | marks | flows | contrast | pictures | steps | cover | shots`); process.exit(2); }
   const b = await chromium.launch({ channel: args.channel || 'msedge' });
   try {
-    const flows = names.some((n) => ['marks', 'flows', 'contrast', 'pictures'].includes(n)) ? await flowsOf(b) : [];
+    const flows = names.some((n) => ['marks', 'flows', 'contrast', 'pictures', 'steps'].includes(n)) ? await flowsOf(b) : [];
     const fresh = [], ok = [];
     for (const n of names) {
       const found = await checks[n](b, flows);
